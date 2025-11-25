@@ -1928,9 +1928,10 @@ def benchmark_all_models(args):
     
     # Output directories
     engine_dir = os.path.join(args.output_dir, 'engines')
-    weights_dir = os.path.join(args.output_dir, 'weights')
+    weights_dir = args.weights_dir if args.weights_dir else os.path.join(args.output_dir, 'weights')
     os.makedirs(engine_dir, exist_ok=True)
-    os.makedirs(weights_dir, exist_ok=True)
+    if not args.weights_dir:
+        os.makedirs(weights_dir, exist_ok=True)
     
     # Models to benchmark
     models_to_test = args.models
@@ -2229,6 +2230,8 @@ def main():
                        help='Maximum number of samples to load per dataset (for memory saving)')
     parser.add_argument('--output-dir', type=str, default='benchmark_results',
                        help='Output directory for results')
+    parser.add_argument('--weights-dir', type=str, default=None,
+                       help='Directory containing model weights (default: <output-dir>/weights)')
     parser.add_argument('--convert-tensorrt', action='store_true',
                        help='Convert models to TensorRT and benchmark')
     parser.add_argument('--skip-accuracy', action='store_true',

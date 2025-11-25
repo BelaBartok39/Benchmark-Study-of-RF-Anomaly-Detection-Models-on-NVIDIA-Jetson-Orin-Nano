@@ -26,7 +26,7 @@ def run_sustained_benchmark():
     print()
     
     # Estimate total time
-    models = ['ae', 'ff']  # Start with just 2 models for testing
+    models = ['ae', 'aae', 'cnn_ae', 'lstm_ae', 'resnet_ae', 'ff']  # All 6 models
     total_time_minutes = len(models) * (5 * 2 + 1)  # 5 min PyTorch + 5 min TensorRT + 1 min cooldown
     
     print(f"Estimated time for {len(models)} models: {total_time_minutes} minutes")
@@ -49,7 +49,8 @@ def run_sustained_benchmark():
         '--convert-tensorrt',
         '--max-samples', '2000',        # Limit dataset size for Jetson
         '--batch-size', '1',            # Single sample inference
-        '--output-dir', 'sustained_results'
+        '--output-dir', 'sustained_results',
+        '--weights-dir', 'src/output/weights'  # Use existing trained weights
     ]
     
     print("Running command:")
@@ -93,7 +94,8 @@ def run_quick_test():
         '--moving-window', '10',        # 10 second windows
         '--max-samples', '500',         # Small dataset
         '--batch-size', '1',
-        '--output-dir', 'test_sustained'
+        '--output-dir', 'test_sustained',
+        '--weights-dir', 'src/output/weights'  # Use existing trained weights
     ]
     
     print("Running command:")
