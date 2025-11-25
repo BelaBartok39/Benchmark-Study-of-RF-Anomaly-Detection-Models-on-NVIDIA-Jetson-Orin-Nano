@@ -492,9 +492,9 @@ def main():
     parser.add_argument('--use-tensorrt', action='store_true',
                        help='Use TensorRT engine if available')
 
-    parser.add_argument('--clean', type=str, default='../clean_5g_dataset.h5',
+    parser.add_argument('--clean', type=str, default='clean_5g_dataset.h5',
                        help='Path to clean dataset')
-    parser.add_argument('--jammed', type=str, default='../jammed_5g_dataset.h5',
+    parser.add_argument('--jammed', type=str, default='jammed_5g_dataset.h5',
                        help='Path to jammed dataset')
     parser.add_argument('--window-size', type=int, default=1024,
                        help='Input window size (must match training)')
