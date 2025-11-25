@@ -1,0 +1,94 @@
+# Datasets (too large for git)
+*.h5
+datasets/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.bak
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Logs
+*.log
+logs/
+
+# New experiment results (not the paper results)
+# Users should generate their own results
+output/
+results/
+test_sustained/
+my_results/
+new_experiments/
+
+# But KEEP the paper results and model weights/engines
+!paper_results/
+!paper_results/**/weights/
+!paper_results/**/engines/
+!paper_results/**/*.pth
+!paper_results/**/*.onnx
+!paper_results/**/*.trt
+!paper_results/**/*.engine
+!paper_results/**/*.json
+!paper_results/**/*.csv
+!paper_results/**/*.png
+
+# TensorRT engine files are binary and large, but we want to keep them
+# They are valuable for reproducibility
+!*.engine
+!*.trt
+
+# Keep model weights
+!*.pth
+!*.pt
+
+# Keep ONNX models
+!*.onnx
+
+# System monitoring
+tegrastats*.log

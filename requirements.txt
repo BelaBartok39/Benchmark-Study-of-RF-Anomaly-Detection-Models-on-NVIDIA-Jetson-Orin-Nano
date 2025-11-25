@@ -1,0 +1,37 @@
+# Core dependencies for RF Anomaly Detection Benchmark
+# Compatible with NVIDIA Jetson Orin Nano, JetPack 6.1+
+
+# Deep Learning Framework
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Data Processing
+numpy>=1.21.0
+h5py>=3.7.0
+pandas>=1.5.0
+scipy>=1.9.0
+
+# Machine Learning
+scikit-learn>=1.1.0
+
+# Model Export and Optimization
+onnx>=1.13.0
+onnxruntime>=1.14.0
+
+# Visualization
+matplotlib>=3.5.0
+seaborn>=0.12.0
+
+# System Monitoring
+psutil>=5.9.0
+
+# TensorRT (pre-installed with JetPack)
+# Note: TensorRT and PyCUDA come with JetPack SDK
+# If not available, the code will gracefully fallback to PyTorch-only mode
+
+# Optional: For dataset download from Hugging Face
+# huggingface-hub>=0.14.0
+
+# Optional: For Jupyter notebooks (if you want to explore data)
+# jupyter>=1.0.0
+# ipython>=8.0.0

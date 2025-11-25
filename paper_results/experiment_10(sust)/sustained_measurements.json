@@ -1,0 +1,1054 @@
+{
+  "PyTorch": {
+    "ae": {
+      "sustained_duration_s": 300.7503662109375,
+      "total_inferences": 71433,
+      "avg_latency_ms": 2.2566868860275613,
+      "avg_throughput_fps": 237.19110637169035,
+      "avg_power_w": 4.3835555555555565,
+      "avg_fps_per_watt": 54.114493315374425,
+      "measurements": [
+        {
+          "timestamp": 30.003551244735718,
+          "window_duration_s": 30.003551244735718,
+          "avg_latency_ms": 2.2064490637773955,
+          "throughput_fps": 240.77149871608913,
+          "power_w": 4.353,
+          "fps_per_watt": 55.31162387229247,
+          "gpu_memory_mb": 17.28955078125,
+          "system_memory_mb": 2224.1796875,
+          "inferences_in_window": 7224
+        },
+        {
+          "timestamp": 60.00566840171814,
+          "window_duration_s": 30.002117156982422,
+          "avg_latency_ms": 2.2778058520078557,
+          "throughput_fps": 236.01667718813079,
+          "power_w": 4.353,
+          "fps_per_watt": 54.219314768695334,
+          "gpu_memory_mb": 17.28955078125,
+          "system_memory_mb": 2225.90234375,
+          "inferences_in_window": 7081
+        },
+        {
+          "timestamp": 90.00784111022949,
+          "window_duration_s": 30.002172708511353,
+          "avg_latency_ms": 2.206562960022513,
+          "throughput_fps": 240.91588533351387,
+          "power_w": 4.432,
+          "fps_per_watt": 54.35827737669536,
+          "gpu_memory_mb": 17.28955078125,
+          "system_memory_mb": 2226.88671875,
+          "inferences_in_window": 7228
+        },
+        {
+          "timestamp": 120.00854277610779,
+          "window_duration_s": 30.000701665878296,
+          "avg_latency_ms": 2.2488007435822714,
+          "throughput_fps": 237.72777315110855,
+          "power_w": 4.432,
+          "fps_per_watt": 53.638937985358424,
+          "gpu_memory_mb": 17.28955078125,
+          "system_memory_mb": 2228.34375,
+          "inferences_in_window": 7132
+        },
+        {
+          "timestamp": 150.0103154182434,
+          "window_duration_s": 30.00177264213562,
+          "avg_latency_ms": 2.215436569258347,
+          "throughput_fps": 240.1191451561909,
+          "power_w": 4.432,
+          "fps_per_watt": 54.17850748109,
+          "gpu_memory_mb": 17.28955078125,
+          "system_memory_mb": 2229.3046875,
+          "inferences_in_window": 7204
+        },
+        {
+          "timestamp": 180.01146030426025,
+          "window_duration_s": 30.001144886016846,
+          "avg_latency_ms": 2.3112029233318885,
+          "throughput_fps": 233.22443282026924,
+          "power_w": 4.392,
+          "fps_per_watt": 53.10210219040738,
+          "gpu_memory_mb": 17.28955078125,
+          "system_memory_mb": 2229.53515625,
+          "inferences_in_window": 6997
+        },
+        {
+          "timestamp": 210.0157811641693,
+          "window_duration_s": 30.004320859909058,
+          "avg_latency_ms": 2.2541841451269,
+          "throughput_fps": 237.43246958536866,
+          "power_w": 4.313,
+          "fps_per_watt": 55.05042188392503,
+          "gpu_memory_mb": 17.28955078125,
+          "system_memory_mb": 2231.47265625,
+          "inferences_in_window": 7124
+        },
+        {
+          "timestamp": 240.01810455322266,
+          "window_duration_s": 30.002323389053345,
+          "avg_latency_ms": 2.3018877730410323,
+          "throughput_fps": 233.98187896879077,
+          "power_w": 4.432,
+          "fps_per_watt": 52.79374525469105,
+          "gpu_memory_mb": 17.28955078125,
+          "system_memory_mb": 2232.375,
+          "inferences_in_window": 7020
+        },
+        {
+          "timestamp": 270.0185058116913,
+          "window_duration_s": 30.000401258468628,
+          "avg_latency_ms": 2.287851944099847,
+          "throughput_fps": 234.53019642575117,
+          "power_w": 4.313,
+          "fps_per_watt": 54.37750902521474,
+          "gpu_memory_mb": 17.28955078125,
+          "system_memory_mb": 2232.34765625,
+          "inferences_in_window": 7036
+        }
+      ],
+      "power_metrics": {
+        "avg_power_w": 4.377615151515152,
+        "peak_power_w": 4.632,
+        "min_power_w": 3.913,
+        "power_std_w": 0.060978290330606484,
+        "total_energy_j": 1316.555927468157,
+        "energy_per_sample_j": 3.989563416570173,
+        "avg_memory_mb": 2228.6750710227275,
+        "peak_memory_mb": 2233.1171875,
+        "memory_std_mb": 3.4807951595255515,
+        "avg_cpu_usage": 12.747979797979797,
+        "peak_cpu_usage": 18.166666666666668,
+        "avg_gpu_usage": 21.381818181818183,
+        "peak_gpu_usage": 63.0,
+        "monitoring_duration_s": 300.74729776382446,
+        "sample_count": 330,
+        "sample_interval_ms": 100
+      },
+      "memory_metrics": {
+        "gpu_memory_allocated_mb": 17.28955078125,
+        "system_memory_used_mb": 2228.9275173611113
+      }
+    },
+    "cnn_ae": {
+      "sustained_duration_s": 300.71563172340393,
+      "total_inferences": 64913,
+      "avg_latency_ms": 2.917822526726119,
+      "avg_throughput_fps": 216.39164071806778,
+      "avg_power_w": 4.241888888888888,
+      "avg_fps_per_watt": 51.01426395202978,
+      "measurements": [
+        {
+          "timestamp": 30.000998973846436,
+          "window_duration_s": 30.000998973846436,
+          "avg_latency_ms": 2.916857482952535,
+          "throughput_fps": 216.02613985120473,
+          "power_w": 4.233,
+          "fps_per_watt": 51.03381522589292,
+          "gpu_memory_mb": 16.4951171875,
+          "system_memory_mb": 3515.63671875,
+          "inferences_in_window": 6481
+        },
+        {
+          "timestamp": 60.00308966636658,
+          "window_duration_s": 30.00209069252014,
+          "avg_latency_ms": 2.9295646805403703,
+          "throughput_fps": 215.71829997879254,
+          "power_w": 4.233,
+          "fps_per_watt": 50.96109141951159,
+          "gpu_memory_mb": 16.4951171875,
+          "system_memory_mb": 3520.8203125,
+          "inferences_in_window": 6472
+        },
+        {
+          "timestamp": 90.00442433357239,
+          "window_duration_s": 30.00133466720581,
+          "avg_latency_ms": 2.930688224312622,
+          "throughput_fps": 215.6904041696982,
+          "power_w": 4.233,
+          "fps_per_watt": 50.95450133940426,
+          "gpu_memory_mb": 16.4951171875,
+          "system_memory_mb": 3521.97265625,
+          "inferences_in_window": 6471
+        },
+        {
+          "timestamp": 120.00647497177124,
+          "window_duration_s": 30.002050638198853,
+          "avg_latency_ms": 2.919545325709866,
+          "throughput_fps": 216.35187801915134,
+          "power_w": 4.193,
+          "fps_per_watt": 51.598349157918285,
+          "gpu_memory_mb": 16.4951171875,
+          "system_memory_mb": 3528.27734375,
+          "inferences_in_window": 6491
+        },
+        {
+          "timestamp": 150.0074064731598,
+          "window_duration_s": 30.00093150138855,
+          "avg_latency_ms": 2.8936840700935464,
+          "throughput_fps": 217.92656670335046,
+          "power_w": 4.273,
+          "fps_per_watt": 51.00083470707945,
+          "gpu_memory_mb": 16.4951171875,
+          "system_memory_mb": 3527.828125,
+          "inferences_in_window": 6538
+        },
+        {
+          "timestamp": 180.00954627990723,
+          "window_duration_s": 30.002139806747437,
+          "avg_latency_ms": 2.896061604030651,
+          "throughput_fps": 217.55114941941866,
+          "power_w": 4.273,
+          "fps_per_watt": 50.91297669539403,
+          "gpu_memory_mb": 16.4951171875,
+          "system_memory_mb": 3527.15234375,
+          "inferences_in_window": 6527
+        },
+        {
+          "timestamp": 210.01346969604492,
+          "window_duration_s": 30.003923416137695,
+          "avg_latency_ms": 2.928805020120409,
+          "throughput_fps": 215.97175509769212,
+          "power_w": 4.273,
+          "fps_per_watt": 50.54335480872739,
+          "gpu_memory_mb": 16.4951171875,
+          "system_memory_mb": 3540.87890625,
+          "inferences_in_window": 6480
+        },
+        {
+          "timestamp": 240.01801562309265,
+          "window_duration_s": 30.00454592704773,
+          "avg_latency_ms": 2.8976212605865976,
+          "throughput_fps": 217.50037530536693,
+          "power_w": 4.233,
+          "fps_per_watt": 51.38208724435789,
+          "gpu_memory_mb": 16.4951171875,
+          "system_memory_mb": 3539.21875,
+          "inferences_in_window": 6526
+        },
+        {
+          "timestamp": 270.01966404914856,
+          "window_duration_s": 30.001648426055908,
+          "avg_latency_ms": 2.947575072188469,
+          "throughput_fps": 214.788197917935,
+          "power_w": 4.233,
+          "fps_per_watt": 50.741364969982286,
+          "gpu_memory_mb": 16.4951171875,
+          "system_memory_mb": 3552.65625,
+          "inferences_in_window": 6444
+        }
+      ],
+      "power_metrics": {
+        "avg_power_w": 4.237963636363636,
+        "peak_power_w": 4.392,
+        "min_power_w": 3.617,
+        "power_std_w": 0.05495451462515112,
+        "total_energy_j": 1274.4005975463867,
+        "energy_per_sample_j": 3.8618199925648082,
+        "avg_memory_mb": 3530.838660037879,
+        "peak_memory_mb": 3560.62109375,
+        "memory_std_mb": 11.76505428462277,
+        "avg_cpu_usage": 13.250505050505051,
+        "peak_cpu_usage": 18.0,
+        "avg_gpu_usage": 25.687878787878788,
+        "peak_gpu_usage": 38.0,
+        "monitoring_duration_s": 300.7106022834778,
+        "sample_count": 330,
+        "sample_interval_ms": 100
+      },
+      "memory_metrics": {
+        "gpu_memory_allocated_mb": 16.4951171875,
+        "system_memory_used_mb": 3530.4934895833335
+      }
+    },
+    "lstm_ae": {
+      "sustained_duration_s": 300.7124979496002,
+      "total_inferences": 31459,
+      "avg_latency_ms": 7.614553577915414,
+      "avg_throughput_fps": 104.84800717618239,
+      "avg_power_w": 4.219666666666665,
+      "avg_fps_per_watt": 24.847528558146582,
+      "measurements": [
+        {
+          "timestamp": 30.005651235580444,
+          "window_duration_s": 30.005651235580444,
+          "avg_latency_ms": 7.800278146881163,
+          "throughput_fps": 102.71398463584723,
+          "power_w": 4.193,
+          "fps_per_watt": 24.496538191234734,
+          "gpu_memory_mb": 8.33740234375,
+          "system_memory_mb": 3543.83984375,
+          "inferences_in_window": 3082
+        },
+        {
+          "timestamp": 60.00869965553284,
+          "window_duration_s": 30.003048419952393,
+          "avg_latency_ms": 7.590810936617564,
+          "throughput_fps": 105.12265140040076,
+          "power_w": 4.233,
+          "fps_per_watt": 24.834077817245632,
+          "gpu_memory_mb": 8.33740234375,
+          "system_memory_mb": 3532.87109375,
+          "inferences_in_window": 3154
+        },
+        {
+          "timestamp": 90.01067757606506,
+          "window_duration_s": 30.001977920532227,
+          "avg_latency_ms": 7.593015016845548,
+          "throughput_fps": 105.09307114189312,
+          "power_w": 4.233,
+          "fps_per_watt": 24.8270898043688,
+          "gpu_memory_mb": 8.33740234375,
+          "system_memory_mb": 3538.1796875,
+          "inferences_in_window": 3153
+        },
+        {
+          "timestamp": 120.01981973648071,
+          "window_duration_s": 30.00914216041565,
+          "avg_latency_ms": 7.598907445885196,
+          "throughput_fps": 105.00133536494121,
+          "power_w": 4.233,
+          "fps_per_watt": 24.805418229374254,
+          "gpu_memory_mb": 8.33740234375,
+          "system_memory_mb": 3542.19140625,
+          "inferences_in_window": 3151
+        },
+        {
+          "timestamp": 150.02330374717712,
+          "window_duration_s": 30.00348401069641,
+          "avg_latency_ms": 7.585892583631895,
+          "throughput_fps": 105.1877841544958,
+          "power_w": 4.193,
+          "fps_per_watt": 25.0865213819451,
+          "gpu_memory_mb": 8.33740234375,
+          "system_memory_mb": 3535.99609375,
+          "inferences_in_window": 3156
+        },
+        {
+          "timestamp": 180.02704906463623,
+          "window_duration_s": 30.003745317459106,
+          "avg_latency_ms": 7.604250535274248,
+          "throughput_fps": 104.92023468044125,
+          "power_w": 4.193,
+          "fps_per_watt": 25.022712778545497,
+          "gpu_memory_mb": 8.33740234375,
+          "system_memory_mb": 3538.6015625,
+          "inferences_in_window": 3148
+        },
+        {
+          "timestamp": 210.03528428077698,
+          "window_duration_s": 30.008235216140747,
+          "avg_latency_ms": 7.578657095945334,
+          "throughput_fps": 105.30442650957055,
+          "power_w": 4.233,
+          "fps_per_watt": 24.87702020070176,
+          "gpu_memory_mb": 8.33740234375,
+          "system_memory_mb": 3534.51953125,
+          "inferences_in_window": 3160
+        },
+        {
+          "timestamp": 240.04230284690857,
+          "window_duration_s": 30.007018566131592,
+          "avg_latency_ms": 7.5954534196112595,
+          "throughput_fps": 105.07541737447842,
+          "power_w": 4.233,
+          "fps_per_watt": 24.822919294703148,
+          "gpu_memory_mb": 8.33740234375,
+          "system_memory_mb": 3538.3046875,
+          "inferences_in_window": 3153
+        },
+        {
+          "timestamp": 270.04805517196655,
+          "window_duration_s": 30.005752325057983,
+          "avg_latency_ms": 7.583717020546517,
+          "throughput_fps": 105.21315932357311,
+          "power_w": 4.233,
+          "fps_per_watt": 24.855459325200357,
+          "gpu_memory_mb": 8.33740234375,
+          "system_memory_mb": 3541.3359375,
+          "inferences_in_window": 3157
+        }
+      ],
+      "power_metrics": {
+        "avg_power_w": 4.210238670694863,
+        "peak_power_w": 4.313,
+        "min_power_w": 3.565,
+        "power_std_w": 0.04933265052579902,
+        "total_energy_j": 1266.0549965928008,
+        "energy_per_sample_j": 3.8249395667456216,
+        "avg_memory_mb": 3538.364839029456,
+        "peak_memory_mb": 3544.796875,
+        "memory_std_mb": 3.2401507799590865,
+        "avg_cpu_usage": 6.3675730110775435,
+        "peak_cpu_usage": 9.5,
+        "avg_gpu_usage": 67.49244712990937,
+        "peak_gpu_usage": 92.0,
+        "monitoring_duration_s": 300.70860481262207,
+        "sample_count": 331,
+        "sample_interval_ms": 100
+      },
+      "memory_metrics": {
+        "gpu_memory_allocated_mb": 8.33740234375,
+        "system_memory_used_mb": 3538.4266493055557
+      }
+    },
+    "resnet_ae": {
+      "sustained_duration_s": 300.5193431377411,
+      "total_inferences": 49662,
+      "avg_latency_ms": 4.509484545469928,
+      "avg_throughput_fps": 165.54067617227528,
+      "avg_power_w": 4.774222222222223,
+      "avg_fps_per_watt": 34.67446618718005,
+      "measurements": [
+        {
+          "timestamp": 30.003663539886475,
+          "window_duration_s": 30.003663539886475,
+          "avg_latency_ms": 4.509201069031993,
+          "throughput_fps": 165.3131456232417,
+          "power_w": 4.792,
+          "fps_per_watt": 34.49773489633591,
+          "gpu_memory_mb": 8.32275390625,
+          "system_memory_mb": 3545.71484375,
+          "inferences_in_window": 4960
+        },
+        {
+          "timestamp": 60.0062050819397,
+          "window_duration_s": 30.002541542053223,
+          "avg_latency_ms": 4.507508028441032,
+          "throughput_fps": 165.65263289557564,
+          "power_w": 4.752,
+          "fps_per_watt": 34.859560794523496,
+          "gpu_memory_mb": 8.32275390625,
+          "system_memory_mb": 3540.609375,
+          "inferences_in_window": 4970
+        },
+        {
+          "timestamp": 90.00839066505432,
+          "window_duration_s": 30.002185583114624,
+          "avg_latency_ms": 4.512006446554102,
+          "throughput_fps": 165.4879437448159,
+          "power_w": 4.752,
+          "fps_per_watt": 34.82490398670369,
+          "gpu_memory_mb": 8.32275390625,
+          "system_memory_mb": 3543.84375,
+          "inferences_in_window": 4965
+        },
+        {
+          "timestamp": 120.00937080383301,
+          "window_duration_s": 30.000980138778687,
+          "avg_latency_ms": 4.512355157650146,
+          "throughput_fps": 165.52792532204788,
+          "power_w": 4.752,
+          "fps_per_watt": 34.83331761827607,
+          "gpu_memory_mb": 8.32275390625,
+          "system_memory_mb": 3545.875,
+          "inferences_in_window": 4966
+        },
+        {
+          "timestamp": 150.0144202709198,
+          "window_duration_s": 30.005049467086792,
+          "avg_latency_ms": 4.507501928061157,
+          "throughput_fps": 165.6054593561196,
+          "power_w": 4.792,
+          "fps_per_watt": 34.558735257954844,
+          "gpu_memory_mb": 8.32275390625,
+          "system_memory_mb": 3541.56640625,
+          "inferences_in_window": 4969
+        },
+        {
+          "timestamp": 180.0147044658661,
+          "window_duration_s": 30.00028419494629,
+          "avg_latency_ms": 4.511822962688895,
+          "throughput_fps": 165.49843220606493,
+          "power_w": 4.792,
+          "fps_per_watt": 34.5364007107815,
+          "gpu_memory_mb": 8.32275390625,
+          "system_memory_mb": 3543.84375,
+          "inferences_in_window": 4965
+        },
+        {
+          "timestamp": 210.01638221740723,
+          "window_duration_s": 30.001677751541138,
+          "avg_latency_ms": 4.510443287882643,
+          "throughput_fps": 165.5574078601272,
+          "power_w": 4.752,
+          "fps_per_watt": 34.83952185608737,
+          "gpu_memory_mb": 8.32275390625,
+          "system_memory_mb": 3538.58984375,
+          "inferences_in_window": 4967
+        },
+        {
+          "timestamp": 240.0203993320465,
+          "window_duration_s": 30.004017114639282,
+          "avg_latency_ms": 4.507807040507224,
+          "throughput_fps": 165.6111573665105,
+          "power_w": 4.792,
+          "fps_per_watt": 34.55992432523174,
+          "gpu_memory_mb": 8.32275390625,
+          "system_memory_mb": 3547.11328125,
+          "inferences_in_window": 4969
+        },
+        {
+          "timestamp": 270.0242671966553,
+          "window_duration_s": 30.003867864608765,
+          "avg_latency_ms": 4.506714988412164,
+          "throughput_fps": 165.61198117597408,
+          "power_w": 4.792,
+          "fps_per_watt": 34.56009623872581,
+          "gpu_memory_mb": 8.32275390625,
+          "system_memory_mb": 3550.01953125,
+          "inferences_in_window": 4969
+        }
+      ],
+      "power_metrics": {
+        "avg_power_w": 4.7664924471299095,
+        "peak_power_w": 4.832,
+        "min_power_w": 4.133,
+        "power_std_w": 0.04177947902290612,
+        "total_energy_j": 1432.4048704141203,
+        "energy_per_sample_j": 4.3275071613719645,
+        "avg_memory_mb": 3543.95605173716,
+        "peak_memory_mb": 3550.01953125,
+        "memory_std_mb": 2.761625549296389,
+        "avg_cpu_usage": 13.8202416918429,
+        "peak_cpu_usage": 16.333333333333332,
+        "avg_gpu_usage": 20.23262839879154,
+        "peak_gpu_usage": 21.0,
+        "monitoring_duration_s": 300.5155019760132,
+        "sample_count": 331,
+        "sample_interval_ms": 100
+      },
+      "memory_metrics": {
+        "gpu_memory_allocated_mb": 8.32275390625,
+        "system_memory_used_mb": 3544.1306423611113
+      }
+    },
+    "aae": {
+      "sustained_duration_s": 300.0965008735657,
+      "total_inferences": 76814,
+      "avg_latency_ms": 1.886356319261072,
+      "avg_throughput_fps": 256.1360139185859,
+      "avg_power_w": 3.7605555555555554,
+      "avg_fps_per_watt": 68.11056730441699,
+      "measurements": [
+        {
+          "timestamp": 30.001542568206787,
+          "window_duration_s": 30.001542568206787,
+          "avg_latency_ms": 1.9238982575946049,
+          "throughput_fps": 252.3870225267748,
+          "power_w": 3.725,
+          "fps_per_watt": 67.75490537631538,
+          "gpu_memory_mb": 12.29150390625,
+          "system_memory_mb": 3547.24609375,
+          "inferences_in_window": 7572
+        },
+        {
+          "timestamp": 60.001835107803345,
+          "window_duration_s": 30.000292539596558,
+          "avg_latency_ms": 1.911930753579126,
+          "throughput_fps": 253.79752513914627,
+          "power_w": 3.766,
+          "fps_per_watt": 67.39180168325711,
+          "gpu_memory_mb": 12.29150390625,
+          "system_memory_mb": 3549.9375,
+          "inferences_in_window": 7614
+        },
+        {
+          "timestamp": 90.00247025489807,
+          "window_duration_s": 30.000635147094727,
+          "avg_latency_ms": 1.8336166749130247,
+          "throughput_fps": 261.02780696489214,
+          "power_w": 3.725,
+          "fps_per_watt": 70.07457905097775,
+          "gpu_memory_mb": 12.29150390625,
+          "system_memory_mb": 3546.1171875,
+          "inferences_in_window": 7831
+        },
+        {
+          "timestamp": 120.00623512268066,
+          "window_duration_s": 30.003764867782593,
+          "avg_latency_ms": 1.9058867151455932,
+          "throughput_fps": 254.53472368064212,
+          "power_w": 3.76,
+          "fps_per_watt": 67.69540523421334,
+          "gpu_memory_mb": 12.29150390625,
+          "system_memory_mb": 3548.40234375,
+          "inferences_in_window": 7637
+        },
+        {
+          "timestamp": 150.00973892211914,
+          "window_duration_s": 30.003503799438477,
+          "avg_latency_ms": 1.9008923362899612,
+          "throughput_fps": 254.77024453867483,
+          "power_w": 3.766,
+          "fps_per_watt": 67.65009148663697,
+          "gpu_memory_mb": 12.29150390625,
+          "system_memory_mb": 3544.17578125,
+          "inferences_in_window": 7644
+        },
+        {
+          "timestamp": 180.01327109336853,
+          "window_duration_s": 30.00353217124939,
+          "avg_latency_ms": 1.8022721916388287,
+          "throughput_fps": 264.2688852347155,
+          "power_w": 3.806,
+          "fps_per_watt": 69.43480957296782,
+          "gpu_memory_mb": 12.29150390625,
+          "system_memory_mb": 3548.8125,
+          "inferences_in_window": 7929
+        },
+        {
+          "timestamp": 210.0136525630951,
+          "window_duration_s": 30.000381469726562,
+          "avg_latency_ms": 1.8405600525691557,
+          "throughput_fps": 260.36335597539295,
+          "power_w": 3.806,
+          "fps_per_watt": 68.40865895307223,
+          "gpu_memory_mb": 12.29150390625,
+          "system_memory_mb": 3543.46875,
+          "inferences_in_window": 7811
+        },
+        {
+          "timestamp": 240.01606941223145,
+          "window_duration_s": 30.002416849136353,
+          "avg_latency_ms": 1.9320879997305922,
+          "throughput_fps": 251.8463775100007,
+          "power_w": 3.725,
+          "fps_per_watt": 67.60976577449684,
+          "gpu_memory_mb": 12.29150390625,
+          "system_memory_mb": 3545.69140625,
+          "inferences_in_window": 7556
+        },
+        {
+          "timestamp": 270.01668190956116,
+          "window_duration_s": 30.000612497329712,
+          "avg_latency_ms": 1.9260618918887593,
+          "throughput_fps": 252.2281836970336,
+          "power_w": 3.766,
+          "fps_per_watt": 66.97508860781561,
+          "gpu_memory_mb": 12.29150390625,
+          "system_memory_mb": 3550.68359375,
+          "inferences_in_window": 7567
+        }
+      ],
+      "power_metrics": {
+        "avg_power_w": 3.762795107033639,
+        "peak_power_w": 3.846,
+        "min_power_w": 3.72,
+        "power_std_w": 0.029295983597721387,
+        "total_energy_j": 1129.1794189704565,
+        "energy_per_sample_j": 3.453148070246044,
+        "avg_memory_mb": 3546.821829606269,
+        "peak_memory_mb": 3550.9296875,
+        "memory_std_mb": 2.3895554205572807,
+        "avg_cpu_usage": 12.6855249745158,
+        "peak_cpu_usage": 21.333333333333332,
+        "avg_gpu_usage": 24.269113149847094,
+        "peak_gpu_usage": 27.0,
+        "monitoring_duration_s": 300.09059405326843,
+        "sample_count": 327,
+        "sample_interval_ms": 100
+      },
+      "memory_metrics": {
+        "gpu_memory_allocated_mb": 12.29150390625,
+        "system_memory_used_mb": 3547.1705729166665
+      }
+    },
+    "ff": {
+      "sustained_duration_s": 300.88996481895447,
+      "total_inferences": 95949,
+      "avg_latency_ms": 1.1086782374232416,
+      "avg_throughput_fps": 319.8153047798544,
+      "avg_power_w": 3.578333333333333,
+      "avg_fps_per_watt": 89.38064076058069,
+      "measurements": [
+        {
+          "timestamp": 30.00207257270813,
+          "window_duration_s": 30.00207257270813,
+          "avg_latency_ms": 1.1069442977809447,
+          "throughput_fps": 318.4446666758266,
+          "power_w": 3.565,
+          "fps_per_watt": 89.32529219518278,
+          "gpu_memory_mb": 9.1669921875,
+          "system_memory_mb": 3547.0859375,
+          "inferences_in_window": 9554
+        },
+        {
+          "timestamp": 60.00366711616516,
+          "window_duration_s": 30.00159454345703,
+          "avg_latency_ms": 1.1089806458333502,
+          "throughput_fps": 319.9163293170097,
+          "power_w": 3.56,
+          "fps_per_watt": 89.86413744859823,
+          "gpu_memory_mb": 9.1669921875,
+          "system_memory_mb": 3550.93359375,
+          "inferences_in_window": 9598
+        },
+        {
+          "timestamp": 90.00376033782959,
+          "window_duration_s": 30.00009322166443,
+          "avg_latency_ms": 1.1083065581267044,
+          "throughput_fps": 319.7990062601451,
+          "power_w": 3.6,
+          "fps_per_watt": 88.83305729448476,
+          "gpu_memory_mb": 9.1669921875,
+          "system_memory_mb": 3544.8984375,
+          "inferences_in_window": 9594
+        },
+        {
+          "timestamp": 120.00380063056946,
+          "window_duration_s": 30.000040292739868,
+          "avg_latency_ms": 1.1098938568312287,
+          "throughput_fps": 320.06623678847933,
+          "power_w": 3.6,
+          "fps_per_watt": 88.90728799679981,
+          "gpu_memory_mb": 9.1669921875,
+          "system_memory_mb": 3547.77734375,
+          "inferences_in_window": 9602
+        },
+        {
+          "timestamp": 150.00665855407715,
+          "window_duration_s": 30.00285792350769,
+          "avg_latency_ms": 1.1113970667157969,
+          "throughput_fps": 319.7362072792319,
+          "power_w": 3.56,
+          "fps_per_watt": 89.81354137057076,
+          "gpu_memory_mb": 9.1669921875,
+          "system_memory_mb": 3544.42578125,
+          "inferences_in_window": 9593
+        },
+        {
+          "timestamp": 180.00690722465515,
+          "window_duration_s": 30.000248670578003,
+          "avg_latency_ms": 1.1099516798596862,
+          "throughput_fps": 319.7306830795411,
+          "power_w": 3.56,
+          "fps_per_watt": 89.81198962908458,
+          "gpu_memory_mb": 9.1669921875,
+          "system_memory_mb": 3547.9765625,
+          "inferences_in_window": 9592
+        },
+        {
+          "timestamp": 210.00947284698486,
+          "window_duration_s": 30.002565622329712,
+          "avg_latency_ms": 1.1089669441284395,
+          "throughput_fps": 319.67266135606087,
+          "power_w": 3.64,
+          "fps_per_watt": 87.82215971320353,
+          "gpu_memory_mb": 9.1669921875,
+          "system_memory_mb": 3550.61328125,
+          "inferences_in_window": 9591
+        },
+        {
+          "timestamp": 240.01071667671204,
+          "window_duration_s": 30.001243829727173,
+          "avg_latency_ms": 1.1032656840941368,
+          "throughput_fps": 320.9866915736998,
+          "power_w": 3.56,
+          "fps_per_watt": 90.16480100384825,
+          "gpu_memory_mb": 9.1669921875,
+          "system_memory_mb": 3546.3515625,
+          "inferences_in_window": 9630
+        },
+        {
+          "timestamp": 270.0120985507965,
+          "window_duration_s": 30.001381874084473,
+          "avg_latency_ms": 1.110397403438886,
+          "throughput_fps": 319.9852606886947,
+          "power_w": 3.56,
+          "fps_per_watt": 89.88350019345357,
+          "gpu_memory_mb": 9.1669921875,
+          "system_memory_mb": 3548.53125,
+          "inferences_in_window": 9600
+        }
+      ],
+      "power_metrics": {
+        "avg_power_w": 3.56215243902439,
+        "peak_power_w": 3.64,
+        "min_power_w": 3.26,
+        "power_std_w": 0.027037371271458204,
+        "total_energy_j": 1071.7989134606908,
+        "energy_per_sample_j": 3.267679614209423,
+        "avg_memory_mb": 3546.9122046493903,
+        "peak_memory_mb": 3551.6015625,
+        "memory_std_mb": 2.247393101235381,
+        "avg_cpu_usage": 11.56910569105691,
+        "peak_cpu_usage": 19.833333333333332,
+        "avg_gpu_usage": 11.067073170731707,
+        "peak_gpu_usage": 40.0,
+        "monitoring_duration_s": 300.8851900100708,
+        "sample_count": 328,
+        "sample_interval_ms": 100
+      },
+      "memory_metrics": {
+        "gpu_memory_allocated_mb": 9.1669921875,
+        "system_memory_used_mb": 3547.621527777778
+      }
+    }
+  },
+  "TensorRT": {
+    "ae": {
+      "sustained_duration_s": 300.76493287086487,
+      "total_inferences": 118952,
+      "avg_latency_ms": 0.7705906561676779,
+      "avg_throughput_fps": 396.53194468982826,
+      "avg_power_w": 4.481222222222223,
+      "avg_fps_per_watt": 88.85695422114748,
+      "measurements": [
+        {
+          "timestamp": 30.000871896743774,
+          "window_duration_s": 30.000871896743774,
+          "avg_latency_ms": 0.7828596571901407,
+          "throughput_fps": 394.0218817868098,
+          "power_w": 4.392,
+          "fps_per_watt": 89.713543211933,
+          "gpu_memory_mb": 17.27294921875,
+          "system_memory_mb": 3528.8515625,
+          "inferences_in_window": 11821
+        },
+        {
+          "timestamp": 60.00124907493591,
+          "window_duration_s": 30.00037717819214,
+          "avg_latency_ms": 0.7716122868580272,
+          "throughput_fps": 396.89500999525535,
+          "power_w": 4.353,
+          "fps_per_watt": 91.17735125092014,
+          "gpu_memory_mb": 17.27294921875,
+          "system_memory_mb": 3536.94140625,
+          "inferences_in_window": 11907
+        },
+        {
+          "timestamp": 90.00224709510803,
+          "window_duration_s": 30.00099802017212,
+          "avg_latency_ms": 0.7762794003500723,
+          "throughput_fps": 394.8201987159107,
+          "power_w": 4.353,
+          "fps_per_watt": 90.70071185754898,
+          "gpu_memory_mb": 17.27294921875,
+          "system_memory_mb": 3531.68359375,
+          "inferences_in_window": 11845
+        },
+        {
+          "timestamp": 120.00241708755493,
+          "window_duration_s": 30.0001699924469,
+          "avg_latency_ms": 0.7407531158328106,
+          "throughput_fps": 401.2310597916791,
+          "power_w": 5.391,
+          "fps_per_watt": 74.42609159556281,
+          "gpu_memory_mb": 17.27294921875,
+          "system_memory_mb": 3568.125,
+          "inferences_in_window": 12037
+        },
+        {
+          "timestamp": 150.00381183624268,
+          "window_duration_s": 30.001394748687744,
+          "avg_latency_ms": 0.7734624764028807,
+          "throughput_fps": 395.0816320137399,
+          "power_w": 4.392,
+          "fps_per_watt": 89.95483424720854,
+          "gpu_memory_mb": 17.27294921875,
+          "system_memory_mb": 3531.35546875,
+          "inferences_in_window": 11853
+        },
+        {
+          "timestamp": 180.00453090667725,
+          "window_duration_s": 30.00071907043457,
+          "avg_latency_ms": 0.7728536003049156,
+          "throughput_fps": 395.62385061952693,
+          "power_w": 4.392,
+          "fps_per_watt": 90.07829021391778,
+          "gpu_memory_mb": 17.27294921875,
+          "system_memory_mb": 3529.625,
+          "inferences_in_window": 11869
+        },
+        {
+          "timestamp": 210.00590920448303,
+          "window_duration_s": 30.001378297805786,
+          "avg_latency_ms": 0.7748457911765606,
+          "throughput_fps": 395.41516667144674,
+          "power_w": 4.313,
+          "fps_per_watt": 91.67984388394314,
+          "gpu_memory_mb": 17.27294921875,
+          "system_memory_mb": 3530.33203125,
+          "inferences_in_window": 11863
+        },
+        {
+          "timestamp": 240.00668859481812,
+          "window_duration_s": 30.000779390335083,
+          "avg_latency_ms": 0.7710785970095566,
+          "throughput_fps": 397.68966815054273,
+          "power_w": 4.392,
+          "fps_per_watt": 90.5486493967538,
+          "gpu_memory_mb": 17.27294921875,
+          "system_memory_mb": 3532.05859375,
+          "inferences_in_window": 11931
+        },
+        {
+          "timestamp": 270.0085201263428,
+          "window_duration_s": 30.001831531524658,
+          "avg_latency_ms": 0.771570980384136,
+          "throughput_fps": 398.0090344635427,
+          "power_w": 4.353,
+          "fps_per_watt": 91.4332723325391,
+          "gpu_memory_mb": 17.27294921875,
+          "system_memory_mb": 3529.93359375,
+          "inferences_in_window": 11941
+        }
+      ],
+      "power_metrics": {
+        "avg_power_w": 4.394054545454546,
+        "peak_power_w": 5.63,
+        "min_power_w": 3.913,
+        "power_std_w": 0.17755860337041965,
+        "total_energy_j": 1321.451755199645,
+        "energy_per_sample_j": 4.004399258180743,
+        "avg_memory_mb": 3532.2332859848484,
+        "peak_memory_mb": 3580.0,
+        "memory_std_mb": 6.0661434432630825,
+        "avg_cpu_usage": 7.8954545454545455,
+        "peak_cpu_usage": 26.166666666666668,
+        "avg_gpu_usage": 23.827272727272728,
+        "peak_gpu_usage": 60.0,
+        "monitoring_duration_s": 300.7363111972809,
+        "sample_count": 330,
+        "sample_interval_ms": 100
+      },
+      "memory_metrics": {
+        "gpu_memory_allocated_mb": 17.27294921875,
+        "system_memory_used_mb": 3535.434027777778
+      }
+    },
+    "ff": {
+      "sustained_duration_s": 300.7333631515503,
+      "total_inferences": 153414,
+      "avg_latency_ms": 0.20227589494982437,
+      "avg_throughput_fps": 510.8399132618724,
+      "avg_power_w": 3.425222222222222,
+      "avg_fps_per_watt": 149.1424173103913,
+      "measurements": [
+        {
+          "timestamp": 30.001874923706055,
+          "window_duration_s": 30.001874923706055,
+          "avg_latency_ms": 0.20226255336541038,
+          "throughput_fps": 510.4680970421224,
+          "power_w": 3.421,
+          "fps_per_watt": 149.21604707457539,
+          "gpu_memory_mb": 9.158203125,
+          "system_memory_mb": 3775.30859375,
+          "inferences_in_window": 15315
+        },
+        {
+          "timestamp": 60.00187873840332,
+          "window_duration_s": 30.000003814697266,
+          "avg_latency_ms": 0.20122562316061818,
+          "throughput_fps": 510.6332684029556,
+          "power_w": 3.445,
+          "fps_per_watt": 148.22446107487826,
+          "gpu_memory_mb": 9.158203125,
+          "system_memory_mb": 3776.85546875,
+          "inferences_in_window": 15319
+        },
+        {
+          "timestamp": 90.00308728218079,
+          "window_duration_s": 30.001208543777466,
+          "avg_latency_ms": 0.20120614621753813,
+          "throughput_fps": 515.4125700448549,
+          "power_w": 3.416,
+          "fps_per_watt": 150.8818998960348,
+          "gpu_memory_mb": 9.158203125,
+          "system_memory_mb": 3774.3984375,
+          "inferences_in_window": 15463
+        },
+        {
+          "timestamp": 120.00489234924316,
+          "window_duration_s": 30.001805067062378,
+          "avg_latency_ms": 0.20202616976390025,
+          "throughput_fps": 510.402622967891,
+          "power_w": 3.421,
+          "fps_per_watt": 149.19690820458666,
+          "gpu_memory_mb": 9.158203125,
+          "system_memory_mb": 3779.2421875,
+          "inferences_in_window": 15313
+        },
+        {
+          "timestamp": 150.0055685043335,
+          "window_duration_s": 30.000676155090332,
+          "avg_latency_ms": 0.2031201516460502,
+          "throughput_fps": 509.5218494735948,
+          "power_w": 3.421,
+          "fps_per_watt": 148.93944737608734,
+          "gpu_memory_mb": 9.158203125,
+          "system_memory_mb": 3772.63671875,
+          "inferences_in_window": 15286
+        },
+        {
+          "timestamp": 180.00737071037292,
+          "window_duration_s": 30.00180220603943,
+          "avg_latency_ms": 0.2025841841217087,
+          "throughput_fps": 510.2693463167444,
+          "power_w": 3.416,
+          "fps_per_watt": 149.37627234096735,
+          "gpu_memory_mb": 9.158203125,
+          "system_memory_mb": 3775.421875,
+          "inferences_in_window": 15309
+        },
+        {
+          "timestamp": 210.00915503501892,
+          "window_duration_s": 30.001784324645996,
+          "avg_latency_ms": 0.20286919533399816,
+          "throughput_fps": 509.8696742324674,
+          "power_w": 3.421,
+          "fps_per_watt": 149.04112079288728,
+          "gpu_memory_mb": 9.158203125,
+          "system_memory_mb": 3771.6796875,
+          "inferences_in_window": 15297
+        },
+        {
+          "timestamp": 240.01091122627258,
+          "window_duration_s": 30.001756191253662,
+          "avg_latency_ms": 0.20199584363022569,
+          "throughput_fps": 510.37012308179044,
+          "power_w": 3.421,
+          "fps_per_watt": 149.1874080917248,
+          "gpu_memory_mb": 9.158203125,
+          "system_memory_mb": 3775.2578125,
+          "inferences_in_window": 15312
+        },
+        {
+          "timestamp": 270.0121841430664,
+          "window_duration_s": 30.001272916793823,
+          "avg_latency_ms": 0.2031931873089698,
+          "throughput_fps": 510.6116677944314,
+          "power_w": 3.445,
+          "fps_per_watt": 148.2181909417798,
+          "gpu_memory_mb": 9.158203125,
+          "system_memory_mb": 3778.4296875,
+          "inferences_in_window": 15319
+        }
+      ],
+      "power_metrics": {
+        "avg_power_w": 3.427542682926829,
+        "peak_power_w": 3.818,
+        "min_power_w": 3.265,
+        "power_std_w": 0.03580363971989649,
+        "total_energy_j": 1030.738299314291,
+        "energy_per_sample_j": 3.1424948149825944,
+        "avg_memory_mb": 3775.189203029726,
+        "peak_memory_mb": 3781.43359375,
+        "memory_std_mb": 2.2752503941086397,
+        "avg_cpu_usage": 8.801829268292684,
+        "peak_cpu_usage": 12.666666666666666,
+        "avg_gpu_usage": 3.2804878048780486,
+        "peak_gpu_usage": 98.0,
+        "monitoring_duration_s": 300.72223591804504,
+        "sample_count": 328,
+        "sample_interval_ms": 100
+      },
+      "memory_metrics": {
+        "gpu_memory_allocated_mb": 9.158203125,
+        "system_memory_used_mb": 3775.4700520833335
+      }
+    }
+  }
+}

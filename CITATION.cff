@@ -1,0 +1,71 @@
+cff-version: 1.2.0
+message: "If you use this software or dataset in your research, please cite it as below."
+type: software
+title: "RF Anomaly Detection Benchmark on NVIDIA Jetson Orin Nano"
+abstract: >
+  This repository contains the code and resources for benchmarking machine learning
+  models for RF anomaly detection on the NVIDIA Jetson Orin Nano platform. The study
+  evaluates six ML architectures (AE, AAE, CNN-AE, LSTM-AE, ResNet-AE, FF) across
+  multiple performance metrics including latency, throughput, energy efficiency,
+  memory footprint, and resource utilization using both PyTorch and TensorRT optimization.
+authors:
+  - family-names: Redmond
+    given-names: Nicholas D.
+    email: ndrdmond@memphis.edu
+    affiliation: "Department of Computer Science, University of Memphis"
+    orcid: "https://orcid.org/0000-0000-0000-0000"  # Add your ORCID if available
+  - family-names: Ali
+    given-names: Mohd Hasan
+    email: mhali@memphis.edu
+    affiliation: "Department of Electrical and Computer Engineering, University of Memphis"
+  - family-names: Dasgupta
+    given-names: Dipankar
+    email: dasgupta@memphis.edu
+    affiliation: "Department of Computer Science, University of Memphis"
+  - family-names: Won
+    given-names: Myounggyu
+    email: mwon@memphis.edu
+    affiliation: "Department of Computer Science, University of Memphis"
+repository-code: "https://github.com/YOUR_USERNAME/rf-anomaly-jetson-benchmark"
+url: "https://github.com/YOUR_USERNAME/rf-anomaly-jetson-benchmark"
+keywords:
+  - RF communication security
+  - Anomaly detection
+  - Edge computing
+  - NVIDIA Jetson Orin Nano
+  - Machine learning
+  - TensorRT
+  - 5G security
+  - Autoencoder
+  - Benchmark study
+license: GPL-3.0
+version: 1.0.0
+date-released: "2025-01-01"  # Update to actual release date
+preferred-citation:
+  type: conference-paper
+  title: "A Benchmark Study of RF Anomaly Detection Models on NVIDIA Jetson Orin Nano"
+  authors:
+    - family-names: Redmond
+      given-names: Nicholas D.
+      email: ndrdmond@memphis.edu
+      affiliation: "Department of Computer Science, University of Memphis"
+    - family-names: Ali
+      given-names: Mohd Hasan
+      email: mhali@memphis.edu
+      affiliation: "Department of Electrical and Computer Engineering, University of Memphis"
+    - family-names: Dasgupta
+      given-names: Dipankar
+      email: dasgupta@memphis.edu
+      affiliation: "Department of Computer Science, University of Memphis"
+    - family-names: Won
+      given-names: Myounggyu
+      email: mwon@memphis.edu
+      affiliation: "Department of Computer Science, University of Memphis"
+  conference:
+    name: "IEEE Consumer Communications & Networking Conference"
+  abbreviation: "CCNC"
+  year: 2025
+  publisher:
+    name: "IEEE"
+  # doi: "10.1109/CCNC.2025.XXXXX"  # Add DOI when available
+  # url: "https://doi.org/10.1109/CCNC.2025.XXXXX"  # Add URL when available
