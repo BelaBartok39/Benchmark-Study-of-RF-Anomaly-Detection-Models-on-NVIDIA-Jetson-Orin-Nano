@@ -93,7 +93,7 @@ for workload in "${WORKLOADS[@]}"; do
         --latency-threshold 10.0 \
         --hysteresis-time 5.0 \
         --run-baselines \
-        --max-samples 1000 \
+        --max-samples 200 \
         --output-dir "$OUTPUT_BASE/results"
 
     echo ""

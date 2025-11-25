@@ -145,7 +145,8 @@ class AdaptiveBenchmark:
             self.dataset_clean,
             self.dataset_jammed,
             window_size=self.window_size,
-            batch_size=1
+            batch_size=1,
+            max_samples=max_samples  # Limit data loading to save memory
         )
 
         # Extract samples

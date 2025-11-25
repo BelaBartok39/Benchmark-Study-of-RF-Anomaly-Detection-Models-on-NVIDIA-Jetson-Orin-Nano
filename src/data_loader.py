@@ -16,27 +16,31 @@ class RadioDataset(Dataset):
         self.use_psd = use_psd
         
         print(f"Loading {split} data...")
-        
-        # Load data from HDF5 files - much faster batch loading
-        with h5py.File(clean_path, 'r') as f:
-            clean_signals = np.array(f[split]['signals'])  # Shape: (N_samples, 1024)
-            clean_labels = np.array(f[split]['jammed'])   # Shape: (N_samples,) - all should be False/0
-        
-        with h5py.File(jammed_path, 'r') as f:
-            jammed_signals = np.array(f[split]['signals'])  # Shape: (M_samples, 1024) 
-            jammed_labels = np.array(f[split]['jammed'])   # Shape: (M_samples,) - all should be True/1
-        
-        print(f"Clean signals: {clean_signals.shape}, Jammed signals: {jammed_signals.shape}")
-        
-        # Limit samples if requested (for memory saving)
+
+        # Calculate how many samples to load if max_samples is specified
+        samples_to_load = None
         if max_samples is not None:
-            max_per_class = max_samples // 2
-            clean_signals = clean_signals[:max_per_class]
-            clean_labels = clean_labels[:max_per_class]
-            jammed_signals = jammed_signals[:max_per_class]
-            jammed_labels = jammed_labels[:max_per_class]
-            print(f"Limited to {max_samples} samples ({max_per_class} per class)")
-        
+            samples_to_load = max_samples // 2  # Half from each class
+
+        # Load data from HDF5 files - use slicing to limit memory usage
+        with h5py.File(clean_path, 'r') as f:
+            if samples_to_load is not None:
+                clean_signals = np.array(f[split]['signals'][:samples_to_load])
+                clean_labels = np.array(f[split]['jammed'][:samples_to_load])
+            else:
+                clean_signals = np.array(f[split]['signals'])
+                clean_labels = np.array(f[split]['jammed'])
+
+        with h5py.File(jammed_path, 'r') as f:
+            if samples_to_load is not None:
+                jammed_signals = np.array(f[split]['signals'][:samples_to_load])
+                jammed_labels = np.array(f[split]['jammed'][:samples_to_load])
+            else:
+                jammed_signals = np.array(f[split]['signals'])
+                jammed_labels = np.array(f[split]['jammed'])
+
+        print(f"Clean signals: {clean_signals.shape}, Jammed signals: {jammed_signals.shape}")
+
         # Combine and convert to correct types
         all_signals = np.concatenate([clean_signals, jammed_signals], axis=0).astype(np.float32)
         # Use the actual labels from the files (they correctly identify jammed vs clean)
