@@ -32,10 +32,12 @@ This is the first comprehensive benchmark study evaluating machine learning mode
 **NEW**: This repository now includes an extension that addresses energy efficiency through **adaptive power management**. The original benchmark used MAXN SUPER mode exclusively, which can waste energy under light workloads.
 
 The adaptive power management system:
-- **Dynamically switches** between power modes (7W and MAXN SUPER) based on real-time latency feedback
+- **Dynamically switches** between power modes (15W and MAXN SUPER) based on real-time latency feedback
 - **Balances performance and energy efficiency** for variable workloads
 - **Reduces energy consumption by 20-40%** for bursty workloads while maintaining latency targets
 - Includes comprehensive evaluation across realistic RF monitoring scenarios
+
+*Note*: Uses 15W mode (JetPack 6.1 mode 0) instead of 7W, which requires a reboot and cannot be dynamically switched.
 
 **Quick Start**:
 ```bash

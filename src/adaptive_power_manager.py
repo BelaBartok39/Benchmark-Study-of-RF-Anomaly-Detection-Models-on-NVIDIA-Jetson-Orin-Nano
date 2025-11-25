@@ -15,9 +15,9 @@ from enum import Enum
 
 
 class PowerMode(Enum):
-    """Jetson Orin Nano power modes."""
-    LOW_POWER = "7W"       # nvpmodel mode 1 (7W)
-    HIGH_POWER = "MAXN"    # nvpmodel mode 0 (MAXN SUPER - 25W)
+    """Jetson Orin Nano power modes (JetPack 6.1)."""
+    LOW_POWER = "15W"      # nvpmodel mode 0 (15W)
+    HIGH_POWER = "MAXN"    # nvpmodel mode 2 (MAXN SUPER - 25W)
 
 
 class AdaptivePowerManager:
@@ -29,10 +29,10 @@ class AdaptivePowerManager:
     performance targets.
 
     Algorithm:
-    1. Start in LOW_POWER mode (7W) by default
+    1. Start in LOW_POWER mode (15W) by default
     2. Monitor inference latency continuously
-    3. If latency > threshold: switch to HIGH_POWER mode
-    4. If latency < threshold for hysteresis_time seconds: switch to LOW_POWER mode
+    3. If latency > threshold: switch to HIGH_POWER mode (MAXN SUPER)
+    4. If latency < threshold for hysteresis_time seconds: switch to LOW_POWER mode (15W)
     5. Track switching overhead and energy consumption
     """
 
@@ -146,8 +146,9 @@ class AdaptivePowerManager:
         start_time = time.time()
 
         try:
-            # Map PowerMode to nvpmodel mode number
-            mode_number = 1 if mode == PowerMode.LOW_POWER else 0
+            # Map PowerMode to nvpmodel mode number (JetPack 6.1)
+            # Mode 0 = 15W, Mode 1 = 25W, Mode 2 = MAXN SUPER
+            mode_number = 0 if mode == PowerMode.LOW_POWER else 2
 
             # Set power mode using nvpmodel
             # Note: This requires sudo privileges. For testing without Jetson, we'll simulate.
@@ -301,7 +302,7 @@ class AdaptivePowerManager:
         print(f"Mode Switches: {stats['total_mode_switches']}")
         print(f"Avg Switch Time: {stats['avg_switch_time_ms']:.1f} ms")
         print()
-        print(f"Time in Low Power (7W): {stats['time_in_low_power_s']:.1f}s ({stats['low_power_percentage']:.1f}%)")
+        print(f"Time in Low Power (15W): {stats['time_in_low_power_s']:.1f}s ({stats['low_power_percentage']:.1f}%)")
         print(f"Time in High Power (MAXN): {stats['time_in_high_power_s']:.1f}s ({100-stats['low_power_percentage']:.1f}%)")
         print(f"Total Runtime: {stats['total_runtime_s']:.1f}s")
         print("="*60 + "\n")
@@ -310,10 +311,10 @@ class AdaptivePowerManager:
 # Utility functions for power mode management
 def get_current_power_mode() -> Optional[int]:
     """
-    Get current nvpmodel power mode.
+    Get current nvpmodel power mode (JetPack 6.1).
 
     Returns:
-        Power mode number (0=MAXN, 1=7W) or None if unable to determine
+        Power mode number (0=15W, 1=25W, 2=MAXN) or None if unable to determine
     """
     try:
         result = subprocess.run(
@@ -325,15 +326,21 @@ def get_current_power_mode() -> Optional[int]:
 
         # Parse output to find current mode
         for line in result.stdout.split('\n'):
-            if 'NV Power Mode' in line and 'Mode' in line:
-                # Example: "NV Power Mode: MAXN"
-                parts = line.split(':')
-                if len(parts) >= 2:
-                    mode_str = parts[1].strip()
-                    if 'MAXN' in mode_str or '0' in mode_str:
-                        return 0
-                    elif '7W' in mode_str or '1' in mode_str:
-                        return 1
+            if 'NV Power Mode' in line or 'mode' in line.lower():
+                # Example: "NV Power Mode: MAXN" or similar
+                if 'MAXN' in line.upper():
+                    return 2
+                elif '25W' in line or '25 W' in line:
+                    return 1
+                elif '15W' in line or '15 W' in line:
+                    return 0
+                # Fallback to mode number in line
+                elif 'Mode: 2' in line or 'mode 2' in line.lower():
+                    return 2
+                elif 'Mode: 1' in line or 'mode 1' in line.lower():
+                    return 1
+                elif 'Mode: 0' in line or 'mode 0' in line.lower():
+                    return 0
 
         return None
 
@@ -343,10 +350,10 @@ def get_current_power_mode() -> Optional[int]:
 
 def set_power_mode(mode: int) -> bool:
     """
-    Set Jetson power mode.
+    Set Jetson power mode (JetPack 6.1).
 
     Args:
-        mode: Power mode number (0=MAXN, 1=7W)
+        mode: Power mode number (0=15W, 1=25W, 2=MAXN)
 
     Returns:
         True if successful, False otherwise

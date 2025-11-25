@@ -17,10 +17,10 @@ from typing import Dict, List, Tuple
 
 def set_power_mode(mode: int, verbose: bool = True) -> float:
     """
-    Set power mode and measure switching time.
+    Set power mode and measure switching time (JetPack 6.1).
 
     Args:
-        mode: Power mode (0=MAXN, 1=7W)
+        mode: Power mode (0=15W, 1=25W, 2=MAXN SUPER)
         verbose: Print status
 
     Returns:
@@ -38,7 +38,8 @@ def set_power_mode(mode: int, verbose: bool = True) -> float:
         switch_time = time.time() - start
 
         if verbose:
-            mode_name = "MAXN SUPER" if mode == 0 else "7W"
+            mode_names = {0: "15W", 1: "25W", 2: "MAXN SUPER"}
+            mode_name = mode_names.get(mode, f"Mode {mode}")
             print(f"  ✓ Switched to {mode_name} mode in {switch_time*1000:.0f}ms")
 
         return switch_time
@@ -52,7 +53,7 @@ def set_power_mode(mode: int, verbose: bool = True) -> float:
 
 
 def get_current_power_mode() -> int:
-    """Get current power mode."""
+    """Get current power mode (JetPack 6.1)."""
     try:
         result = subprocess.run(
             ['nvpmodel', '-q'],
@@ -63,10 +64,19 @@ def get_current_power_mode() -> int:
 
         for line in result.stdout.split('\n'):
             if 'NV Power Mode' in line or 'mode' in line.lower():
-                if 'MAXN' in line or '0' in line:
-                    return 0
-                elif '7W' in line or '1' in line:
+                if 'MAXN' in line.upper():
+                    return 2
+                elif '25W' in line or '25 W' in line:
                     return 1
+                elif '15W' in line or '15 W' in line:
+                    return 0
+                # Fallback to mode number
+                elif 'Mode: 2' in line or 'mode 2' in line.lower():
+                    return 2
+                elif 'Mode: 1' in line or 'mode 1' in line.lower():
+                    return 1
+                elif 'Mode: 0' in line or 'mode 0' in line.lower():
+                    return 0
 
         return -1
 
@@ -96,13 +106,13 @@ def measure_switching_overhead(num_trials: int = 20,
         print(f"Stabilization time: {stabilization_time}s")
         print()
 
-    low_to_high_times = []  # 7W -> MAXN
-    high_to_low_times = []  # MAXN -> 7W
+    low_to_high_times = []  # 15W -> MAXN
+    high_to_low_times = []  # MAXN -> 15W
 
-    # Start from known state (7W)
+    # Start from known state (15W)
     if verbose:
-        print("🔧 Setting initial state to 7W mode...")
-    set_power_mode(1, verbose=False)
+        print("🔧 Setting initial state to 15W mode...")
+    set_power_mode(0, verbose=False)
     time.sleep(stabilization_time)
 
     for trial in range(num_trials):
@@ -112,22 +122,23 @@ def measure_switching_overhead(num_trials: int = 20,
         # Verify current mode
         current_mode = get_current_power_mode()
         if verbose and current_mode >= 0:
-            mode_name = "MAXN" if current_mode == 0 else "7W"
+            mode_names = {0: "15W", 1: "25W", 2: "MAXN"}
+            mode_name = mode_names.get(current_mode, f"Mode {current_mode}")
             print(f"  Current mode: {mode_name}")
 
-        # Switch from 7W to MAXN
+        # Switch from 15W to MAXN
         if verbose:
-            print("  7W → MAXN...")
-        switch_time = set_power_mode(0, verbose=verbose)
+            print("  15W → MAXN...")
+        switch_time = set_power_mode(2, verbose=verbose)
         low_to_high_times.append(switch_time)
 
         # Wait for stabilization
         time.sleep(stabilization_time)
 
-        # Switch from MAXN to 7W
+        # Switch from MAXN to 15W
         if verbose:
-            print("  MAXN → 7W...")
-        switch_time = set_power_mode(1, verbose=verbose)
+            print("  MAXN → 15W...")
+        switch_time = set_power_mode(0, verbose=verbose)
         high_to_low_times.append(switch_time)
 
         # Wait for stabilization
@@ -141,7 +152,7 @@ def measure_switching_overhead(num_trials: int = 20,
         'num_trials': num_trials,
         'stabilization_time_s': stabilization_time,
 
-        # 7W -> MAXN statistics
+        # 15W -> MAXN statistics
         'low_to_high_avg_ms': float(np.mean(low_to_high) * 1000),
         'low_to_high_median_ms': float(np.median(low_to_high) * 1000),
         'low_to_high_std_ms': float(np.std(low_to_high) * 1000),
@@ -149,7 +160,7 @@ def measure_switching_overhead(num_trials: int = 20,
         'low_to_high_max_ms': float(np.max(low_to_high) * 1000),
         'low_to_high_p95_ms': float(np.percentile(low_to_high, 95) * 1000),
 
-        # MAXN -> 7W statistics
+        # MAXN -> 15W statistics
         'high_to_low_avg_ms': float(np.mean(high_to_low) * 1000),
         'high_to_low_median_ms': float(np.median(high_to_low) * 1000),
         'high_to_low_std_ms': float(np.std(high_to_low) * 1000),
@@ -169,7 +180,7 @@ def measure_switching_overhead(num_trials: int = 20,
         print("\n" + "="*60)
         print("SWITCHING OVERHEAD SUMMARY")
         print("="*60)
-        print(f"\n7W → MAXN SUPER:")
+        print(f"\n15W → MAXN SUPER:")
         print(f"  Average: {results['low_to_high_avg_ms']:.1f} ms")
         print(f"  Median:  {results['low_to_high_median_ms']:.1f} ms")
         print(f"  Std Dev: {results['low_to_high_std_ms']:.1f} ms")
@@ -177,7 +188,7 @@ def measure_switching_overhead(num_trials: int = 20,
         print(f"  Max:     {results['low_to_high_max_ms']:.1f} ms")
         print(f"  P95:     {results['low_to_high_p95_ms']:.1f} ms")
 
-        print(f"\nMAXN SUPER → 7W:")
+        print(f"\nMAXN SUPER → 15W:")
         print(f"  Average: {results['high_to_low_avg_ms']:.1f} ms")
         print(f"  Median:  {results['high_to_low_median_ms']:.1f} ms")
         print(f"  Std Dev: {results['high_to_low_std_ms']:.1f} ms")
@@ -212,13 +223,13 @@ def measure_performance_impact(model_path: str = None,
 
     results = {
         'samples_per_mode': samples_per_mode,
-        'modes_tested': ['7W', 'MAXN SUPER']
+        'modes_tested': ['15W', 'MAXN SUPER']
     }
 
     # Test dummy workload (sleep simulation)
     # In a real scenario, this would run actual model inference
 
-    for mode_num, mode_name in [(1, '7W'), (0, 'MAXN SUPER')]:
+    for mode_num, mode_name in [(0, '15W'), (2, 'MAXN SUPER')]:
         if verbose:
             print(f"\nTesting {mode_name} mode...")
 
@@ -249,11 +260,11 @@ def measure_performance_impact(model_path: str = None,
             print(f"  Std dev:     {results[f'{mode_key}_std_latency_ms']:.2f} ms")
 
     # Calculate speedup
-    speedup = results['7w_avg_latency_ms'] / results['maxn_super_avg_latency_ms']
+    speedup = results['15w_avg_latency_ms'] / results['maxn_super_avg_latency_ms']
     results['speedup_factor'] = float(speedup)
 
     if verbose:
-        print(f"\nSpeedup (MAXN vs 7W): {speedup:.2f}x")
+        print(f"\nSpeedup (MAXN vs 15W): {speedup:.2f}x")
         print("="*60 + "\n")
 
     return results

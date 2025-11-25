@@ -6,7 +6,7 @@ Evaluates the effectiveness of adaptive power management for balancing
 performance and energy efficiency on NVIDIA Jetson Orin Nano.
 
 Compares three power management strategies:
-1. Static Low Power (7W) - Maximum energy efficiency
+1. Static Low Power (15W) - Maximum energy efficiency
 2. Static High Power (MAXN SUPER) - Maximum performance
 3. Adaptive - Dynamic switching based on latency feedback
 """
@@ -122,7 +122,16 @@ class AdaptiveBenchmark:
                 print(f"🔥 Loading PyTorch model from {self.model_path}")
 
             self.model = get_model(self.model_name, self.window_size)
-            self.model.load_state_dict(torch.load(self.model_path, map_location=self.device))
+            try:
+                self.model.load_state_dict(torch.load(self.model_path, map_location=self.device, weights_only=False))
+            except RuntimeError as e:
+                if "size mismatch" in str(e):
+                    print(f"\n❌ Error loading model: Shape mismatch detected.")
+                    print(f"   This usually means the window_size doesn't match the trained model.")
+                    print(f"   Current window_size: {self.window_size}")
+                    print(f"   Try: --window-size 1024 or --window-size 2048")
+                    print(f"\n   Error details: {e}\n")
+                raise
             self.model.to(self.device)
             self.model.eval()
             self.use_tensorrt = False
@@ -204,8 +213,8 @@ class AdaptiveBenchmark:
             print(f"STATIC BASELINE: {power_mode.value} - {workload_pattern.value}")
             print(f"{'='*60}")
 
-        # Set static power mode
-        mode_num = 1 if power_mode == PowerMode.LOW_POWER else 0
+        # Set static power mode (JetPack 6.1: 0=15W, 1=25W, 2=MAXN)
+        mode_num = 0 if power_mode == PowerMode.LOW_POWER else 2
         try:
             import subprocess
             subprocess.run(['sudo', 'nvpmodel', '-m', str(mode_num)],
@@ -487,8 +496,8 @@ def main():
                        help='Path to clean dataset')
     parser.add_argument('--jammed', type=str, default='../jammed_5g_dataset.h5',
                        help='Path to jammed dataset')
-    parser.add_argument('--window-size', type=int, default=128,
-                       help='Input window size')
+    parser.add_argument('--window-size', type=int, default=1024,
+                       help='Input window size (must match training)')
     parser.add_argument('--max-samples', type=int, default=1000,
                        help='Maximum number of test samples')
 

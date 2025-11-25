@@ -29,15 +29,17 @@ Running continuously in MAXN SUPER mode wastes energy during light workloads, wh
 Our adaptive power management system implements a latency-driven mode switching strategy with hysteresis:
 
 ```
-1. Initialize in LOW_POWER mode (7W)
+1. Initialize in LOW_POWER mode (15W)
 2. For each inference:
    a. Measure inference latency
    b. If latency > threshold:
       - Switch to HIGH_POWER mode (MAXN SUPER)
    c. If latency < threshold for X consecutive seconds:
-      - Switch to LOW_POWER mode (7W)
+      - Switch to LOW_POWER mode (15W)
 3. Track mode switches, energy consumption, and performance
 ```
+
+**Note**: JetPack 6.1 supports three power modes: 15W (mode 0), 25W (mode 1), and MAXN SUPER (mode 2). The 7W mode requires a reboot and cannot be dynamically switched, so we use 15W as the low power mode.
 
 ### Key Parameters
 
@@ -134,7 +136,7 @@ python src/characterize_switching_overhead.py \
    - Expected: Predictable switching patterns, good energy savings
 
 **Baselines**:
-- **Static 7W**: Energy efficiency baseline (may violate latency targets)
+- **Static 15W**: Energy efficiency baseline (may violate latency targets)
 - **Static MAXN SUPER**: Performance baseline (wastes energy during idle)
 
 **Per-Workload Experiments**:
@@ -222,7 +224,7 @@ Adaptive power management will:
 ### Energy-Performance Trade-off
 
 We expect to demonstrate a **Pareto frontier** showing:
-- Static 7W: Best energy, worst latency (may violate constraints)
+- Static 15W: Best energy, worst latency (may violate constraints)
 - Static MAXN: Best latency, worst energy
 - **Adaptive: Near-optimal balance** - close to MAXN latency with significantly lower energy
 
