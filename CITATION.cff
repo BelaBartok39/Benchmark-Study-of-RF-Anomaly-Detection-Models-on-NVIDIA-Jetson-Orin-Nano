@@ -8,12 +8,13 @@ abstract: >
   evaluates six ML architectures (AE, AAE, CNN-AE, LSTM-AE, ResNet-AE, FF) across
   multiple performance metrics including latency, throughput, energy efficiency,
   memory footprint, and resource utilization using both PyTorch and TensorRT optimization.
+  *Code was produced with some assistance of Claude Sonnet 4 and Claude
+  Sonnet 4.5 was used to assist with repository documentation.
 authors:
   - family-names: Redmond
     given-names: Nicholas D.
     email: ndrdmond@memphis.edu
     affiliation: "Department of Computer Science, University of Memphis"
-    orcid: "https://orcid.org/0000-0000-0000-0000"  # Add your ORCID if available
   - family-names: Ali
     given-names: Mohd Hasan
     email: mhali@memphis.edu
@@ -26,8 +27,8 @@ authors:
     given-names: Myounggyu
     email: mwon@memphis.edu
     affiliation: "Department of Computer Science, University of Memphis"
-repository-code: "https://github.com/YOUR_USERNAME/rf-anomaly-jetson-benchmark"
-url: "https://github.com/YOUR_USERNAME/rf-anomaly-jetson-benchmark"
+repository-code: "https://github.com/BelaBartok39/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano"
+url: "https://github.com/BelaBartok39/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano"
 keywords:
   - RF communication security
   - Anomaly detection
@@ -40,7 +41,7 @@ keywords:
   - Benchmark study
 license: GPL-3.0
 version: 1.0.0
-date-released: "2025-01-01"  # Update to actual release date
+date-released: "2026-01-09"
 preferred-citation:
   type: conference-paper
   title: "A Benchmark Study of RF Anomaly Detection Models on NVIDIA Jetson Orin Nano"
@@ -67,5 +68,5 @@ preferred-citation:
   year: 2025
   publisher:
     name: "IEEE"
-  # doi: "10.1109/CCNC.2025.XXXXX"  # Add DOI when available
-  # url: "https://doi.org/10.1109/CCNC.2025.XXXXX"  # Add URL when available
+  # doi: "10.1109/CCNC.2025.XXXXX"  # I need to add DOI when available
+  # url: "https://doi.org/10.1109/CCNC.2025.XXXXX"  # Same for URL when available

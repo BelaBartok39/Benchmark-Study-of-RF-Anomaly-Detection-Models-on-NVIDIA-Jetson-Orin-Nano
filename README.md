@@ -47,8 +47,8 @@ This is the first comprehensive benchmark study evaluating machine learning mode
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/rf-anomaly-jetson-benchmark.git
-cd rf-anomaly-jetson-benchmark
+git clone git@github.com:BelaBartok39/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano.git
+cd Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano
 ```
 
 ### 2. Install Python Dependencies
