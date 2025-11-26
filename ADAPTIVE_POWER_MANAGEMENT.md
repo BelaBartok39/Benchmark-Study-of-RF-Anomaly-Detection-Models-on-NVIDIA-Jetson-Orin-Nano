@@ -94,7 +94,7 @@ The implementation consists of four main components:
 **Objective**: Measure the cost of transitioning between power modes
 
 **Experiments**:
-1. Measure switching latency (7W → MAXN and MAXN → 7W)
+1. Measure switching latency (15W → MAXN and MAXN → 15W)
 2. Test with multiple trials (20+) for statistical significance
 3. Allow stabilization time (2s) after each switch
 4. Measure impact on inference performance during transitions
