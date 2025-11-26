@@ -4,7 +4,7 @@ This repository contains the code and resources for the paper:
 
 **"A Benchmark Study of RF Anomaly Detection Models on NVIDIA Jetson Orin Nano"**
 Nicholas D. Redmond, Mohd Hasan Ali, Dipankar Dasgupta, Myounggyu Won
-*IEEE Consumer Communications & Networking Conference (CCNC) 2025*
+*IEEE Consumer Communications & Networking Conference (CCNC) 2026*
 
 ## Overview
 
