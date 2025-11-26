@@ -2,7 +2,7 @@
 Data preprocessing utilities for RF signal processing.
 
 This module provides functions for I/Q channel extraction, PSD computation,
-and input validation for RF anomaly detection.
+and input validation.
 """
 
 import numpy as np
