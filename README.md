@@ -298,3 +298,6 @@ For questions or issues, please open an issue on GitHub or contact:
 - [JetPack SDK](https://developer.nvidia.com/embedded/jetpack)
 - [Dataset on Hugging Face](https://huggingface.co/datasets/b4byn1cky/RF_Anomaly_Detection)
 - [TensorRT Documentation](https://docs.nvidia.com/deeplearning/tensorrt/)
+
+* Code was produced with some assistance of Claude Sonnet 4 and Claude
+  Sonnet 4.5 was used to assist with repository documentation.
