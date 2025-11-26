@@ -84,7 +84,7 @@ echo "Checking Jetson configuration..."
 jetson_release  # Should show JetPack 6.1+
 
 # Enable MAXN SUPER power mode
-sudo nvpmodel -m 0
+sudo nvpmodel -m 2
 sudo jetson_clocks  # Maximize clock frequencies
 
 # Verify power mode
