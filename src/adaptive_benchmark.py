@@ -155,8 +155,9 @@ class AdaptiveBenchmark:
             if i >= max_samples:
                 break
 
-            # Flatten input if needed
-            if 'ae' in self.model_name or self.model_name == 'ff':
+            # Flatten input only for dense models (ae, aae, ff)
+            # CNN/LSTM models need 3D input: (batch, channels, seq_len)
+            if self.model_name in ['ae', 'aae', 'ff']:
                 x = x.view(x.size(0), -1)
 
             self.test_data.append(x)
