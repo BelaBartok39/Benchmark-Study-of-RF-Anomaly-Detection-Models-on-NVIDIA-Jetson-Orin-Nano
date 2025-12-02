@@ -562,7 +562,7 @@ def main():
     for pattern in patterns:
         # Run baselines if requested
         if args.run_baselines:
-            # Low power baseline
+            # Low power baseline (15W)
             low_power_results = benchmark.run_static_baseline(
                 power_mode=PowerMode.LOW_POWER,
                 workload_pattern=pattern,
@@ -578,7 +578,23 @@ def main():
             print("\n⏳ Thermal cooldown: 30 seconds...")
             time.sleep(30)
 
-            # High power baseline
+            # Medium power baseline (25W)
+            medium_power_results = benchmark.run_static_baseline(
+                power_mode=PowerMode.MEDIUM_POWER,
+                workload_pattern=pattern,
+                duration_s=args.duration
+            )
+            all_results.append(medium_power_results)
+            benchmark.save_results(
+                medium_power_results,
+                f'{args.model}_static_medium_{pattern.value}_results.json'
+            )
+
+            # Cooldown
+            print("\n⏳ Thermal cooldown: 30 seconds...")
+            time.sleep(30)
+
+            # High power baseline (MAXN)
             high_power_results = benchmark.run_static_baseline(
                 power_mode=PowerMode.HIGH_POWER,
                 workload_pattern=pattern,

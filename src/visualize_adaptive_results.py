@@ -30,17 +30,23 @@ def load_results(results_dir: Path, model: str, workload: str) -> Dict:
     Load all results for a given model and workload.
 
     Returns:
-        Dictionary with keys: 'static_low', 'static_high', 'adaptive'
+        Dictionary with keys: 'static_low', 'static_medium', 'static_high', 'adaptive'
     """
     results = {}
 
-    # Load static low power results
+    # Load static low power results (15W)
     low_file = results_dir / f'{model}_static_low_{workload}_results.json'
     if low_file.exists():
         with open(low_file, 'r') as f:
             results['static_low'] = json.load(f)
 
-    # Load static high power results
+    # Load static medium power results (25W)
+    medium_file = results_dir / f'{model}_static_medium_{workload}_results.json'
+    if medium_file.exists():
+        with open(medium_file, 'r') as f:
+            results['static_medium'] = json.load(f)
+
+    # Load static high power results (MAXN)
     high_file = results_dir / f'{model}_static_high_{workload}_results.json'
     if high_file.exists():
         with open(high_file, 'r') as f:
@@ -76,6 +82,13 @@ def plot_energy_latency_tradeoff(results: Dict, output_path: Path):
         latencies.append(results['static_low']['p95_latency_ms'])
         colors.append('#3498db')  # Blue
         markers.append('s')  # Square
+
+    if 'static_medium' in results:
+        strategies.append('Static 25W')
+        energies.append(results['static_medium']['energy_per_inference_j'])
+        latencies.append(results['static_medium']['p95_latency_ms'])
+        colors.append('#f39c12')  # Orange
+        markers.append('D')  # Diamond
 
     if 'static_high' in results:
         strategies.append('Static MAXN')
@@ -213,26 +226,30 @@ def plot_comparison_bars(results_all_workloads: Dict, metric: str,
 
     # Prepare data
     static_low_values = []
+    static_medium_values = []
     static_high_values = []
     adaptive_values = []
 
     for workload in workloads:
         results = results_all_workloads[workload]
         static_low_values.append(results.get('static_low', {}).get(metric, 0))
+        static_medium_values.append(results.get('static_medium', {}).get(metric, 0))
         static_high_values.append(results.get('static_high', {}).get(metric, 0))
         adaptive_values.append(results.get('adaptive', {}).get(metric, 0))
 
     # Create bar chart
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(14, 6))
 
     x = np.arange(n_workloads)
-    width = 0.25
+    width = 0.20  # Narrower bars to fit 4 groups
 
-    bars1 = ax.bar(x - width, static_low_values, width, label='Static 15W',
+    bars1 = ax.bar(x - 1.5*width, static_low_values, width, label='Static 15W',
                    color='#3498db', alpha=0.8, edgecolor='black')
-    bars2 = ax.bar(x, static_high_values, width, label='Static MAXN',
+    bars2 = ax.bar(x - 0.5*width, static_medium_values, width, label='Static 25W',
+                   color='#f39c12', alpha=0.8, edgecolor='black')
+    bars3 = ax.bar(x + 0.5*width, static_high_values, width, label='Static MAXN',
                    color='#e74c3c', alpha=0.8, edgecolor='black')
-    bars3 = ax.bar(x + width, adaptive_values, width, label='Adaptive',
+    bars4 = ax.bar(x + 1.5*width, adaptive_values, width, label='Adaptive',
                    color='#2ecc71', alpha=0.8, edgecolor='black')
 
     ax.set_xlabel('Workload Pattern', fontweight='bold')
@@ -294,8 +311,8 @@ def create_summary_table(results_all_workloads: Dict, output_path: Path):
 
         for workload, results in results_all_workloads.items():
             f.write(f"## {workload.capitalize()} Workload\n\n")
-            f.write("| Metric | Static 15W | Static MAXN | Adaptive | Improvement |\n")
-            f.write("|--------|-----------|-------------|----------|-------------|\n")
+            f.write("| Metric | Static 15W | Static 25W | Static MAXN | Adaptive | Improvement |\n")
+            f.write("|--------|-----------|-----------|-------------|----------|-------------|\n")
 
             metrics = [
                 ('P95 Latency (ms)', 'p95_latency_ms', '.2f'),
@@ -310,6 +327,7 @@ def create_summary_table(results_all_workloads: Dict, output_path: Path):
                 scale = scale[0] if scale else 1
 
                 low_val = results.get('static_low', {}).get(metric_key, 0) * scale
+                medium_val = results.get('static_medium', {}).get(metric_key, 0) * scale
                 high_val = results.get('static_high', {}).get(metric_key, 0) * scale
                 adap_val = results.get('adaptive', {}).get(metric_key, 0) * scale
 
@@ -326,15 +344,18 @@ def create_summary_table(results_all_workloads: Dict, output_path: Path):
                 else:
                     improvement_str = "N/A"
 
-                f.write(f"| {metric_name} | {low_val:{fmt}} | {high_val:{fmt}} | "
+                f.write(f"| {metric_name} | {low_val:{fmt}} | {medium_val:{fmt}} | {high_val:{fmt}} | "
                        f"{adap_val:{fmt}} | {improvement_str} |\n")
 
-            # Add mode switching stats for adaptive
+            # Add mode switching stats for adaptive (three-tier)
             if 'adaptive' in results:
                 adap = results['adaptive']
                 f.write(f"\n**Adaptive Statistics:**\n")
                 f.write(f"- Mode Switches: {adap.get('total_mode_switches', 0)}\n")
-                f.write(f"- Low Power Time: {adap.get('low_power_percentage', 0):.1f}%\n")
+                f.write(f"- Low Power Time (15W): {adap.get('low_power_percentage', 0):.1f}%\n")
+                if 'medium_power_percentage' in adap:
+                    f.write(f"- Medium Power Time (25W): {adap.get('medium_power_percentage', 0):.1f}%\n")
+                    f.write(f"- High Power Time (MAXN): {adap.get('high_power_percentage', 0):.1f}%\n")
                 f.write(f"- Avg Switch Time: {adap.get('avg_switch_time_ms', 0):.1f} ms\n")
 
             f.write("\n")
