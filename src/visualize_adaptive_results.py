@@ -71,7 +71,7 @@ def plot_energy_latency_tradeoff(results: Dict, output_path: Path):
     markers = []
 
     if 'static_low' in results:
-        strategies.append('Static 7W')
+        strategies.append('Static 15W')
         energies.append(results['static_low']['energy_per_inference_j'])
         latencies.append(results['static_low']['p95_latency_ms'])
         colors.append('#3498db')  # Blue
@@ -179,7 +179,7 @@ def plot_latency_timeline(results: Dict, output_path: Path):
     ax2.set_ylabel('Power Mode', fontweight='bold')
     ax2.set_xlabel('Time (s)', fontweight='bold')
     ax2.set_yticks([0, 1])
-    ax2.set_yticklabels(['7W', 'MAXN'])
+    ax2.set_yticklabels(['15W', 'MAXN'])
     ax2.grid(True, alpha=0.3, linestyle='--', axis='x')
 
     # Mark mode switches
@@ -228,7 +228,7 @@ def plot_comparison_bars(results_all_workloads: Dict, metric: str,
     x = np.arange(n_workloads)
     width = 0.25
 
-    bars1 = ax.bar(x - width, static_low_values, width, label='Static 7W',
+    bars1 = ax.bar(x - width, static_low_values, width, label='Static 15W',
                    color='#3498db', alpha=0.8, edgecolor='black')
     bars2 = ax.bar(x, static_high_values, width, label='Static MAXN',
                    color='#e74c3c', alpha=0.8, edgecolor='black')
@@ -294,7 +294,7 @@ def create_summary_table(results_all_workloads: Dict, output_path: Path):
 
         for workload, results in results_all_workloads.items():
             f.write(f"## {workload.capitalize()} Workload\n\n")
-            f.write("| Metric | Static 7W | Static MAXN | Adaptive | Improvement |\n")
+            f.write("| Metric | Static 15W | Static MAXN | Adaptive | Improvement |\n")
             f.write("|--------|-----------|-------------|----------|-------------|\n")
 
             metrics = [
