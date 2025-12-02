@@ -1,0 +1,18 @@
+{
+  "samples_per_mode": 100,
+  "modes_tested": [
+    "15W",
+    "MAXN SUPER"
+  ],
+  "15w_avg_latency_ms": 110.48502922058105,
+  "15w_median_latency_ms": 104.74681854248047,
+  "15w_std_latency_ms": 21.473096956343824,
+  "15w_min_latency_ms": 103.91068458557129,
+  "15w_max_latency_ms": 272.7811336517334,
+  "maxn_super_avg_latency_ms": 95.60482740402222,
+  "maxn_super_median_latency_ms": 91.67826175689697,
+  "maxn_super_std_latency_ms": 16.159476981474604,
+  "maxn_super_min_latency_ms": 90.5153751373291,
+  "maxn_super_max_latency_ms": 227.09941864013672,
+  "speedup_factor": 1.1556427873006423
+}
