@@ -328,7 +328,8 @@ class AdaptiveBenchmark:
                                duration_s: float = 60.0,
                                latency_threshold_ms: float = 10.0,
                                hysteresis_time_s: float = 5.0,
-                               use_model_defaults: bool = False) -> Dict:
+                               use_model_defaults: bool = False,
+                               enable_three_tier: bool = True) -> Dict:
         """
         Run experiment with adaptive power management.
 
@@ -354,6 +355,7 @@ class AdaptiveBenchmark:
             hysteresis_time_s=hysteresis_time_s,
             initial_mode=PowerMode.LOW_POWER,
             enable_switching=True,
+            enable_three_tier=enable_three_tier,
             verbose=self.verbose,
             model_name=self.model_name,
             use_model_defaults=use_model_defaults
@@ -519,6 +521,10 @@ def main():
                        help='Hysteresis time in seconds')
     parser.add_argument('--use-model-defaults', action='store_true',
                        help='Use model-specific thresholds and hysteresis (overrides --latency-threshold and --hysteresis-time)')
+    parser.add_argument('--enable-three-tier', action='store_true', default=True,
+                       help='Enable three-tier power management (15W/25W/MAXN) instead of two-tier (15W/MAXN)')
+    parser.add_argument('--disable-three-tier', dest='enable_three_tier', action='store_false',
+                       help='Disable three-tier mode and use two-tier (15W/MAXN) only')
 
     parser.add_argument('--output-dir', type=str, default='adaptive_results',
                        help='Output directory for results')
@@ -594,7 +600,8 @@ def main():
             duration_s=args.duration,
             latency_threshold_ms=args.latency_threshold,
             hysteresis_time_s=args.hysteresis_time,
-            use_model_defaults=args.use_model_defaults
+            use_model_defaults=args.use_model_defaults,
+            enable_three_tier=args.enable_three_tier
         )
         all_results.append(adaptive_results)
         benchmark.save_results(
