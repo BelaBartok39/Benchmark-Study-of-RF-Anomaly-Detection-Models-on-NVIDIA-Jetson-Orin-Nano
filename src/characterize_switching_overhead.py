@@ -88,7 +88,7 @@ def measure_switching_overhead(num_trials: int = 20,
                                stabilization_time: float = 2.0,
                                verbose: bool = True) -> Dict:
     """
-    Measure power mode switching overhead.
+    Measure power mode switching overhead for all transitions (three-tier).
 
     Args:
         num_trials: Number of switching cycles to measure
@@ -96,18 +96,29 @@ def measure_switching_overhead(num_trials: int = 20,
         verbose: Print progress
 
     Returns:
-        Dictionary with switching overhead statistics
+        Dictionary with switching overhead statistics for all 6 transitions
     """
     if verbose:
         print("\n" + "="*60)
-        print("MODE SWITCHING OVERHEAD CHARACTERIZATION")
+        print("MODE SWITCHING OVERHEAD CHARACTERIZATION (THREE-TIER)")
         print("="*60)
         print(f"Trials: {num_trials}")
         print(f"Stabilization time: {stabilization_time}s")
+        print(f"Measuring all 6 transitions:")
+        print("  • 15W ↔ 25W")
+        print("  • 25W ↔ MAXN")
+        print("  • 15W ↔ MAXN")
         print()
 
-    low_to_high_times = []  # 15W -> MAXN
-    high_to_low_times = []  # MAXN -> 15W
+    # Storage for all transition times
+    transitions = {
+        'low_to_medium': [],    # 15W -> 25W
+        'medium_to_low': [],    # 25W -> 15W
+        'medium_to_high': [],   # 25W -> MAXN
+        'high_to_medium': [],   # MAXN -> 25W
+        'low_to_high': [],      # 15W -> MAXN
+        'high_to_low': []       # MAXN -> 15W
+    }
 
     # Start from known state (15W)
     if verbose:
@@ -126,77 +137,125 @@ def measure_switching_overhead(num_trials: int = 20,
             mode_name = mode_names.get(current_mode, f"Mode {current_mode}")
             print(f"  Current mode: {mode_name}")
 
-        # Switch from 15W to MAXN
+        # Cycle 1: 15W → 25W → 15W
+        if verbose:
+            print("  15W → 25W...")
+        switch_time = set_power_mode(1, verbose=verbose)
+        transitions['low_to_medium'].append(switch_time)
+        time.sleep(stabilization_time)
+
+        if verbose:
+            print("  25W → 15W...")
+        switch_time = set_power_mode(0, verbose=verbose)
+        transitions['medium_to_low'].append(switch_time)
+        time.sleep(stabilization_time)
+
+        # Cycle 2: 15W → 25W → MAXN → 25W → 15W
+        if verbose:
+            print("  15W → 25W...")
+        switch_time = set_power_mode(1, verbose=verbose)
+        # Don't store this redundant measurement
+        time.sleep(stabilization_time)
+
+        if verbose:
+            print("  25W → MAXN...")
+        switch_time = set_power_mode(2, verbose=verbose)
+        transitions['medium_to_high'].append(switch_time)
+        time.sleep(stabilization_time)
+
+        if verbose:
+            print("  MAXN → 25W...")
+        switch_time = set_power_mode(1, verbose=verbose)
+        transitions['high_to_medium'].append(switch_time)
+        time.sleep(stabilization_time)
+
+        if verbose:
+            print("  25W → 15W...")
+        switch_time = set_power_mode(0, verbose=verbose)
+        # Don't store this redundant measurement
+        time.sleep(stabilization_time)
+
+        # Cycle 3: 15W → MAXN → 15W (legacy two-tier comparison)
         if verbose:
             print("  15W → MAXN...")
         switch_time = set_power_mode(2, verbose=verbose)
-        low_to_high_times.append(switch_time)
-
-        # Wait for stabilization
+        transitions['low_to_high'].append(switch_time)
         time.sleep(stabilization_time)
 
-        # Switch from MAXN to 15W
         if verbose:
             print("  MAXN → 15W...")
         switch_time = set_power_mode(0, verbose=verbose)
-        high_to_low_times.append(switch_time)
-
-        # Wait for stabilization
+        transitions['high_to_low'].append(switch_time)
         time.sleep(stabilization_time)
 
-    # Calculate statistics
-    low_to_high = np.array(low_to_high_times)
-    high_to_low = np.array(high_to_low_times)
-
+    # Calculate statistics for all transitions
     results = {
         'num_trials': num_trials,
         'stabilization_time_s': stabilization_time,
-
-        # 15W -> MAXN statistics
-        'low_to_high_avg_ms': float(np.mean(low_to_high) * 1000),
-        'low_to_high_median_ms': float(np.median(low_to_high) * 1000),
-        'low_to_high_std_ms': float(np.std(low_to_high) * 1000),
-        'low_to_high_min_ms': float(np.min(low_to_high) * 1000),
-        'low_to_high_max_ms': float(np.max(low_to_high) * 1000),
-        'low_to_high_p95_ms': float(np.percentile(low_to_high, 95) * 1000),
-
-        # MAXN -> 15W statistics
-        'high_to_low_avg_ms': float(np.mean(high_to_low) * 1000),
-        'high_to_low_median_ms': float(np.median(high_to_low) * 1000),
-        'high_to_low_std_ms': float(np.std(high_to_low) * 1000),
-        'high_to_low_min_ms': float(np.min(high_to_low) * 1000),
-        'high_to_low_max_ms': float(np.max(high_to_low) * 1000),
-        'high_to_low_p95_ms': float(np.percentile(high_to_low, 95) * 1000),
-
-        # Overall statistics
-        'avg_switch_time_ms': float(np.mean([np.mean(low_to_high), np.mean(high_to_low)]) * 1000),
-
-        # Raw data
-        'low_to_high_times_ms': (low_to_high * 1000).tolist(),
-        'high_to_low_times_ms': (high_to_low * 1000).tolist()
     }
+
+    # Helper function to calculate stats
+    def add_stats(data: List[float], prefix: str) -> None:
+        arr = np.array(data)
+        results[f'{prefix}_avg_ms'] = float(np.mean(arr) * 1000)
+        results[f'{prefix}_median_ms'] = float(np.median(arr) * 1000)
+        results[f'{prefix}_std_ms'] = float(np.std(arr) * 1000)
+        results[f'{prefix}_min_ms'] = float(np.min(arr) * 1000)
+        results[f'{prefix}_max_ms'] = float(np.max(arr) * 1000)
+        results[f'{prefix}_p95_ms'] = float(np.percentile(arr, 95) * 1000)
+        results[f'{prefix}_times_ms'] = [float(t * 1000) for t in data]
+
+    # Add statistics for each transition type
+    add_stats(transitions['low_to_medium'], 'low_to_medium')
+    add_stats(transitions['medium_to_low'], 'medium_to_low')
+    add_stats(transitions['medium_to_high'], 'medium_to_high')
+    add_stats(transitions['high_to_medium'], 'high_to_medium')
+    add_stats(transitions['low_to_high'], 'low_to_high')
+    add_stats(transitions['high_to_low'], 'high_to_low')
+
+    # Calculate average switching time across all transitions
+    all_times = []
+    for times_list in transitions.values():
+        all_times.extend(times_list)
+
+    results['avg_switch_time_ms'] = float(np.mean(all_times) * 1000)
 
     if verbose:
         print("\n" + "="*60)
-        print("SWITCHING OVERHEAD SUMMARY")
+        print("SWITCHING OVERHEAD SUMMARY (THREE-TIER)")
         print("="*60)
-        print(f"\n15W → MAXN SUPER:")
+
+        print(f"\n15W → 25W:")
+        print(f"  Average: {results['low_to_medium_avg_ms']:.1f} ms")
+        print(f"  Median:  {results['low_to_medium_median_ms']:.1f} ms")
+        print(f"  P95:     {results['low_to_medium_p95_ms']:.1f} ms")
+
+        print(f"\n25W → 15W:")
+        print(f"  Average: {results['medium_to_low_avg_ms']:.1f} ms")
+        print(f"  Median:  {results['medium_to_low_median_ms']:.1f} ms")
+        print(f"  P95:     {results['medium_to_low_p95_ms']:.1f} ms")
+
+        print(f"\n25W → MAXN:")
+        print(f"  Average: {results['medium_to_high_avg_ms']:.1f} ms")
+        print(f"  Median:  {results['medium_to_high_median_ms']:.1f} ms")
+        print(f"  P95:     {results['medium_to_high_p95_ms']:.1f} ms")
+
+        print(f"\nMAXN → 25W:")
+        print(f"  Average: {results['high_to_medium_avg_ms']:.1f} ms")
+        print(f"  Median:  {results['high_to_medium_median_ms']:.1f} ms")
+        print(f"  P95:     {results['high_to_medium_p95_ms']:.1f} ms")
+
+        print(f"\n15W → MAXN (legacy two-tier):")
         print(f"  Average: {results['low_to_high_avg_ms']:.1f} ms")
         print(f"  Median:  {results['low_to_high_median_ms']:.1f} ms")
-        print(f"  Std Dev: {results['low_to_high_std_ms']:.1f} ms")
-        print(f"  Min:     {results['low_to_high_min_ms']:.1f} ms")
-        print(f"  Max:     {results['low_to_high_max_ms']:.1f} ms")
         print(f"  P95:     {results['low_to_high_p95_ms']:.1f} ms")
 
-        print(f"\nMAXN SUPER → 15W:")
+        print(f"\nMAXN → 15W (legacy two-tier):")
         print(f"  Average: {results['high_to_low_avg_ms']:.1f} ms")
         print(f"  Median:  {results['high_to_low_median_ms']:.1f} ms")
-        print(f"  Std Dev: {results['high_to_low_std_ms']:.1f} ms")
-        print(f"  Min:     {results['high_to_low_min_ms']:.1f} ms")
-        print(f"  Max:     {results['high_to_low_max_ms']:.1f} ms")
         print(f"  P95:     {results['high_to_low_p95_ms']:.1f} ms")
 
-        print(f"\nOverall Average Switch Time: {results['avg_switch_time_ms']:.1f} ms")
+        print(f"\nOverall Average Switch Time (all transitions): {results['avg_switch_time_ms']:.1f} ms")
         print("="*60 + "\n")
 
     return results
@@ -218,18 +277,18 @@ def measure_performance_impact(model_path: str = None,
     """
     if verbose:
         print("\n" + "="*60)
-        print("POWER MODE PERFORMANCE IMPACT")
+        print("POWER MODE PERFORMANCE IMPACT (THREE-TIER)")
         print("="*60)
 
     results = {
         'samples_per_mode': samples_per_mode,
-        'modes_tested': ['15W', 'MAXN SUPER']
+        'modes_tested': ['15W', '25W', 'MAXN SUPER']
     }
 
     # Test dummy workload (sleep simulation)
     # In a real scenario, this would run actual model inference
 
-    for mode_num, mode_name in [(0, '15W'), (2, 'MAXN SUPER')]:
+    for mode_num, mode_name in [(0, '15W'), (1, '25W'), (2, 'MAXN SUPER')]:
         if verbose:
             print(f"\nTesting {mode_name} mode...")
 
@@ -259,12 +318,20 @@ def measure_performance_impact(model_path: str = None,
             print(f"  Avg latency: {results[f'{mode_key}_avg_latency_ms']:.2f} ms")
             print(f"  Std dev:     {results[f'{mode_key}_std_latency_ms']:.2f} ms")
 
-    # Calculate speedup
-    speedup = results['15w_avg_latency_ms'] / results['maxn_super_avg_latency_ms']
-    results['speedup_factor'] = float(speedup)
+    # Calculate speedups
+    speedup_maxn_vs_15w = results['15w_avg_latency_ms'] / results['maxn_super_avg_latency_ms']
+    speedup_maxn_vs_25w = results['25w_avg_latency_ms'] / results['maxn_super_avg_latency_ms']
+    speedup_25w_vs_15w = results['15w_avg_latency_ms'] / results['25w_avg_latency_ms']
+
+    results['speedup_maxn_vs_15w'] = float(speedup_maxn_vs_15w)
+    results['speedup_maxn_vs_25w'] = float(speedup_maxn_vs_25w)
+    results['speedup_25w_vs_15w'] = float(speedup_25w_vs_15w)
 
     if verbose:
-        print(f"\nSpeedup (MAXN vs 15W): {speedup:.2f}x")
+        print(f"\nPerformance Comparison:")
+        print(f"  MAXN vs 15W: {speedup_maxn_vs_15w:.2f}x speedup")
+        print(f"  MAXN vs 25W: {speedup_maxn_vs_25w:.2f}x speedup")
+        print(f"  25W vs 15W:  {speedup_25w_vs_15w:.2f}x speedup")
         print("="*60 + "\n")
 
     return results
