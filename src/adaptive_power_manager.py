@@ -14,6 +14,30 @@ from collections import deque
 from enum import Enum
 
 
+# Model-specific latency thresholds (ms) based on empirical baseline performance
+# These thresholds allow each model to operate efficiently in low power mode
+# while switching to high power when truly needed
+MODEL_THRESHOLDS = {
+    'ae': 15.0,         # Fast model (~2.5ms baseline) - loose threshold
+    'ff': 15.0,         # Fast feedforward model
+    'aae': 12.0,        # Medium-fast adversarial AE
+    'cnn_ae': 18.0,     # Medium complexity CNN-based AE
+    'resnet_ae': 20.0,  # Medium-slow ResNet-based AE
+    'lstm_ae': 25.0     # Slow LSTM-based model (~10ms baseline) - very loose threshold
+}
+
+# Model-specific hysteresis times (seconds)
+# Longer hysteresis for models with higher latency variance
+MODEL_HYSTERESIS = {
+    'ae': 3.0,          # Stable, quick downshift
+    'ff': 3.0,          # Stable
+    'aae': 4.0,         # Moderate variance
+    'cnn_ae': 5.0,      # Moderate variance
+    'resnet_ae': 6.0,   # Higher variance
+    'lstm_ae': 8.0      # High variance, conservative downshift
+}
+
+
 class PowerMode(Enum):
     """Jetson Orin Nano power modes (JetPack 6.1)."""
     LOW_POWER = "15W"      # nvpmodel mode 0 (15W)
@@ -41,7 +65,9 @@ class AdaptivePowerManager:
                  hysteresis_time_s: float = 5.0,
                  initial_mode: PowerMode = PowerMode.LOW_POWER,
                  enable_switching: bool = True,
-                 verbose: bool = True):
+                 verbose: bool = True,
+                 model_name: Optional[str] = None,
+                 use_model_defaults: bool = False):
         """
         Initialize adaptive power manager.
 
@@ -51,9 +77,22 @@ class AdaptivePowerManager:
             initial_mode: Starting power mode (default: LOW_POWER)
             enable_switching: Enable automatic power mode switching (default: True)
             verbose: Print detailed status messages (default: True)
+            model_name: Model name for auto-configuration (e.g., 'ae', 'lstm_ae')
+            use_model_defaults: If True, use model-specific thresholds and hysteresis (default: False)
         """
-        self.latency_threshold_ms = latency_threshold_ms
-        self.hysteresis_time_s = hysteresis_time_s
+        # Auto-configure based on model if requested
+        if use_model_defaults and model_name is not None:
+            self.latency_threshold_ms = MODEL_THRESHOLDS.get(model_name, latency_threshold_ms)
+            self.hysteresis_time_s = MODEL_HYSTERESIS.get(model_name, hysteresis_time_s)
+            if verbose:
+                print(f"🎯 Using model-specific configuration for '{model_name}':")
+                print(f"   Threshold: {self.latency_threshold_ms}ms")
+                print(f"   Hysteresis: {self.hysteresis_time_s}s")
+        else:
+            self.latency_threshold_ms = latency_threshold_ms
+            self.hysteresis_time_s = hysteresis_time_s
+
+        self.model_name = model_name
         self.current_mode = initial_mode
         self.enable_switching = enable_switching
         self.verbose = verbose
