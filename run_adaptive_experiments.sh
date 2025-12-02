@@ -80,31 +80,39 @@ else
     TRT_FLAG=""
 fi
 
-# Build model defaults flag
-if [ "$USE_MODEL_DEFAULTS" = "true" ]; then
-    MODEL_DEFAULTS_FLAG="--use-model-defaults"
-else
-    MODEL_DEFAULTS_FLAG=""
-fi
-
 # Run benchmark for each workload
 for workload in "${WORKLOADS[@]}"; do
     echo ""
     echo "Testing workload: $workload"
     echo "-----------------------------------"
 
-    python src/adaptive_benchmark.py \
-        --model "$MODEL" \
-        --model-path "$MODEL_PATH" \
-        $TRT_FLAG \
-        --workload "$workload" \
-        --duration 60 \
-        --latency-threshold 10.0 \
-        --hysteresis-time 5.0 \
-        $MODEL_DEFAULTS_FLAG \
-        --run-baselines \
-        --max-samples 200 \
-        --output-dir "$OUTPUT_BASE/results"
+    # Build command based on whether we're using model defaults
+    if [ "$USE_MODEL_DEFAULTS" = "true" ]; then
+        # Use model-specific thresholds and hysteresis
+        python src/adaptive_benchmark.py \
+            --model "$MODEL" \
+            --model-path "$MODEL_PATH" \
+            $TRT_FLAG \
+            --workload "$workload" \
+            --duration 60 \
+            --use-model-defaults \
+            --run-baselines \
+            --max-samples 200 \
+            --output-dir "$OUTPUT_BASE/results"
+    else
+        # Use explicit threshold and hysteresis values
+        python src/adaptive_benchmark.py \
+            --model "$MODEL" \
+            --model-path "$MODEL_PATH" \
+            $TRT_FLAG \
+            --workload "$workload" \
+            --duration 60 \
+            --latency-threshold 10.0 \
+            --hysteresis-time 5.0 \
+            --run-baselines \
+            --max-samples 200 \
+            --output-dir "$OUTPUT_BASE/results"
+    fi
 
     echo ""
     echo "✅ Workload $workload complete"
@@ -151,14 +159,15 @@ cat > "$SUMMARY_FILE" << EOF
 **Date**: $(date)
 **Model**: $MODEL
 **TensorRT**: $USE_TENSORRT
+**Model-Specific Defaults**: $USE_MODEL_DEFAULTS
 
 ## Experiment Configuration
 
-- **Latency Threshold**: 10.0 ms
-- **Hysteresis Time**: 5.0 seconds
+- **Power Management**: Three-tier adaptive (15W/25W/MAXN)
+- **Threshold Mode**: $(if [ "$USE_MODEL_DEFAULTS" = "true" ]; then echo "Model-specific (auto-configured)"; else echo "Manual (10.0ms threshold, 5.0s hysteresis)"; fi)
 - **Duration per Workload**: 60 seconds
 - **Workload Patterns**: ${WORKLOADS[*]}
-- **Test Samples**: 1000
+- **Test Samples**: 200
 
 ## Directory Structure
 
