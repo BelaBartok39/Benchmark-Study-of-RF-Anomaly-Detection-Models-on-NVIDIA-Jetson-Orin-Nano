@@ -9,6 +9,7 @@ set -e  # Exit on error
 # Configuration
 MODEL=${1:-ae}
 USE_TENSORRT=${2:-false}
+USE_MODEL_DEFAULTS=${3:-true}  # Enable model-specific thresholds by default
 OUTPUT_BASE="adaptive_experiments_$(date +%Y%m%d_%H%M%S)"
 
 echo "========================================"
@@ -16,6 +17,7 @@ echo "ADAPTIVE POWER MANAGEMENT EXPERIMENTS"
 echo "========================================"
 echo "Model: $MODEL"
 echo "Use TensorRT: $USE_TENSORRT"
+echo "Use Model Defaults: $USE_MODEL_DEFAULTS"
 echo "Output directory: $OUTPUT_BASE"
 echo ""
 
@@ -78,6 +80,13 @@ else
     TRT_FLAG=""
 fi
 
+# Build model defaults flag
+if [ "$USE_MODEL_DEFAULTS" = "true" ]; then
+    MODEL_DEFAULTS_FLAG="--use-model-defaults"
+else
+    MODEL_DEFAULTS_FLAG=""
+fi
+
 # Run benchmark for each workload
 for workload in "${WORKLOADS[@]}"; do
     echo ""
@@ -92,6 +101,7 @@ for workload in "${WORKLOADS[@]}"; do
         --duration 60 \
         --latency-threshold 10.0 \
         --hysteresis-time 5.0 \
+        $MODEL_DEFAULTS_FLAG \
         --run-baselines \
         --max-samples 200 \
         --output-dir "$OUTPUT_BASE/results"

@@ -14,10 +14,47 @@ from collections import deque
 from enum import Enum
 
 
+# Model-specific latency thresholds (ms) for three-tier power management
+# PRIMARY threshold: 15W → 25W transition
+# SECONDARY threshold: 25W → MAXN transition
+MODEL_THRESHOLDS_MEDIUM = {
+    'ae': 8.0,          # Fast model - rarely needs 25W
+    'ff': 8.0,          # Fast feedforward model
+    'aae': 7.0,         # Medium-fast
+    'cnn_ae': 10.0,     # Medium complexity
+    'resnet_ae': 12.0,  # Medium-slow
+    'lstm_ae': 15.0     # Slow model - 15W→25W at 15ms
+}
+
+MODEL_THRESHOLDS_HIGH = {
+    'ae': 20.0,         # Fast model - very loose for MAXN
+    'ff': 20.0,         # Fast feedforward
+    'aae': 15.0,        # Medium-fast
+    'cnn_ae': 25.0,     # Medium complexity
+    'resnet_ae': 30.0,  # Medium-slow
+    'lstm_ae': 35.0     # Slow model - only MAXN for extreme bursts
+}
+
+# Legacy single-threshold support (maps to HIGH threshold)
+MODEL_THRESHOLDS = MODEL_THRESHOLDS_HIGH
+
+# Model-specific hysteresis times (seconds)
+# Longer hysteresis for models with higher latency variance
+MODEL_HYSTERESIS = {
+    'ae': 3.0,          # Stable, quick downshift
+    'ff': 3.0,          # Stable
+    'aae': 4.0,         # Moderate variance
+    'cnn_ae': 5.0,      # Moderate variance
+    'resnet_ae': 6.0,   # Higher variance
+    'lstm_ae': 8.0      # High variance, conservative downshift
+}
+
+
 class PowerMode(Enum):
     """Jetson Orin Nano power modes (JetPack 6.1)."""
-    LOW_POWER = "15W"      # nvpmodel mode 0 (15W)
-    HIGH_POWER = "MAXN"    # nvpmodel mode 2 (MAXN SUPER - 25W)
+    LOW_POWER = "15W"       # nvpmodel mode 0 (15W)
+    MEDIUM_POWER = "25W"    # nvpmodel mode 1 (25W)
+    HIGH_POWER = "MAXN"     # nvpmodel mode 2 (MAXN SUPER)
 
 
 class AdaptivePowerManager:
@@ -38,22 +75,65 @@ class AdaptivePowerManager:
 
     def __init__(self,
                  latency_threshold_ms: float = 10.0,
+                 latency_threshold_medium_ms: Optional[float] = None,
+                 latency_threshold_high_ms: Optional[float] = None,
                  hysteresis_time_s: float = 5.0,
                  initial_mode: PowerMode = PowerMode.LOW_POWER,
                  enable_switching: bool = True,
-                 verbose: bool = True):
+                 enable_three_tier: bool = True,
+                 verbose: bool = True,
+                 model_name: Optional[str] = None,
+                 use_model_defaults: bool = False):
         """
         Initialize adaptive power manager.
 
         Args:
-            latency_threshold_ms: Latency threshold in milliseconds. If exceeded, switch to high power mode.
-            hysteresis_time_s: Time in seconds latency must remain below threshold before switching to low power.
+            latency_threshold_ms: Legacy single threshold (for backward compatibility)
+            latency_threshold_medium_ms: Threshold for 15W → 25W transition (three-tier mode)
+            latency_threshold_high_ms: Threshold for 25W → MAXN transition (three-tier mode)
+            hysteresis_time_s: Time in seconds latency must remain below threshold before downshifting
             initial_mode: Starting power mode (default: LOW_POWER)
             enable_switching: Enable automatic power mode switching (default: True)
+            enable_three_tier: Use three-tier mode (15W/25W/MAXN) vs two-tier (15W/MAXN) (default: True)
             verbose: Print detailed status messages (default: True)
+            model_name: Model name for auto-configuration (e.g., 'ae', 'lstm_ae')
+            use_model_defaults: If True, use model-specific thresholds and hysteresis (default: False)
         """
-        self.latency_threshold_ms = latency_threshold_ms
-        self.hysteresis_time_s = hysteresis_time_s
+        self.enable_three_tier = enable_three_tier
+
+        # Auto-configure based on model if requested
+        if use_model_defaults and model_name is not None:
+            if enable_three_tier:
+                self.latency_threshold_medium_ms = MODEL_THRESHOLDS_MEDIUM.get(model_name, latency_threshold_ms)
+                self.latency_threshold_high_ms = MODEL_THRESHOLDS_HIGH.get(model_name, latency_threshold_ms * 2)
+            else:
+                # Two-tier mode: use single threshold for 15W → MAXN
+                self.latency_threshold_medium_ms = None
+                self.latency_threshold_high_ms = MODEL_THRESHOLDS_HIGH.get(model_name, latency_threshold_ms)
+            self.hysteresis_time_s = MODEL_HYSTERESIS.get(model_name, hysteresis_time_s)
+            if verbose:
+                print(f"🎯 Using model-specific configuration for '{model_name}':")
+                if enable_three_tier:
+                    print(f"   Three-tier mode: 15W → 25W → MAXN")
+                    print(f"   Medium threshold (15W→25W): {self.latency_threshold_medium_ms}ms")
+                    print(f"   High threshold (25W→MAXN): {self.latency_threshold_high_ms}ms")
+                else:
+                    print(f"   Two-tier mode: 15W → MAXN")
+                    print(f"   Threshold: {self.latency_threshold_high_ms}ms")
+                print(f"   Hysteresis: {self.hysteresis_time_s}s")
+        else:
+            # Manual configuration
+            if enable_three_tier and latency_threshold_medium_ms is not None and latency_threshold_high_ms is not None:
+                self.latency_threshold_medium_ms = latency_threshold_medium_ms
+                self.latency_threshold_high_ms = latency_threshold_high_ms
+            else:
+                # Legacy single threshold or two-tier mode
+                self.latency_threshold_medium_ms = None
+                self.latency_threshold_high_ms = latency_threshold_ms
+                self.enable_three_tier = False
+            self.hysteresis_time_s = hysteresis_time_s
+
+        self.model_name = model_name
         self.current_mode = initial_mode
         self.enable_switching = enable_switching
         self.verbose = verbose
@@ -65,7 +145,11 @@ class AdaptivePowerManager:
         # Mode switching tracking
         self.mode_switches = []  # List of (timestamp, from_mode, to_mode, reason)
         self.mode_switch_times = []  # Switching overhead measurements
-        self.time_in_modes = {PowerMode.LOW_POWER: 0.0, PowerMode.HIGH_POWER: 0.0}
+        self.time_in_modes = {
+            PowerMode.LOW_POWER: 0.0,
+            PowerMode.MEDIUM_POWER: 0.0,
+            PowerMode.HIGH_POWER: 0.0
+        }
         self.last_mode_change_time = time.time()
 
         # Statistics
@@ -96,37 +180,99 @@ class AdaptivePowerManager:
             if not self.enable_switching:
                 return None
 
-            # Check if latency exceeds threshold
-            if latency_ms > self.latency_threshold_ms:
-                self.violations += 1
+            if self.enable_three_tier:
+                return self._record_inference_three_tier(latency_ms)
+            else:
+                return self._record_inference_two_tier(latency_ms)
 
-                # If in low power mode and threshold violated, switch to high power immediately
-                if self.current_mode == PowerMode.LOW_POWER:
+    def _record_inference_three_tier(self, latency_ms: float) -> Optional[str]:
+        """Three-tier power management: 15W → 25W → MAXN."""
+        # Priority 1: If latency exceeds high threshold, immediately switch to MAXN
+        if latency_ms > self.latency_threshold_high_ms:
+            self.violations += 1
+            if self.current_mode != PowerMode.HIGH_POWER:
+                msg = self._set_power_mode(
+                    PowerMode.HIGH_POWER,
+                    reason=f"latency {latency_ms:.2f}ms > high threshold {self.latency_threshold_high_ms}ms"
+                )
+                self.below_threshold_start_time = None
+                return msg
+
+        # Priority 2: If latency exceeds medium threshold, switch to 25W (if currently at 15W)
+        elif latency_ms > self.latency_threshold_medium_ms:
+            if self.current_mode == PowerMode.LOW_POWER:
+                msg = self._set_power_mode(
+                    PowerMode.MEDIUM_POWER,
+                    reason=f"latency {latency_ms:.2f}ms > medium threshold {self.latency_threshold_medium_ms}ms"
+                )
+                self.below_threshold_start_time = None
+                return msg
+            # If already at MAXN, stay there (don't downshift yet)
+            self.below_threshold_start_time = None
+
+        # Latency is below medium threshold - consider downshifting
+        else:
+            # Start or continue tracking time below threshold
+            if self.below_threshold_start_time is None:
+                self.below_threshold_start_time = time.time()
+
+            time_below = time.time() - self.below_threshold_start_time
+
+            # Gradual downshift after hysteresis period
+            if time_below >= self.hysteresis_time_s:
+                # Step down one level at a time
+                if self.current_mode == PowerMode.HIGH_POWER:
+                    # MAXN → 25W
                     msg = self._set_power_mode(
-                        PowerMode.HIGH_POWER,
-                        reason=f"latency {latency_ms:.2f}ms > threshold {self.latency_threshold_ms}ms"
+                        PowerMode.MEDIUM_POWER,
+                        reason=f"latency below high threshold for {time_below:.1f}s"
+                    )
+                    self.below_threshold_start_time = time.time()  # Restart timer for next downshift
+                    return msg
+                elif self.current_mode == PowerMode.MEDIUM_POWER and latency_ms < self.latency_threshold_medium_ms:
+                    # 25W → 15W
+                    msg = self._set_power_mode(
+                        PowerMode.LOW_POWER,
+                        reason=f"latency below medium threshold for {time_below:.1f}s"
                     )
                     self.below_threshold_start_time = None
                     return msg
 
-            else:
-                # Latency is below threshold
-                if self.current_mode == PowerMode.HIGH_POWER:
-                    # Start or continue tracking time below threshold
-                    if self.below_threshold_start_time is None:
-                        self.below_threshold_start_time = time.time()
+        return None
 
-                    # Check if we've been below threshold long enough (hysteresis)
-                    time_below = time.time() - self.below_threshold_start_time
-                    if time_below >= self.hysteresis_time_s:
-                        msg = self._set_power_mode(
-                            PowerMode.LOW_POWER,
-                            reason=f"latency below threshold for {time_below:.1f}s"
-                        )
-                        self.below_threshold_start_time = None
-                        return msg
+    def _record_inference_two_tier(self, latency_ms: float) -> Optional[str]:
+        """Legacy two-tier power management: 15W → MAXN."""
+        # Check if latency exceeds threshold
+        if latency_ms > self.latency_threshold_high_ms:
+            self.violations += 1
 
-            return None
+            # If in low power mode and threshold violated, switch to high power immediately
+            if self.current_mode == PowerMode.LOW_POWER:
+                msg = self._set_power_mode(
+                    PowerMode.HIGH_POWER,
+                    reason=f"latency {latency_ms:.2f}ms > threshold {self.latency_threshold_high_ms}ms"
+                )
+                self.below_threshold_start_time = None
+                return msg
+
+        else:
+            # Latency is below threshold
+            if self.current_mode == PowerMode.HIGH_POWER:
+                # Start or continue tracking time below threshold
+                if self.below_threshold_start_time is None:
+                    self.below_threshold_start_time = time.time()
+
+                # Check if we've been below threshold long enough (hysteresis)
+                time_below = time.time() - self.below_threshold_start_time
+                if time_below >= self.hysteresis_time_s:
+                    msg = self._set_power_mode(
+                        PowerMode.LOW_POWER,
+                        reason=f"latency below threshold for {time_below:.1f}s"
+                    )
+                    self.below_threshold_start_time = None
+                    return msg
+
+        return None
 
     def _set_power_mode(self, mode: PowerMode, reason: str = "") -> str:
         """
@@ -148,7 +294,12 @@ class AdaptivePowerManager:
         try:
             # Map PowerMode to nvpmodel mode number (JetPack 6.1)
             # Mode 0 = 15W, Mode 1 = 25W, Mode 2 = MAXN SUPER
-            mode_number = 0 if mode == PowerMode.LOW_POWER else 2
+            if mode == PowerMode.LOW_POWER:
+                mode_number = 0
+            elif mode == PowerMode.MEDIUM_POWER:
+                mode_number = 1
+            else:  # HIGH_POWER
+                mode_number = 2
 
             # Set power mode using nvpmodel
             # Note: This requires sudo privileges. For testing without Jetson, we'll simulate.
@@ -235,8 +386,11 @@ class AdaptivePowerManager:
             return {
                 # Current state
                 'current_mode': self.current_mode.value,
-                'latency_threshold_ms': self.latency_threshold_ms,
+                'latency_threshold_ms': self.latency_threshold_high_ms if hasattr(self, 'latency_threshold_high_ms') else self.latency_threshold_ms,
+                'latency_threshold_medium_ms': self.latency_threshold_medium_ms if hasattr(self, 'latency_threshold_medium_ms') else None,
+                'latency_threshold_high_ms': self.latency_threshold_high_ms if hasattr(self, 'latency_threshold_high_ms') else None,
                 'hysteresis_time_s': self.hysteresis_time_s,
+                'three_tier_enabled': self.enable_three_tier,
 
                 # Latency statistics
                 'total_inferences': self.total_inferences,
@@ -259,12 +413,20 @@ class AdaptivePowerManager:
                 # Time in modes
                 'time_in_low_power_s': self.time_in_modes[PowerMode.LOW_POWER] +
                                         (time_in_current if self.current_mode == PowerMode.LOW_POWER else 0),
+                'time_in_medium_power_s': self.time_in_modes[PowerMode.MEDIUM_POWER] +
+                                          (time_in_current if self.current_mode == PowerMode.MEDIUM_POWER else 0),
                 'time_in_high_power_s': self.time_in_modes[PowerMode.HIGH_POWER] +
                                          (time_in_current if self.current_mode == PowerMode.HIGH_POWER else 0),
                 'total_runtime_s': total_time,
                 'low_power_percentage': float((self.time_in_modes[PowerMode.LOW_POWER] +
                                                (time_in_current if self.current_mode == PowerMode.LOW_POWER else 0)) /
                                               total_time * 100) if total_time > 0 else 0,
+                'medium_power_percentage': float((self.time_in_modes[PowerMode.MEDIUM_POWER] +
+                                                  (time_in_current if self.current_mode == PowerMode.MEDIUM_POWER else 0)) /
+                                                 total_time * 100) if total_time > 0 else 0,
+                'high_power_percentage': float((self.time_in_modes[PowerMode.HIGH_POWER] +
+                                                (time_in_current if self.current_mode == PowerMode.HIGH_POWER else 0)) /
+                                               total_time * 100) if total_time > 0 else 0,
 
                 # Mode switch history
                 'mode_switches': self.mode_switches.copy()

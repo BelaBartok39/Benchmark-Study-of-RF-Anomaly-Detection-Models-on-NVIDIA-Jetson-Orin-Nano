@@ -327,15 +327,18 @@ class AdaptiveBenchmark:
                                workload_pattern: WorkloadPattern,
                                duration_s: float = 60.0,
                                latency_threshold_ms: float = 10.0,
-                               hysteresis_time_s: float = 5.0) -> Dict:
+                               hysteresis_time_s: float = 5.0,
+                               use_model_defaults: bool = False,
+                               enable_three_tier: bool = True) -> Dict:
         """
         Run experiment with adaptive power management.
 
         Args:
             workload_pattern: Workload pattern
             duration_s: Duration of experiment
-            latency_threshold_ms: Latency threshold for mode switching
-            hysteresis_time_s: Hysteresis time before switching back to low power
+            latency_threshold_ms: Latency threshold for mode switching (ignored if use_model_defaults=True)
+            hysteresis_time_s: Hysteresis time before switching back to low power (ignored if use_model_defaults=True)
+            use_model_defaults: If True, use model-specific thresholds and hysteresis
 
         Returns:
             Dictionary with experiment results
@@ -352,7 +355,10 @@ class AdaptiveBenchmark:
             hysteresis_time_s=hysteresis_time_s,
             initial_mode=PowerMode.LOW_POWER,
             enable_switching=True,
-            verbose=self.verbose
+            enable_three_tier=enable_three_tier,
+            verbose=self.verbose,
+            model_name=self.model_name,
+            use_model_defaults=use_model_defaults
         )
 
         # Generate workload
@@ -513,6 +519,12 @@ def main():
                        help='Latency threshold in milliseconds')
     parser.add_argument('--hysteresis-time', type=float, default=5.0,
                        help='Hysteresis time in seconds')
+    parser.add_argument('--use-model-defaults', action='store_true',
+                       help='Use model-specific thresholds and hysteresis (overrides --latency-threshold and --hysteresis-time)')
+    parser.add_argument('--enable-three-tier', action='store_true', default=True,
+                       help='Enable three-tier power management (15W/25W/MAXN) instead of two-tier (15W/MAXN)')
+    parser.add_argument('--disable-three-tier', dest='enable_three_tier', action='store_false',
+                       help='Disable three-tier mode and use two-tier (15W/MAXN) only')
 
     parser.add_argument('--output-dir', type=str, default='adaptive_results',
                        help='Output directory for results')
@@ -587,7 +599,9 @@ def main():
             workload_pattern=pattern,
             duration_s=args.duration,
             latency_threshold_ms=args.latency_threshold,
-            hysteresis_time_s=args.hysteresis_time
+            hysteresis_time_s=args.hysteresis_time,
+            use_model_defaults=args.use_model_defaults,
+            enable_three_tier=args.enable_three_tier
         )
         all_results.append(adaptive_results)
         benchmark.save_results(
