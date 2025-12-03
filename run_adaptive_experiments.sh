@@ -3,6 +3,26 @@
 # Adaptive Power Management Experiment Launcher
 # Runs comprehensive experiments for the paper extension
 #
+# Usage:
+#   ./run_adaptive_experiments.sh [MODEL] [USE_TENSORRT] [USE_MODEL_DEFAULTS]
+#
+# Optional environment variables:
+#   BATCH_SIZE=N      - Batch size for batched inference (default: 1)
+#   NUM_CHANNELS=N    - Number of concurrent channels (default: 1)
+#
+# Examples:
+#   # Default: single-channel, single-sample
+#   ./run_adaptive_experiments.sh lstm_ae false true
+#
+#   # Batched inference (8 samples per batch)
+#   BATCH_SIZE=8 ./run_adaptive_experiments.sh lstm_ae false true
+#
+#   # Multi-channel (10 concurrent channels)
+#   NUM_CHANNELS=10 ./run_adaptive_experiments.sh lstm_ae false true
+#
+#   # Hybrid: 10 channels, each processing batches of 8
+#   BATCH_SIZE=8 NUM_CHANNELS=10 ./run_adaptive_experiments.sh lstm_ae false true
+#
 
 set -e  # Exit on error
 
@@ -10,6 +30,8 @@ set -e  # Exit on error
 MODEL=${1:-ae}
 USE_TENSORRT=${2:-false}
 USE_MODEL_DEFAULTS=${3:-true}  # Enable model-specific thresholds by default
+BATCH_SIZE=${BATCH_SIZE:-1}    # Default: single-sample (set via env: BATCH_SIZE=8 ./run_adaptive_experiments.sh)
+NUM_CHANNELS=${NUM_CHANNELS:-1}  # Default: single-channel (set via env: NUM_CHANNELS=10 ./run_adaptive_experiments.sh)
 OUTPUT_BASE="adaptive_experiments_$(date +%Y%m%d_%H%M%S)"
 
 echo "========================================"
@@ -18,6 +40,8 @@ echo "========================================"
 echo "Model: $MODEL"
 echo "Use TensorRT: $USE_TENSORRT"
 echo "Use Model Defaults: $USE_MODEL_DEFAULTS"
+echo "Batch Size: $BATCH_SIZE"
+echo "Num Channels: $NUM_CHANNELS"
 echo "Output directory: $OUTPUT_BASE"
 echo ""
 
@@ -98,6 +122,8 @@ for workload in "${WORKLOADS[@]}"; do
             --use-model-defaults \
             --run-baselines \
             --max-samples 200 \
+            --batch-size "$BATCH_SIZE" \
+            --num-channels "$NUM_CHANNELS" \
             --output-dir "$OUTPUT_BASE/results"
     else
         # Use explicit threshold and hysteresis values
@@ -111,6 +137,8 @@ for workload in "${WORKLOADS[@]}"; do
             --hysteresis-time 5.0 \
             --run-baselines \
             --max-samples 200 \
+            --batch-size "$BATCH_SIZE" \
+            --num-channels "$NUM_CHANNELS" \
             --output-dir "$OUTPUT_BASE/results"
     fi
 
@@ -165,6 +193,8 @@ cat > "$SUMMARY_FILE" << EOF
 
 - **Power Management**: Three-tier adaptive (15W/25W/MAXN)
 - **Threshold Mode**: $(if [ "$USE_MODEL_DEFAULTS" = "true" ]; then echo "Model-specific (auto-configured)"; else echo "Manual (10.0ms threshold, 5.0s hysteresis)"; fi)
+- **Batch Size**: $BATCH_SIZE $(if [ "$BATCH_SIZE" -gt 1 ]; then echo "(batched inference)"; else echo "(single-sample)"; fi)
+- **Channels**: $NUM_CHANNELS $(if [ "$NUM_CHANNELS" -gt 1 ]; then echo "(multi-channel concurrent)"; else echo "(single-channel)"; fi)
 - **Duration per Workload**: 60 seconds
 - **Workload Patterns**: ${WORKLOADS[*]}
 - **Test Samples**: 200
