@@ -18,9 +18,11 @@ import json
 import argparse
 import numpy as np
 import torch
+import threading
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from datetime import datetime
+from queue import Queue
 
 # Import local modules
 from adaptive_power_manager import AdaptivePowerManager, PowerMode
@@ -195,6 +197,261 @@ class AdaptiveBenchmark:
 
         return latency
 
+    def run_inference_batch(self, sample_indices: List[int]) -> Tuple[float, List[float]]:
+        """
+        Run batched inference and return aggregate latency.
+
+        Args:
+            sample_indices: List of sample indices to process as batch
+
+        Returns:
+            Tuple of (total_batch_latency_ms, per_sample_latencies_ms)
+        """
+        # Gather batch
+        batch_samples = []
+        for idx in sample_indices:
+            sample = self.test_data[idx % len(self.test_data)]
+            batch_samples.append(sample)
+
+        # Stack into batch tensor
+        batch = torch.stack(batch_samples)
+
+        if self.use_tensorrt:
+            # TensorRT batched inference
+            start = time.time()
+            self.trt_context.execute_async_v2(self.trt_bindings, self.trt_stream.handle, None)
+            self.trt_stream.synchronize()
+            total_latency = (time.time() - start) * 1000  # Convert to ms
+        else:
+            # PyTorch batched inference
+            batch = batch.to(self.device)
+            with torch.no_grad():
+                start = time.time()
+                _ = self.model(batch)[0]
+                if self.device.type == 'cuda':
+                    torch.cuda.synchronize()
+                total_latency = (time.time() - start) * 1000  # Convert to ms
+
+        # Per-sample latency (amortized)
+        per_sample_latency = total_latency / len(sample_indices)
+        per_sample_latencies = [per_sample_latency] * len(sample_indices)
+
+        return total_latency, per_sample_latencies
+
+    def _run_single_channel_adaptive(self,
+                                     apm: AdaptivePowerManager,
+                                     schedule: Dict,
+                                     batch_size: int) -> Dict:
+        """
+        Run single-channel adaptive experiment with optional batching.
+
+        Args:
+            apm: Adaptive power manager instance
+            schedule: Workload schedule from generator
+            batch_size: Batch size (1 for single-sample)
+
+        Returns:
+            Dictionary with latencies, timestamps, and power modes
+        """
+        latencies = []
+        actual_timestamps = []
+        power_modes = []
+
+        start_time = time.time()
+        sample_idx = 0
+        schedule_idx = 0
+
+        if batch_size == 1:
+            # Single-sample mode (backward compatible)
+            for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
+                # Wait until scheduled time
+                while (time.time() - start_time) < scheduled_time:
+                    time.sleep(0.0001)  # 0.1ms sleep
+
+                # Run single inference
+                latency = self.run_inference(sample_idx)
+                latencies.append(latency)
+                actual_timestamps.append(time.time() - start_time)
+                power_modes.append(apm.get_current_mode().value)
+
+                # Record with adaptive power manager
+                apm.record_inference(latency)
+
+                sample_idx += 1
+
+                # Progress update
+                if self.verbose and sample_idx % 100 == 0:
+                    elapsed = time.time() - start_time
+                    stats = apm.get_statistics()
+                    print(f"  Progress: {sample_idx} inferences, {elapsed:.1f}s elapsed, "
+                          f"mode: {apm.get_current_mode().value}, "
+                          f"switches: {stats['total_mode_switches']}, "
+                          f"avg latency: {np.mean(latencies):.2f}ms")
+        else:
+            # Batched mode
+            batch_indices = []
+
+            for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
+                # Wait until scheduled time
+                while (time.time() - start_time) < scheduled_time:
+                    time.sleep(0.0001)  # 0.1ms sleep
+
+                # Accumulate samples for batch
+                batch_indices.append(sample_idx)
+                sample_idx += 1
+
+                # Process batch when full or at end
+                if len(batch_indices) >= batch_size or schedule_idx == len(schedule['timestamps']) - 1:
+                    # Run batched inference
+                    batch_latency, per_sample_lats = self.run_inference_batch(batch_indices)
+
+                    # Record each sample's latency
+                    for lat in per_sample_lats:
+                        latencies.append(lat)
+                        actual_timestamps.append(time.time() - start_time)
+                        power_modes.append(apm.get_current_mode().value)
+
+                        # Record with adaptive power manager (using amortized latency)
+                        apm.record_inference(lat)
+
+                    batch_indices = []
+
+                    # Progress update
+                    if self.verbose and len(latencies) % 100 == 0:
+                        elapsed = time.time() - start_time
+                        stats = apm.get_statistics()
+                        print(f"  Progress: {len(latencies)} inferences, {elapsed:.1f}s elapsed, "
+                              f"mode: {apm.get_current_mode().value}, "
+                              f"switches: {stats['total_mode_switches']}, "
+                              f"avg latency: {np.mean(latencies):.2f}ms")
+
+                schedule_idx += 1
+
+        return {
+            'latencies': latencies,
+            'timestamps': actual_timestamps,
+            'power_modes': power_modes
+        }
+
+    def _run_multi_channel_adaptive(self,
+                                    apm: AdaptivePowerManager,
+                                    schedule: Dict,
+                                    num_channels: int,
+                                    batch_size: int,
+                                    duration_s: float) -> Dict:
+        """
+        Run multi-channel adaptive experiment with optional batching per channel.
+
+        Args:
+            apm: Adaptive power manager instance
+            schedule: Workload schedule from generator (will be replicated per channel)
+            num_channels: Number of concurrent channels
+            batch_size: Batch size per channel (1 for single-sample)
+            duration_s: Duration of experiment
+
+        Returns:
+            Dictionary with aggregated latencies, timestamps, and power modes
+        """
+        # Shared data structures (thread-safe)
+        all_latencies = []
+        all_timestamps = []
+        all_power_modes = []
+        latency_lock = threading.Lock()
+
+        # Global start time
+        global_start_time = time.time()
+
+        def channel_worker(channel_id: int):
+            """Worker function for each channel thread."""
+            sample_idx = channel_id * 10000  # Offset to avoid sample overlap
+            schedule_idx = 0
+
+            if batch_size == 1:
+                # Single-sample per channel
+                for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
+                    # Wait until scheduled time
+                    while (time.time() - global_start_time) < scheduled_time:
+                        time.sleep(0.0001)
+
+                    # Run inference
+                    latency = self.run_inference(sample_idx)
+                    current_time = time.time() - global_start_time
+                    current_mode = apm.get_current_mode().value
+
+                    # Thread-safe append
+                    with latency_lock:
+                        all_latencies.append(latency)
+                        all_timestamps.append(current_time)
+                        all_power_modes.append(current_mode)
+
+                        # Record with adaptive power manager
+                        apm.record_inference(latency)
+
+                    sample_idx += 1
+            else:
+                # Batched per channel
+                batch_indices = []
+
+                for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
+                    # Wait until scheduled time
+                    while (time.time() - global_start_time) < scheduled_time:
+                        time.sleep(0.0001)
+
+                    # Accumulate samples for batch
+                    batch_indices.append(sample_idx)
+                    sample_idx += 1
+
+                    # Process batch when full or at end
+                    if len(batch_indices) >= batch_size or schedule_idx == len(schedule['timestamps']) - 1:
+                        # Run batched inference
+                        batch_latency, per_sample_lats = self.run_inference_batch(batch_indices)
+                        current_time = time.time() - global_start_time
+                        current_mode = apm.get_current_mode().value
+
+                        # Thread-safe append
+                        with latency_lock:
+                            for lat in per_sample_lats:
+                                all_latencies.append(lat)
+                                all_timestamps.append(current_time)
+                                all_power_modes.append(current_mode)
+
+                                # Record with adaptive power manager
+                                apm.record_inference(lat)
+
+                        batch_indices = []
+
+                    schedule_idx += 1
+
+        # Create and start channel threads
+        threads = []
+        for channel_id in range(num_channels):
+            thread = threading.Thread(target=channel_worker, args=(channel_id,))
+            thread.start()
+            threads.append(thread)
+
+        # Progress monitoring in main thread
+        while any(t.is_alive() for t in threads):
+            time.sleep(1.0)
+            if self.verbose:
+                with latency_lock:
+                    if len(all_latencies) > 0:
+                        elapsed = time.time() - global_start_time
+                        stats = apm.get_statistics()
+                        print(f"  Progress: {len(all_latencies)} inferences, {elapsed:.1f}s elapsed, "
+                              f"mode: {apm.get_current_mode().value}, "
+                              f"switches: {stats['total_mode_switches']}, "
+                              f"avg latency: {np.mean(all_latencies):.2f}ms")
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+
+        return {
+            'latencies': all_latencies,
+            'timestamps': all_timestamps,
+            'power_modes': all_power_modes
+        }
+
     def run_static_baseline(self,
                            power_mode: PowerMode,
                            workload_pattern: WorkloadPattern,
@@ -329,7 +586,9 @@ class AdaptiveBenchmark:
                                latency_threshold_ms: float = 10.0,
                                hysteresis_time_s: float = 5.0,
                                use_model_defaults: bool = False,
-                               enable_three_tier: bool = True) -> Dict:
+                               enable_three_tier: bool = True,
+                               batch_size: int = 1,
+                               num_channels: int = 1) -> Dict:
         """
         Run experiment with adaptive power management.
 
@@ -339,6 +598,9 @@ class AdaptiveBenchmark:
             latency_threshold_ms: Latency threshold for mode switching (ignored if use_model_defaults=True)
             hysteresis_time_s: Hysteresis time before switching back to low power (ignored if use_model_defaults=True)
             use_model_defaults: If True, use model-specific thresholds and hysteresis
+            enable_three_tier: Enable three-tier power management (15W/25W/MAXN)
+            batch_size: Batch size for batched inference (default: 1 for single-sample)
+            num_channels: Number of concurrent channels to simulate (default: 1 for single-channel)
 
         Returns:
             Dictionary with experiment results
@@ -347,6 +609,10 @@ class AdaptiveBenchmark:
             print(f"\n{'='*60}")
             print(f"ADAPTIVE: {workload_pattern.value}")
             print(f"  Threshold: {latency_threshold_ms}ms, Hysteresis: {hysteresis_time_s}s")
+            if batch_size > 1:
+                print(f"  Batch Size: {batch_size}")
+            if num_channels > 1:
+                print(f"  Channels: {num_channels}")
             print(f"{'='*60}")
 
         # Initialize adaptive power manager
@@ -374,38 +640,21 @@ class AdaptiveBenchmark:
         power_monitor = JetsonPowerMonitor(sample_interval_ms=100)
         power_monitor.start_monitoring()
 
-        # Run inference following workload schedule
-        latencies = []
-        actual_timestamps = []
-        power_modes = []  # Track power mode at each inference
+        # Dispatch to appropriate execution mode
+        if num_channels == 1:
+            # Single-channel mode (with or without batching)
+            results_data = self._run_single_channel_adaptive(
+                apm, schedule, batch_size
+            )
+        else:
+            # Multi-channel mode (with or without batching)
+            results_data = self._run_multi_channel_adaptive(
+                apm, schedule, num_channels, batch_size, duration_s
+            )
 
-        start_time = time.time()
-        sample_idx = 0
-
-        for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
-            # Wait until scheduled time
-            while (time.time() - start_time) < scheduled_time:
-                time.sleep(0.0001)  # 0.1ms sleep
-
-            # Run inference
-            latency = self.run_inference(sample_idx)
-            latencies.append(latency)
-            actual_timestamps.append(time.time() - start_time)
-            power_modes.append(apm.get_current_mode().value)
-
-            # Record with adaptive power manager
-            apm.record_inference(latency)
-
-            sample_idx += 1
-
-            # Progress update
-            if self.verbose and sample_idx % 100 == 0:
-                elapsed = time.time() - start_time
-                stats = apm.get_statistics()
-                print(f"  Progress: {sample_idx} inferences, {elapsed:.1f}s elapsed, "
-                      f"mode: {apm.get_current_mode().value}, "
-                      f"switches: {stats['total_mode_switches']}, "
-                      f"avg latency: {np.mean(latencies):.2f}ms")
+        latencies = results_data['latencies']
+        actual_timestamps = results_data['timestamps']
+        power_modes = results_data['power_modes']
 
         # Stop power monitoring
         power_metrics = power_monitor.stop_monitoring()
@@ -423,6 +672,8 @@ class AdaptiveBenchmark:
             'use_tensorrt': self.use_tensorrt,
             'latency_threshold_ms': latency_threshold_ms,
             'hysteresis_time_s': hysteresis_time_s,
+            'batch_size': batch_size,
+            'num_channels': num_channels,
 
             # Latency metrics
             'total_inferences': len(latencies),
@@ -526,6 +777,11 @@ def main():
     parser.add_argument('--disable-three-tier', dest='enable_three_tier', action='store_false',
                        help='Disable three-tier mode and use two-tier (15W/MAXN) only')
 
+    parser.add_argument('--batch-size', type=int, default=1,
+                       help='Batch size for batched inference (default: 1 for single-sample)')
+    parser.add_argument('--num-channels', type=int, default=1,
+                       help='Number of concurrent channels to simulate multi-channel RF monitoring (default: 1)')
+
     parser.add_argument('--output-dir', type=str, default='adaptive_results',
                        help='Output directory for results')
     parser.add_argument('--run-baselines', action='store_true',
@@ -617,7 +873,9 @@ def main():
             latency_threshold_ms=args.latency_threshold,
             hysteresis_time_s=args.hysteresis_time,
             use_model_defaults=args.use_model_defaults,
-            enable_three_tier=args.enable_three_tier
+            enable_three_tier=args.enable_three_tier,
+            batch_size=args.batch_size,
+            num_channels=args.num_channels
         )
         all_results.append(adaptive_results)
         benchmark.save_results(
@@ -638,7 +896,11 @@ def main():
         'configuration': {
             'latency_threshold_ms': args.latency_threshold,
             'hysteresis_time_s': args.hysteresis_time,
-            'duration_s': args.duration
+            'duration_s': args.duration,
+            'batch_size': args.batch_size,
+            'num_channels': args.num_channels,
+            'enable_three_tier': args.enable_three_tier,
+            'use_model_defaults': args.use_model_defaults
         },
         'results': all_results
     }
