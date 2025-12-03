@@ -452,10 +452,190 @@ class AdaptiveBenchmark:
             'power_modes': all_power_modes
         }
 
+    def _run_single_channel_static(self,
+                                   schedule: Dict,
+                                   batch_size: int) -> Dict:
+        """
+        Run single-channel static baseline with optional batching.
+
+        Args:
+            schedule: Workload schedule from generator
+            batch_size: Batch size (1 for single-sample)
+
+        Returns:
+            Dictionary with latencies, timestamps, and violations
+        """
+        latencies = []
+        actual_timestamps = []
+        violations = 0
+        latency_threshold = 10.0  # ms
+
+        start_time = time.time()
+        sample_idx = 0
+        schedule_idx = 0
+
+        if batch_size == 1:
+            # Single-sample mode
+            for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
+                while (time.time() - start_time) < scheduled_time:
+                    time.sleep(0.0001)
+
+                latency = self.run_inference(sample_idx)
+                latencies.append(latency)
+                actual_timestamps.append(time.time() - start_time)
+
+                if latency > latency_threshold:
+                    violations += 1
+
+                sample_idx += 1
+
+                if self.verbose and sample_idx % 100 == 0:
+                    elapsed = time.time() - start_time
+                    print(f"  Progress: {sample_idx} inferences, {elapsed:.1f}s elapsed, "
+                          f"avg latency: {np.mean(latencies):.2f}ms")
+        else:
+            # Batched mode
+            batch_indices = []
+
+            for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
+                while (time.time() - start_time) < scheduled_time:
+                    time.sleep(0.0001)
+
+                batch_indices.append(sample_idx)
+                sample_idx += 1
+
+                if len(batch_indices) >= batch_size or schedule_idx == len(schedule['timestamps']) - 1:
+                    batch_latency, per_sample_lats = self.run_inference_batch(batch_indices)
+
+                    for lat in per_sample_lats:
+                        latencies.append(lat)
+                        actual_timestamps.append(time.time() - start_time)
+
+                        if lat > latency_threshold:
+                            violations += 1
+
+                    batch_indices = []
+
+                    if self.verbose and len(latencies) % 100 == 0:
+                        elapsed = time.time() - start_time
+                        print(f"  Progress: {len(latencies)} inferences, {elapsed:.1f}s elapsed, "
+                              f"avg latency: {np.mean(latencies):.2f}ms")
+
+                schedule_idx += 1
+
+        return {
+            'latencies': latencies,
+            'timestamps': actual_timestamps,
+            'violations': violations
+        }
+
+    def _run_multi_channel_static(self,
+                                  schedule: Dict,
+                                  num_channels: int,
+                                  batch_size: int,
+                                  duration_s: float) -> Dict:
+        """
+        Run multi-channel static baseline with optional batching per channel.
+
+        Args:
+            schedule: Workload schedule from generator (replicated per channel)
+            num_channels: Number of concurrent channels
+            batch_size: Batch size per channel (1 for single-sample)
+            duration_s: Duration of experiment
+
+        Returns:
+            Dictionary with aggregated latencies, timestamps, and violations
+        """
+        all_latencies = []
+        all_timestamps = []
+        all_violations = [0]  # List to allow mutation in thread
+        latency_lock = threading.Lock()
+        latency_threshold = 10.0  # ms
+
+        global_start_time = time.time()
+
+        def channel_worker(channel_id: int):
+            """Worker function for each channel thread."""
+            sample_idx = channel_id * 10000
+            schedule_idx = 0
+
+            if batch_size == 1:
+                # Single-sample per channel
+                for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
+                    while (time.time() - global_start_time) < scheduled_time:
+                        time.sleep(0.0001)
+
+                    latency = self.run_inference(sample_idx)
+                    current_time = time.time() - global_start_time
+
+                    with latency_lock:
+                        all_latencies.append(latency)
+                        all_timestamps.append(current_time)
+
+                        if latency > latency_threshold:
+                            all_violations[0] += 1
+
+                    sample_idx += 1
+            else:
+                # Batched per channel
+                batch_indices = []
+
+                for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
+                    while (time.time() - global_start_time) < scheduled_time:
+                        time.sleep(0.0001)
+
+                    batch_indices.append(sample_idx)
+                    sample_idx += 1
+
+                    if len(batch_indices) >= batch_size or schedule_idx == len(schedule['timestamps']) - 1:
+                        batch_latency, per_sample_lats = self.run_inference_batch(batch_indices)
+                        current_time = time.time() - global_start_time
+
+                        with latency_lock:
+                            for lat in per_sample_lats:
+                                all_latencies.append(lat)
+                                all_timestamps.append(current_time)
+
+                                if lat > latency_threshold:
+                                    all_violations[0] += 1
+
+                        batch_indices = []
+
+                    schedule_idx += 1
+
+        # Create and start channel threads
+        threads = []
+        for channel_id in range(num_channels):
+            thread = threading.Thread(target=channel_worker, args=(channel_id,))
+            thread.start()
+            threads.append(thread)
+
+        # Progress monitoring
+        while any(t.is_alive() for t in threads):
+            time.sleep(1.0)
+            if self.verbose:
+                with latency_lock:
+                    if len(all_latencies) > 0:
+                        elapsed = time.time() - global_start_time
+                        print(f"  Progress: {len(all_latencies)} inferences, {elapsed:.1f}s elapsed, "
+                              f"avg latency: {np.mean(all_latencies):.2f}ms")
+
+        # Wait for all threads
+        for thread in threads:
+            thread.join()
+
+        return {
+            'latencies': all_latencies,
+            'timestamps': all_timestamps,
+            'violations': all_violations[0]
+        }
+
     def run_static_baseline(self,
                            power_mode: PowerMode,
                            workload_pattern: WorkloadPattern,
-                           duration_s: float = 60.0) -> Dict:
+                           duration_s: float = 60.0,
+                           batch_size: int = 1,
+                           num_channels: int = 1) -> Dict:
         """
         Run baseline experiment with static power mode.
 
@@ -463,6 +643,8 @@ class AdaptiveBenchmark:
             power_mode: Static power mode to use
             workload_pattern: Workload pattern
             duration_s: Duration of experiment
+            batch_size: Batch size for batched inference (default: 1)
+            num_channels: Number of concurrent channels (default: 1)
 
         Returns:
             Dictionary with experiment results
@@ -470,6 +652,10 @@ class AdaptiveBenchmark:
         if self.verbose:
             print(f"\n{'='*60}")
             print(f"STATIC BASELINE: {power_mode.value} - {workload_pattern.value}")
+            if batch_size > 1:
+                print(f"  Batch Size: {batch_size}")
+            if num_channels > 1:
+                print(f"  Channels: {num_channels}")
             print(f"{'='*60}")
 
         # Set static power mode (JetPack 6.1: 0=15W, 1=25W, 2=MAXN)
@@ -497,35 +683,17 @@ class AdaptiveBenchmark:
         power_monitor = JetsonPowerMonitor(sample_interval_ms=100)
         power_monitor.start_monitoring()
 
-        # Run inference following workload schedule
-        latencies = []
-        actual_timestamps = []
-        violations = 0
-        latency_threshold = 10.0  # ms
+        # Dispatch to appropriate execution mode
+        if num_channels == 1:
+            # Single-channel mode (with or without batching)
+            results_data = self._run_single_channel_static(schedule, batch_size)
+        else:
+            # Multi-channel mode (with or without batching)
+            results_data = self._run_multi_channel_static(schedule, num_channels, batch_size, duration_s)
 
-        start_time = time.time()
-        sample_idx = 0
-
-        for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
-            # Wait until scheduled time
-            while (time.time() - start_time) < scheduled_time:
-                time.sleep(0.0001)  # 0.1ms sleep
-
-            # Run inference
-            latency = self.run_inference(sample_idx)
-            latencies.append(latency)
-            actual_timestamps.append(time.time() - start_time)
-
-            if latency > latency_threshold:
-                violations += 1
-
-            sample_idx += 1
-
-            # Progress update
-            if self.verbose and sample_idx % 100 == 0:
-                elapsed = time.time() - start_time
-                print(f"  Progress: {sample_idx} inferences, {elapsed:.1f}s elapsed, "
-                      f"avg latency: {np.mean(latencies):.2f}ms")
+        latencies = results_data['latencies']
+        actual_timestamps = results_data['timestamps']
+        violations = results_data['violations']
 
         # Stop power monitoring
         power_metrics = power_monitor.stop_monitoring()
@@ -539,6 +707,8 @@ class AdaptiveBenchmark:
             'workload_pattern': workload_pattern.value,
             'model_name': self.model_name,
             'use_tensorrt': self.use_tensorrt,
+            'batch_size': batch_size,
+            'num_channels': num_channels,
 
             # Latency metrics
             'total_inferences': len(latencies),
@@ -822,7 +992,9 @@ def main():
             low_power_results = benchmark.run_static_baseline(
                 power_mode=PowerMode.LOW_POWER,
                 workload_pattern=pattern,
-                duration_s=args.duration
+                duration_s=args.duration,
+                batch_size=args.batch_size,
+                num_channels=args.num_channels
             )
             all_results.append(low_power_results)
             benchmark.save_results(
@@ -838,7 +1010,9 @@ def main():
             medium_power_results = benchmark.run_static_baseline(
                 power_mode=PowerMode.MEDIUM_POWER,
                 workload_pattern=pattern,
-                duration_s=args.duration
+                duration_s=args.duration,
+                batch_size=args.batch_size,
+                num_channels=args.num_channels
             )
             all_results.append(medium_power_results)
             benchmark.save_results(
@@ -854,7 +1028,9 @@ def main():
             high_power_results = benchmark.run_static_baseline(
                 power_mode=PowerMode.HIGH_POWER,
                 workload_pattern=pattern,
-                duration_s=args.duration
+                duration_s=args.duration,
+                batch_size=args.batch_size,
+                num_channels=args.num_channels
             )
             all_results.append(high_power_results)
             benchmark.save_results(
