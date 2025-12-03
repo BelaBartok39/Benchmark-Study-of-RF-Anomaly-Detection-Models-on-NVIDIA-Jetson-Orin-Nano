@@ -207,14 +207,14 @@ class AdaptiveBenchmark:
         Returns:
             Tuple of (total_batch_latency_ms, per_sample_latencies_ms)
         """
-        # Gather batch
+        # Gather batch - concatenate along batch dimension
         batch_samples = []
         for idx in sample_indices:
             sample = self.test_data[idx % len(self.test_data)]
             batch_samples.append(sample)
 
-        # Stack into batch tensor
-        batch = torch.stack(batch_samples)
+        # Concatenate into batch tensor (each sample is [1, C, S], result is [N, C, S])
+        batch = torch.cat(batch_samples, dim=0)
 
         if self.use_tensorrt:
             # TensorRT batched inference
