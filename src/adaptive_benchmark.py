@@ -30,6 +30,7 @@ from workload_generator import WorkloadGenerator, WorkloadPattern
 from power_monitor import JetsonPowerMonitor, SystemResourceMonitor
 from data_loader import get_dataloaders
 from train import get_model
+from threshold_calibrator import ThresholdCalibrator
 
 try:
     import pycuda.autoinit
@@ -942,6 +943,10 @@ def main():
                        help='Hysteresis time in seconds')
     parser.add_argument('--use-model-defaults', action='store_true',
                        help='Use model-specific thresholds and hysteresis (overrides --latency-threshold and --hysteresis-time)')
+    parser.add_argument('--auto-calibrate', action='store_true',
+                       help='Automatically calibrate thresholds based on hardware profiling (overrides --use-model-defaults)')
+    parser.add_argument('--target-sla', type=float, default=10.0,
+                       help='Target SLA (latency) in milliseconds for auto-calibration (default: 10.0)')
     parser.add_argument('--enable-three-tier', action='store_true', default=True,
                        help='Enable three-tier power management (15W/25W/MAXN) instead of two-tier (15W/MAXN)')
     parser.add_argument('--disable-three-tier', dest='enable_three_tier', action='store_false',
@@ -974,6 +979,51 @@ def main():
     # Load model and data
     benchmark.load_model(use_tensorrt=args.use_tensorrt)
     benchmark.load_test_data(max_samples=args.max_samples)
+
+    # Auto-calibrate thresholds if requested
+    calibration_results = None
+    if args.auto_calibrate:
+        print("\n" + "="*60)
+        print("AUTOMATIC THRESHOLD CALIBRATION")
+        print("="*60)
+        print("Running hardware profiling to determine optimal thresholds...")
+        print("")
+
+        calibrator = ThresholdCalibrator(
+            benchmark=benchmark,
+            target_sla_ms=args.target_sla,
+            safety_margin=0.9,
+            verbose=True
+        )
+
+        try:
+            calibration_results = calibrator.calibrate(strategy='sla_based')
+
+            # Override thresholds with calibrated values
+            args.latency_threshold = calibration_results['high_threshold_ms']
+            args.hysteresis_time = calibration_results['hysteresis_time_s']
+
+            # For three-tier, we need the medium threshold too
+            # We'll store it in a way that adaptive_power_manager can access
+            # For now, pass high_threshold (25W→MAXN threshold) to latency_threshold
+
+            print(f"\n✅ Calibration complete!")
+            print(f"   Using calibrated thresholds:")
+            print(f"   - 15W → 25W: {calibration_results['medium_threshold_ms']:.2f}ms")
+            print(f"   - 25W → MAXN: {calibration_results['high_threshold_ms']:.2f}ms")
+            print(f"   - Hysteresis: {calibration_results['hysteresis_time_s']:.1f}s")
+            print("")
+
+            # Save calibration results
+            benchmark.save_results(
+                calibration_results,
+                f'{args.model}_calibration_results.json'
+            )
+
+        except ValueError as e:
+            print(f"\n❌ Calibration failed: {e}")
+            print("   Falling back to default thresholds")
+            args.auto_calibrate = False
 
     # Determine workload patterns to test
     if args.workload == 'all':
@@ -1076,8 +1126,11 @@ def main():
             'batch_size': args.batch_size,
             'num_channels': args.num_channels,
             'enable_three_tier': args.enable_three_tier,
-            'use_model_defaults': args.use_model_defaults
+            'use_model_defaults': args.use_model_defaults,
+            'auto_calibrate': args.auto_calibrate,
+            'target_sla_ms': args.target_sla if args.auto_calibrate else None
         },
+        'calibration': calibration_results if args.auto_calibrate else None,
         'results': all_results
     }
     benchmark.save_results(summary, f'{args.model}_adaptive_summary.json')
