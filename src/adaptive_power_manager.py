@@ -186,70 +186,57 @@ class AdaptivePowerManager:
                 return self._record_inference_two_tier(latency_ms)
 
     def _record_inference_three_tier(self, latency_ms: float) -> Optional[str]:
-        """
-        Three-tier power management: 15W → 25W → MAXN.
-
-        Progressive upward transitions (one step at a time):
-        - From 15W: Check medium threshold → go to 25W if exceeded
-        - From 25W: Check high threshold → go to MAXN if exceeded
-        - Never skip intermediate levels
-        """
-        # Track violations (based on high threshold for consistency)
+        """Three-tier power management: 15W → 25W → MAXN."""
+        # Priority 1: If latency exceeds high threshold, immediately switch to MAXN
         if latency_ms > self.latency_threshold_high_ms:
             self.violations += 1
-
-        # Progressive upward switching (one level at a time)
-        if self.current_mode == PowerMode.LOW_POWER:
-            # At 15W: Check if we need to go to 25W
-            if latency_ms > self.latency_threshold_medium_ms:
-                msg = self._set_power_mode(
-                    PowerMode.MEDIUM_POWER,
-                    reason=f"latency {latency_ms:.2f}ms > medium threshold {self.latency_threshold_medium_ms}ms"
-                )
-                self.below_threshold_start_time = None
-                return msg
-
-        elif self.current_mode == PowerMode.MEDIUM_POWER:
-            # At 25W: Check if we need to go to MAXN
-            if latency_ms > self.latency_threshold_high_ms:
+            if self.current_mode != PowerMode.HIGH_POWER:
                 msg = self._set_power_mode(
                     PowerMode.HIGH_POWER,
                     reason=f"latency {latency_ms:.2f}ms > high threshold {self.latency_threshold_high_ms}ms"
                 )
                 self.below_threshold_start_time = None
                 return msg
-            # If latency dropped below medium threshold, consider downshifting to 15W
-            elif latency_ms <= self.latency_threshold_medium_ms:
-                if self.below_threshold_start_time is None:
-                    self.below_threshold_start_time = time.time()
-                time_below = time.time() - self.below_threshold_start_time
-                if time_below >= self.hysteresis_time_s:
-                    msg = self._set_power_mode(
-                        PowerMode.LOW_POWER,
-                        reason=f"latency below medium threshold for {time_below:.1f}s"
-                    )
-                    self.below_threshold_start_time = None
-                    return msg
-            else:
-                # Latency between medium and high thresholds - stay at 25W
-                self.below_threshold_start_time = None
 
-        elif self.current_mode == PowerMode.HIGH_POWER:
-            # At MAXN: Check if we can downshift to 25W
-            if latency_ms <= self.latency_threshold_high_ms:
-                if self.below_threshold_start_time is None:
-                    self.below_threshold_start_time = time.time()
-                time_below = time.time() - self.below_threshold_start_time
-                if time_below >= self.hysteresis_time_s:
+        # Priority 2: If latency exceeds medium threshold, switch to 25W (if currently at 15W)
+        elif latency_ms > self.latency_threshold_medium_ms:
+            if self.current_mode == PowerMode.LOW_POWER:
+                msg = self._set_power_mode(
+                    PowerMode.MEDIUM_POWER,
+                    reason=f"latency {latency_ms:.2f}ms > medium threshold {self.latency_threshold_medium_ms}ms"
+                )
+                self.below_threshold_start_time = None
+                return msg
+            # If already at MAXN, stay there (don't downshift yet)
+            self.below_threshold_start_time = None
+
+        # Latency is below medium threshold - consider downshifting
+        else:
+            # Start or continue tracking time below threshold
+            if self.below_threshold_start_time is None:
+                self.below_threshold_start_time = time.time()
+
+            time_below = time.time() - self.below_threshold_start_time
+
+            # Gradual downshift after hysteresis period
+            if time_below >= self.hysteresis_time_s:
+                # Step down one level at a time
+                if self.current_mode == PowerMode.HIGH_POWER:
+                    # MAXN → 25W
                     msg = self._set_power_mode(
                         PowerMode.MEDIUM_POWER,
                         reason=f"latency below high threshold for {time_below:.1f}s"
                     )
                     self.below_threshold_start_time = time.time()  # Restart timer for next downshift
                     return msg
-            else:
-                # Latency still high - stay at MAXN
-                self.below_threshold_start_time = None
+                elif self.current_mode == PowerMode.MEDIUM_POWER and latency_ms < self.latency_threshold_medium_ms:
+                    # 25W → 15W
+                    msg = self._set_power_mode(
+                        PowerMode.LOW_POWER,
+                        reason=f"latency below medium threshold for {time_below:.1f}s"
+                    )
+                    self.below_threshold_start_time = None
+                    return msg
 
         return None
 
