@@ -7,8 +7,10 @@
 #   ./run_adaptive_experiments.sh [MODEL] [USE_TENSORRT] [USE_MODEL_DEFAULTS]
 #
 # Optional environment variables:
-#   BATCH_SIZE=N      - Batch size for batched inference (default: 1)
-#   NUM_CHANNELS=N    - Number of concurrent channels (default: 1)
+#   BATCH_SIZE=N         - Batch size for batched inference (default: 1)
+#   NUM_CHANNELS=N       - Number of concurrent channels (default: 1)
+#   AUTO_CALIBRATE=true  - Automatically calibrate thresholds (default: false)
+#   TARGET_SLA=X         - Target SLA in ms for auto-calibration (default: 10.0)
 #
 # Examples:
 #   # Default: single-channel, single-sample
@@ -23,6 +25,12 @@
 #   # Hybrid: 10 channels, each processing batches of 8
 #   BATCH_SIZE=8 NUM_CHANNELS=10 ./run_adaptive_experiments.sh lstm_ae false true
 #
+#   # Auto-calibrate thresholds for optimal performance
+#   AUTO_CALIBRATE=true ./run_adaptive_experiments.sh lstm_ae false false
+#
+#   # Auto-calibrate with custom SLA target
+#   AUTO_CALIBRATE=true TARGET_SLA=15.0 ./run_adaptive_experiments.sh lstm_ae
+#
 
 set -e  # Exit on error
 
@@ -30,8 +38,10 @@ set -e  # Exit on error
 MODEL=${1:-ae}
 USE_TENSORRT=${2:-false}
 USE_MODEL_DEFAULTS=${3:-true}  # Enable model-specific thresholds by default
-BATCH_SIZE=${BATCH_SIZE:-1}    # Default: single-sample (set via env: BATCH_SIZE=8 ./run_adaptive_experiments.sh)
-NUM_CHANNELS=${NUM_CHANNELS:-1}  # Default: single-channel (set via env: NUM_CHANNELS=10 ./run_adaptive_experiments.sh)
+BATCH_SIZE=${BATCH_SIZE:-1}    # Default: single-sample
+NUM_CHANNELS=${NUM_CHANNELS:-1}  # Default: single-channel
+AUTO_CALIBRATE=${AUTO_CALIBRATE:-false}  # Default: use fixed/model-defaults
+TARGET_SLA=${TARGET_SLA:-10.0}  # Default: 10ms SLA
 OUTPUT_BASE="adaptive_experiments_$(date +%Y%m%d_%H%M%S)"
 
 echo "========================================"
@@ -40,6 +50,10 @@ echo "========================================"
 echo "Model: $MODEL"
 echo "Use TensorRT: $USE_TENSORRT"
 echo "Use Model Defaults: $USE_MODEL_DEFAULTS"
+echo "Auto Calibrate: $AUTO_CALIBRATE"
+if [ "$AUTO_CALIBRATE" = "true" ]; then
+    echo "Target SLA: ${TARGET_SLA}ms"
+fi
 echo "Batch Size: $BATCH_SIZE"
 echo "Num Channels: $NUM_CHANNELS"
 echo "Output directory: $OUTPUT_BASE"
@@ -104,14 +118,35 @@ else
     TRT_FLAG=""
 fi
 
+# Build auto-calibrate flag
+if [ "$AUTO_CALIBRATE" = "true" ]; then
+    CALIBRATE_FLAG="--auto-calibrate --target-sla $TARGET_SLA"
+else
+    CALIBRATE_FLAG=""
+fi
+
 # Run benchmark for each workload
 for workload in "${WORKLOADS[@]}"; do
     echo ""
     echo "Testing workload: $workload"
     echo "-----------------------------------"
 
-    # Build command based on whether we're using model defaults
-    if [ "$USE_MODEL_DEFAULTS" = "true" ]; then
+    # Build command based on whether we're using model defaults or auto-calibration
+    if [ "$AUTO_CALIBRATE" = "true" ]; then
+        # Use auto-calibrated thresholds (overrides model defaults)
+        python src/adaptive_benchmark.py \
+            --model "$MODEL" \
+            --model-path "$MODEL_PATH" \
+            $TRT_FLAG \
+            --workload "$workload" \
+            --duration 60 \
+            $CALIBRATE_FLAG \
+            --run-baselines \
+            --max-samples 200 \
+            --batch-size "$BATCH_SIZE" \
+            --num-channels "$NUM_CHANNELS" \
+            --output-dir "$OUTPUT_BASE/results"
+    elif [ "$USE_MODEL_DEFAULTS" = "true" ]; then
         # Use model-specific thresholds and hysteresis
         python src/adaptive_benchmark.py \
             --model "$MODEL" \
