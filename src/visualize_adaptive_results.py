@@ -363,6 +363,203 @@ def create_summary_table(results_all_workloads: Dict, output_path: Path):
     print(f"📄 Saved: {output_path}")
 
 
+def plot_power_mode_distribution(results: Dict, output_path: Path):
+    """
+    Create pie chart showing time distribution across power modes.
+    """
+    if 'adaptive' not in results:
+        print("⚠️  No adaptive results available for power mode distribution")
+        return
+
+    adaptive = results['adaptive']
+
+    # Extract mode percentages
+    modes = []
+    percentages = []
+    colors = []
+
+    if adaptive.get('low_power_percentage', 0) > 0:
+        modes.append('15W')
+        percentages.append(adaptive['low_power_percentage'])
+        colors.append('#3498db')  # Blue
+
+    if adaptive.get('medium_power_percentage', 0) > 0:
+        modes.append('25W')
+        percentages.append(adaptive['medium_power_percentage'])
+        colors.append('#f39c12')  # Orange
+
+    if adaptive.get('high_power_percentage', 0) > 0:
+        modes.append('MAXN')
+        percentages.append(adaptive['high_power_percentage'])
+        colors.append('#e74c3c')  # Red
+
+    if not modes:
+        print("⚠️  No power mode data available")
+        return
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    wedges, texts, autotexts = ax.pie(
+        percentages,
+        labels=modes,
+        colors=colors,
+        autopct='%1.1f%%',
+        startangle=90,
+        textprops={'fontsize': 12}
+    )
+
+    # Make percentage text bold
+    for autotext in autotexts:
+        autotext.set_color('white')
+        autotext.set_weight('bold')
+        autotext.set_fontsize(14)
+
+    ax.set_title('Power Mode Time Distribution\n(Adaptive Management)',
+                 fontsize=14, fontweight='bold', pad=20)
+
+    # Add statistics box
+    stats_text = (
+        f"Mode Switches: {adaptive.get('total_mode_switches', 0)}\n"
+        f"Avg Switch Time: {adaptive.get('avg_switch_time_ms', 0):.1f}ms\n"
+        f"Energy/Inference: {adaptive.get('energy_per_inference_j', 0)*1000:.2f}mJ"
+    )
+
+    ax.text(0.5, -0.15, stats_text,
+            transform=ax.transAxes,
+            ha='center',
+            va='top',
+            fontsize=10,
+            bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    print(f"📊 Saved: {output_path}")
+    plt.close()
+
+
+def plot_adaptive_behavior_dashboard(results: Dict, output_path: Path):
+    """
+    Create comprehensive dashboard showing key adaptive metrics.
+    """
+    if 'adaptive' not in results:
+        print("⚠️  No adaptive results available for dashboard")
+        return
+
+    adaptive = results['adaptive']
+
+    fig = plt.figure(figsize=(14, 10))
+    gs = fig.add_gridspec(3, 2, hspace=0.3, wspace=0.3)
+
+    # 1. Power vs Time
+    ax1 = fig.add_subplot(gs[0, :])
+    if 'power_samples' in adaptive and 'power_timestamps' in adaptive:
+        ax1.plot(adaptive['power_timestamps'], adaptive['power_samples'],
+                'g-', linewidth=1, alpha=0.7)
+        ax1.set_xlabel('Time (s)')
+        ax1.set_ylabel('Power (W)')
+        ax1.set_title('Power Consumption Over Time', fontweight='bold')
+        ax1.grid(True, alpha=0.3)
+
+        # Add average line
+        avg_power = adaptive.get('avg_power_w', 0)
+        ax1.axhline(y=avg_power, color='r', linestyle='--',
+                   label=f'Average: {avg_power:.2f}W')
+        ax1.legend()
+
+    # 2. Latency Distribution
+    ax2 = fig.add_subplot(gs[1, 0])
+    latencies = np.array(adaptive.get('latencies', []))
+    if len(latencies) > 0:
+        ax2.hist(latencies, bins=50, color='steelblue', alpha=0.7, edgecolor='black')
+        ax2.axvline(x=np.median(latencies), color='r', linestyle='--',
+                   label=f'Median: {np.median(latencies):.2f}ms')
+        ax2.axvline(x=np.percentile(latencies, 95), color='orange', linestyle='--',
+                   label=f'P95: {np.percentile(latencies, 95):.2f}ms')
+        threshold = adaptive.get('latency_threshold_ms', 10.0)
+        ax2.axvline(x=threshold, color='red', linestyle='-', linewidth=2,
+                   label=f'Threshold: {threshold}ms')
+        ax2.set_xlabel('Latency (ms)')
+        ax2.set_ylabel('Frequency')
+        ax2.set_title('Latency Distribution', fontweight='bold')
+        ax2.legend()
+        ax2.grid(True, alpha=0.3)
+
+    # 3. Mode Switching Timeline
+    ax3 = fig.add_subplot(gs[1, 1])
+    power_modes = adaptive.get('power_modes', [])
+    timestamps = adaptive.get('timestamps', [])
+    if len(power_modes) > 0 and len(timestamps) > 0:
+        # Convert mode names to numbers for plotting
+        mode_map = {'15W': 0, '25W': 1, 'MAXN': 2}
+        mode_values = [mode_map.get(m, 0) for m in power_modes]
+
+        ax3.plot(timestamps, mode_values, 'b-', linewidth=2, drawstyle='steps-post')
+        ax3.set_xlabel('Time (s)')
+        ax3.set_ylabel('Power Mode')
+        ax3.set_yticks([0, 1, 2])
+        ax3.set_yticklabels(['15W', '25W', 'MAXN'])
+        ax3.set_title('Power Mode Transitions', fontweight='bold')
+        ax3.grid(True, alpha=0.3)
+        ax3.set_ylim([-0.2, 2.2])
+
+    # 4. Energy Breakdown
+    ax4 = fig.add_subplot(gs[2, 0])
+    metrics = {
+        'Total Energy': adaptive.get('total_energy_j', 0),
+        'Per Inference': adaptive.get('energy_per_inference_j', 0) * 1000  # Convert to mJ
+    }
+    if all(v > 0 for v in metrics.values()):
+        bars = ax4.bar(metrics.keys(), metrics.values(), color=['#3498db', '#e74c3c'])
+        ax4.set_ylabel('Energy (J for Total, mJ for Per Inference)')
+        ax4.set_title('Energy Metrics', fontweight='bold')
+
+        # Add value labels on bars
+        for bar in bars:
+            height = bar.get_height()
+            ax4.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{height:.2f}',
+                    ha='center', va='bottom', fontweight='bold')
+
+    # 5. Performance Summary
+    ax5 = fig.add_subplot(gs[2, 1])
+    ax5.axis('off')
+
+    summary_text = f"""
+    📊 ADAPTIVE PERFORMANCE SUMMARY
+
+    Total Inferences: {adaptive.get('num_inferences', 0)}
+    Duration: {adaptive.get('duration_s', 0):.1f}s
+
+    Power Management:
+    • Mode Switches: {adaptive.get('total_mode_switches', 0)}
+    • Avg Switch Time: {adaptive.get('avg_switch_time_ms', 0):.2f}ms
+    • 15W Time: {adaptive.get('low_power_percentage', 0):.1f}%
+    • 25W Time: {adaptive.get('medium_power_percentage', 0):.1f}%
+    • MAXN Time: {adaptive.get('high_power_percentage', 0):.1f}%
+
+    Latency:
+    • Mean: {adaptive.get('mean_latency_ms', 0):.2f}ms
+    • P95: {adaptive.get('p95_latency_ms', 0):.2f}ms
+    • Violations: {adaptive.get('threshold_violations', 0)} ({adaptive.get('violation_rate', 0)*100:.2f}%)
+
+    Efficiency:
+    • Avg Power: {adaptive.get('avg_power_w', 0):.2f}W
+    • Energy/Inf: {adaptive.get('energy_per_inference_j', 0)*1000:.2f}mJ
+    • FPS/Watt: {adaptive.get('fps_per_watt', 0):.2f}
+    """
+
+    ax5.text(0.1, 0.95, summary_text, transform=ax5.transAxes,
+            fontsize=10, verticalalignment='top', fontfamily='monospace',
+            bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.3))
+
+    plt.suptitle('Adaptive Power Management Dashboard',
+                 fontsize=16, fontweight='bold', y=0.995)
+
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    print(f"📊 Saved: {output_path}")
+    plt.close()
+
+
 def main():
     """Main visualization function."""
     parser = argparse.ArgumentParser(
@@ -419,6 +616,18 @@ def main():
         plot_latency_timeline(
             results,
             output_dir / f'{args.model}_{workload}_timeline.png'
+        )
+
+        # Power mode distribution (adaptive only)
+        plot_power_mode_distribution(
+            results,
+            output_dir / f'{args.model}_{workload}_power_distribution.png'
+        )
+
+        # Adaptive behavior dashboard (adaptive only)
+        plot_adaptive_behavior_dashboard(
+            results,
+            output_dir / f'{args.model}_{workload}_adaptive_dashboard.png'
         )
 
     # Cross-workload comparison plots

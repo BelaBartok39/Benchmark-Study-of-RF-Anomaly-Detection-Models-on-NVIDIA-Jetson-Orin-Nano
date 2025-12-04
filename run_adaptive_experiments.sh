@@ -9,6 +9,8 @@
 # Optional environment variables:
 #   BATCH_SIZE=N              - Batch size for batched inference (default: 1)
 #   NUM_CHANNELS=N            - Number of concurrent channels (default: 1)
+#   DURATION=X                - Experiment duration in seconds (default: 60)
+#   WORKLOAD=pattern          - Run single workload only: bursty, continuous, variable, periodic (default: all)
 #   AUTO_CALIBRATE=true       - Automatically calibrate thresholds (default: false)
 #   TARGET_SLA=X              - Target SLA in ms for auto-calibration (default: 10.0)
 #   AUTO_ADJUST_SLA=true      - Auto-adjust SLA if unreachable (default: false)
@@ -48,6 +50,18 @@
 #   # Quick experiment: skip switching, short cooldown
 #   SKIP_SWITCHING=true THERMAL_COOLDOWN=10 ./run_adaptive_experiments.sh lstm_ae
 #
+#   # Custom duration (120 seconds)
+#   DURATION=120 ./run_adaptive_experiments.sh lstm_ae false true
+#
+#   # Single workload only (bursty)
+#   WORKLOAD=bursty ./run_adaptive_experiments.sh lstm_ae false true
+#
+#   # Quick single workload test: bursty, 30s duration, skip switching
+#   SKIP_SWITCHING=true DURATION=30 WORKLOAD=bursty ./run_adaptive_experiments.sh lstm_ae
+#
+#   # Multi-channel scaling test: 10 channels, bursty workload, 120s
+#   NUM_CHANNELS=10 WORKLOAD=bursty DURATION=120 ./run_adaptive_experiments.sh lstm_ae
+#
 
 set -e  # Exit on error
 
@@ -57,6 +71,8 @@ USE_TENSORRT=${2:-false}
 USE_MODEL_DEFAULTS=${3:-true}  # Enable model-specific thresholds by default
 BATCH_SIZE=${BATCH_SIZE:-1}    # Default: single-sample
 NUM_CHANNELS=${NUM_CHANNELS:-1}  # Default: single-channel
+DURATION=${DURATION:-60}  # Default: 60 seconds experiment duration
+WORKLOAD=${WORKLOAD:-all}  # Default: run all workloads (or specify: bursty, continuous, variable, periodic)
 AUTO_CALIBRATE=${AUTO_CALIBRATE:-false}  # Default: use fixed/model-defaults
 TARGET_SLA=${TARGET_SLA:-10.0}  # Default: 10ms SLA
 AUTO_ADJUST_SLA=${AUTO_ADJUST_SLA:-false}  # Default: don't auto-adjust
@@ -79,6 +95,8 @@ if [ "$AUTO_CALIBRATE" = "true" ]; then
 fi
 echo "Batch Size: $BATCH_SIZE"
 echo "Num Channels: $NUM_CHANNELS"
+echo "Duration: ${DURATION}s"
+echo "Workload: $WORKLOAD"
 echo "Skip Switching: $SKIP_SWITCHING"
 if [ "$SKIP_SWITCHING" = "false" ]; then
     echo "Switching Trials: $SWITCHING_TRIALS"
@@ -147,7 +165,14 @@ echo "==============================="
 echo ""
 
 # Define workload patterns
-WORKLOADS=("bursty" "continuous" "variable" "periodic")
+if [ "$WORKLOAD" = "all" ]; then
+    WORKLOADS=("bursty" "continuous" "variable" "periodic")
+else
+    # Single workload mode
+    WORKLOADS=("$WORKLOAD")
+    echo "🎯 Single workload mode: $WORKLOAD"
+    echo ""
+fi
 
 # Build TensorRT flag
 if [ "$USE_TENSORRT" = "true" ]; then
@@ -180,7 +205,7 @@ for workload in "${WORKLOADS[@]}"; do
             --model-path "$MODEL_PATH" \
             $TRT_FLAG \
             --workload "$workload" \
-            --duration 60 \
+            --duration "$DURATION" \
             $CALIBRATE_FLAG \
             --run-baselines \
             --max-samples 200 \
@@ -194,7 +219,7 @@ for workload in "${WORKLOADS[@]}"; do
             --model-path "$MODEL_PATH" \
             $TRT_FLAG \
             --workload "$workload" \
-            --duration 60 \
+            --duration "$DURATION" \
             --use-model-defaults \
             --run-baselines \
             --max-samples 200 \
@@ -208,7 +233,7 @@ for workload in "${WORKLOADS[@]}"; do
             --model-path "$MODEL_PATH" \
             $TRT_FLAG \
             --workload "$workload" \
-            --duration 60 \
+            --duration "$DURATION" \
             --latency-threshold 10.0 \
             --hysteresis-time 5.0 \
             --run-baselines \
