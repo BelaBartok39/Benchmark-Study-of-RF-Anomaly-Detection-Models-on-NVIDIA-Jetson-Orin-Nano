@@ -947,6 +947,8 @@ def main():
                        help='Automatically calibrate thresholds based on hardware profiling (overrides --use-model-defaults)')
     parser.add_argument('--target-sla', type=float, default=10.0,
                        help='Target SLA (latency) in milliseconds for auto-calibration (default: 10.0)')
+    parser.add_argument('--auto-adjust-sla', action='store_true',
+                       help='Automatically adjust SLA if target is unreachable based on hardware profiling (requires --auto-calibrate)')
     parser.add_argument('--enable-three-tier', action='store_true', default=True,
                        help='Enable three-tier power management (15W/25W/MAXN) instead of two-tier (15W/MAXN)')
     parser.add_argument('--disable-three-tier', dest='enable_three_tier', action='store_false',
@@ -993,7 +995,8 @@ def main():
             benchmark=benchmark,
             target_sla_ms=args.target_sla,
             safety_margin=0.9,
-            verbose=True
+            verbose=True,
+            auto_adjust_sla=args.auto_adjust_sla
         )
 
         try:
