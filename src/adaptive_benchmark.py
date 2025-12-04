@@ -455,13 +455,15 @@ class AdaptiveBenchmark:
 
     def _run_single_channel_static(self,
                                    schedule: Dict,
-                                   batch_size: int) -> Dict:
+                                   batch_size: int,
+                                   latency_threshold_ms: float = 10.0) -> Dict:
         """
         Run single-channel static baseline with optional batching.
 
         Args:
             schedule: Workload schedule from generator
             batch_size: Batch size (1 for single-sample)
+            latency_threshold_ms: Latency threshold for violation counting (default: 10.0ms)
 
         Returns:
             Dictionary with latencies, timestamps, and violations
@@ -469,7 +471,7 @@ class AdaptiveBenchmark:
         latencies = []
         actual_timestamps = []
         violations = 0
-        latency_threshold = 10.0  # ms
+        latency_threshold = latency_threshold_ms  # Use parameter instead of hardcoded value
 
         start_time = time.time()
         sample_idx = 0
@@ -534,7 +536,8 @@ class AdaptiveBenchmark:
                                   schedule: Dict,
                                   num_channels: int,
                                   batch_size: int,
-                                  duration_s: float) -> Dict:
+                                  duration_s: float,
+                                  latency_threshold_ms: float = 10.0) -> Dict:
         """
         Run multi-channel static baseline with optional batching per channel.
 
@@ -543,6 +546,7 @@ class AdaptiveBenchmark:
             num_channels: Number of concurrent channels
             batch_size: Batch size per channel (1 for single-sample)
             duration_s: Duration of experiment
+            latency_threshold_ms: Latency threshold for violation counting (default: 10.0ms)
 
         Returns:
             Dictionary with aggregated latencies, timestamps, and violations
@@ -551,7 +555,7 @@ class AdaptiveBenchmark:
         all_timestamps = []
         all_violations = [0]  # List to allow mutation in thread
         latency_lock = threading.Lock()
-        latency_threshold = 10.0  # ms
+        latency_threshold = latency_threshold_ms  # Use parameter instead of hardcoded value
 
         global_start_time = time.time()
 
@@ -636,7 +640,8 @@ class AdaptiveBenchmark:
                            workload_pattern: WorkloadPattern,
                            duration_s: float = 60.0,
                            batch_size: int = 1,
-                           num_channels: int = 1) -> Dict:
+                           num_channels: int = 1,
+                           latency_threshold_ms: float = 10.0) -> Dict:
         """
         Run baseline experiment with static power mode.
 
@@ -646,6 +651,7 @@ class AdaptiveBenchmark:
             duration_s: Duration of experiment
             batch_size: Batch size for batched inference (default: 1)
             num_channels: Number of concurrent channels (default: 1)
+            latency_threshold_ms: Latency threshold for violation counting (default: 10.0ms)
 
         Returns:
             Dictionary with experiment results
@@ -687,10 +693,10 @@ class AdaptiveBenchmark:
         # Dispatch to appropriate execution mode
         if num_channels == 1:
             # Single-channel mode (with or without batching)
-            results_data = self._run_single_channel_static(schedule, batch_size)
+            results_data = self._run_single_channel_static(schedule, batch_size, latency_threshold_ms)
         else:
             # Multi-channel mode (with or without batching)
-            results_data = self._run_multi_channel_static(schedule, num_channels, batch_size, duration_s)
+            results_data = self._run_multi_channel_static(schedule, num_channels, batch_size, duration_s, latency_threshold_ms)
 
         latencies = results_data['latencies']
         actual_timestamps = results_data['timestamps']
@@ -1047,7 +1053,8 @@ def main():
                 workload_pattern=pattern,
                 duration_s=args.duration,
                 batch_size=args.batch_size,
-                num_channels=args.num_channels
+                num_channels=args.num_channels,
+                latency_threshold_ms=args.latency_threshold
             )
             all_results.append(low_power_results)
             benchmark.save_results(
@@ -1065,7 +1072,8 @@ def main():
                 workload_pattern=pattern,
                 duration_s=args.duration,
                 batch_size=args.batch_size,
-                num_channels=args.num_channels
+                num_channels=args.num_channels,
+                latency_threshold_ms=args.latency_threshold
             )
             all_results.append(medium_power_results)
             benchmark.save_results(
@@ -1083,7 +1091,8 @@ def main():
                 workload_pattern=pattern,
                 duration_s=args.duration,
                 batch_size=args.batch_size,
-                num_channels=args.num_channels
+                num_channels=args.num_channels,
+                latency_threshold_ms=args.latency_threshold
             )
             all_results.append(high_power_results)
             benchmark.save_results(
