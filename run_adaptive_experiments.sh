@@ -7,11 +7,15 @@
 #   ./run_adaptive_experiments.sh [MODEL] [USE_TENSORRT] [USE_MODEL_DEFAULTS]
 #
 # Optional environment variables:
-#   BATCH_SIZE=N          - Batch size for batched inference (default: 1)
-#   NUM_CHANNELS=N        - Number of concurrent channels (default: 1)
-#   AUTO_CALIBRATE=true   - Automatically calibrate thresholds (default: false)
-#   TARGET_SLA=X          - Target SLA in ms for auto-calibration (default: 10.0)
-#   AUTO_ADJUST_SLA=true  - Auto-adjust SLA if unreachable (default: false)
+#   BATCH_SIZE=N              - Batch size for batched inference (default: 1)
+#   NUM_CHANNELS=N            - Number of concurrent channels (default: 1)
+#   AUTO_CALIBRATE=true       - Automatically calibrate thresholds (default: false)
+#   TARGET_SLA=X              - Target SLA in ms for auto-calibration (default: 10.0)
+#   AUTO_ADJUST_SLA=true      - Auto-adjust SLA if unreachable (default: false)
+#   SKIP_SWITCHING=true       - Skip switching characterization phase (default: false)
+#   THERMAL_COOLDOWN=X        - Thermal cooldown seconds between workloads (default: 60)
+#   SWITCHING_TRIALS=X        - Number of switching trials (default: 20)
+#   SWITCHING_STABILIZATION=X - Stabilization time in seconds (default: 2.0)
 #
 # Examples:
 #   # Default: single-channel, single-sample
@@ -38,6 +42,12 @@
 #   # Multi-channel with auto-adjustment (realistic workload scaling)
 #   AUTO_CALIBRATE=true AUTO_ADJUST_SLA=true NUM_CHANNELS=10 ./run_adaptive_experiments.sh lstm_ae
 #
+#   # Skip switching characterization for faster experiments
+#   SKIP_SWITCHING=true ./run_adaptive_experiments.sh lstm_ae false true
+#
+#   # Quick experiment: skip switching, short cooldown
+#   SKIP_SWITCHING=true THERMAL_COOLDOWN=10 ./run_adaptive_experiments.sh lstm_ae
+#
 
 set -e  # Exit on error
 
@@ -50,6 +60,10 @@ NUM_CHANNELS=${NUM_CHANNELS:-1}  # Default: single-channel
 AUTO_CALIBRATE=${AUTO_CALIBRATE:-false}  # Default: use fixed/model-defaults
 TARGET_SLA=${TARGET_SLA:-10.0}  # Default: 10ms SLA
 AUTO_ADJUST_SLA=${AUTO_ADJUST_SLA:-false}  # Default: don't auto-adjust
+SKIP_SWITCHING=${SKIP_SWITCHING:-false}  # Default: run switching characterization
+THERMAL_COOLDOWN=${THERMAL_COOLDOWN:-60}  # Default: 60 seconds between workloads
+SWITCHING_TRIALS=${SWITCHING_TRIALS:-20}  # Default: 20 trials for switching overhead
+SWITCHING_STABILIZATION=${SWITCHING_STABILIZATION:-2.0}  # Default: 2.0s stabilization
 OUTPUT_BASE="adaptive_experiments_$(date +%Y%m%d_%H%M%S)"
 
 echo "========================================"
@@ -65,6 +79,12 @@ if [ "$AUTO_CALIBRATE" = "true" ]; then
 fi
 echo "Batch Size: $BATCH_SIZE"
 echo "Num Channels: $NUM_CHANNELS"
+echo "Skip Switching: $SKIP_SWITCHING"
+if [ "$SKIP_SWITCHING" = "false" ]; then
+    echo "Switching Trials: $SWITCHING_TRIALS"
+    echo "Switching Stabilization: ${SWITCHING_STABILIZATION}s"
+fi
+echo "Thermal Cooldown: ${THERMAL_COOLDOWN}s"
 echo "Output directory: $OUTPUT_BASE"
 echo ""
 
@@ -91,24 +111,33 @@ if [ "$USE_TENSORRT" = "true" ] && [ ! -f "$ENGINE_PATH" ]; then
     USE_TENSORRT="false"
 fi
 
-# Phase 1: Mode Switching Characterization
-echo ""
-echo "========================================="
-echo "PHASE 1: Mode Switching Characterization"
-echo "========================================="
-echo ""
+# Phase 1: Mode Switching Characterization (conditional)
+if [ "$SKIP_SWITCHING" = "false" ]; then
+    echo ""
+    echo "========================================="
+    echo "PHASE 1: Mode Switching Characterization"
+    echo "========================================="
+    echo ""
 
-python src/characterize_switching_overhead.py \
-    --trials 20 \
-    --stabilization-time 2.0 \
-    --performance-test \
-    --samples 100 \
-    --output-dir "$OUTPUT_BASE/switching_overhead"
+    python src/characterize_switching_overhead.py \
+        --trials "$SWITCHING_TRIALS" \
+        --stabilization-time "$SWITCHING_STABILIZATION" \
+        --performance-test \
+        --samples 100 \
+        --output-dir "$OUTPUT_BASE/switching_overhead"
 
-echo ""
-echo "✅ Phase 1 complete: Switching overhead characterized"
-echo "   Results: $OUTPUT_BASE/switching_overhead/"
-echo ""
+    echo ""
+    echo "✅ Phase 1 complete: Switching overhead characterized"
+    echo "   Results: $OUTPUT_BASE/switching_overhead/"
+    echo ""
+else
+    echo ""
+    echo "========================================="
+    echo "PHASE 1: Mode Switching (SKIPPED)"
+    echo "========================================="
+    echo "⏭️  Skipping switching characterization (SKIP_SWITCHING=true)"
+    echo ""
+fi
 
 # Phase 2: Adaptive Benchmarking
 echo ""
@@ -194,8 +223,8 @@ for workload in "${WORKLOADS[@]}"; do
 
     # Thermal cooldown between workloads
     if [ "$workload" != "periodic" ]; then
-        echo "⏳ Thermal cooldown: 60 seconds..."
-        sleep 60
+        echo "⏳ Thermal cooldown: ${THERMAL_COOLDOWN} seconds..."
+        sleep "$THERMAL_COOLDOWN"
     fi
 done
 
