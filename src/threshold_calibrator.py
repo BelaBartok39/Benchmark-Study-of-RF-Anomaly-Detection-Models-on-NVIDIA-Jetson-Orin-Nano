@@ -10,6 +10,7 @@ energy efficiency.
 import time
 import numpy as np
 import subprocess
+import threading
 from typing import Dict, List
 from adaptive_power_manager import PowerMode
 
@@ -22,7 +23,7 @@ class ThresholdCalibrator:
 
     def __init__(self, benchmark, target_sla_ms: float = 10.0,
                  safety_margin: float = 0.9, verbose: bool = True,
-                 auto_adjust_sla: bool = False):
+                 auto_adjust_sla: bool = False, num_channels: int = 1):
         """
         Args:
             benchmark: AdaptiveBenchmark instance with loaded model
@@ -30,12 +31,14 @@ class ThresholdCalibrator:
             safety_margin: Safety factor (0.9 = use 90% of measured capacity)
             verbose: Print calibration progress
             auto_adjust_sla: Automatically adjust SLA if target is unreachable
+            num_channels: Number of concurrent channels to simulate during profiling
         """
         self.benchmark = benchmark
         self.target_sla_ms = target_sla_ms
         self.safety_margin = safety_margin
         self.verbose = verbose
         self.auto_adjust_sla = auto_adjust_sla
+        self.num_channels = num_channels
         self.original_target_sla_ms = target_sla_ms  # Keep original for reporting
 
     def profile_power_mode(self, power_mode: PowerMode,
@@ -43,15 +46,20 @@ class ThresholdCalibrator:
         """
         Profile inference latency at a specific power mode.
 
+        Uses multi-threaded concurrent profiling if num_channels > 1 to simulate
+        realistic GPU contention that will occur during actual benchmarking.
+
         Args:
             power_mode: Power mode to profile
-            num_samples: Number of inference samples to collect
+            num_samples: Number of inference samples to collect (total across all channels)
 
         Returns:
             Dict with latency statistics
         """
         if self.verbose:
             print(f"\n🔍 Profiling {power_mode.value}...")
+            if self.num_channels > 1:
+                print(f"   Using {self.num_channels} concurrent channels to simulate realistic load")
 
         # Set power mode
         mode_num = {
@@ -72,15 +80,53 @@ class ThresholdCalibrator:
         for i in range(10):
             self.benchmark.run_inference(i)
 
-        # Collect latency samples
-        latencies = []
-        for i in range(num_samples):
-            latency = self.benchmark.run_inference(i)
-            latencies.append(latency)
+        # Collect latency samples with concurrent threads if num_channels > 1
+        if self.num_channels == 1:
+            # Single-threaded sequential profiling
+            latencies = []
+            for i in range(num_samples):
+                latency = self.benchmark.run_inference(i)
+                latencies.append(latency)
 
-            if self.verbose and (i + 1) % 25 == 0:
-                print(f"  {i+1}/{num_samples} samples, "
-                      f"avg: {np.mean(latencies):.2f}ms")
+                if self.verbose and (i + 1) % 25 == 0:
+                    print(f"  {i+1}/{num_samples} samples, "
+                          f"avg: {np.mean(latencies):.2f}ms")
+        else:
+            # Multi-threaded concurrent profiling (simulates realistic GPU contention)
+            latencies = []
+            latency_lock = threading.Lock()
+            samples_per_channel = num_samples // self.num_channels
+            completed_samples = [0]  # Mutable list for closure
+
+            def channel_worker(channel_id: int):
+                """Worker function for each channel thread."""
+                sample_idx = channel_id * 10000  # Offset to avoid sample overlap
+
+                for i in range(samples_per_channel):
+                    latency = self.benchmark.run_inference(sample_idx)
+
+                    # Thread-safe append
+                    with latency_lock:
+                        latencies.append(latency)
+                        completed_samples[0] += 1
+
+                        # Progress reporting
+                        if self.verbose and completed_samples[0] % 25 == 0:
+                            print(f"  {completed_samples[0]}/{num_samples} samples, "
+                                  f"avg: {np.mean(latencies):.2f}ms")
+
+                    sample_idx += 1
+
+            # Launch concurrent channel threads
+            threads = []
+            for channel_id in range(self.num_channels):
+                thread = threading.Thread(target=channel_worker, args=(channel_id,))
+                threads.append(thread)
+                thread.start()
+
+            # Wait for all threads to complete
+            for thread in threads:
+                thread.join()
 
         latencies = np.array(latencies)
 
@@ -302,6 +348,12 @@ class ThresholdCalibrator:
             print(f"   Original target: {result['original_target_sla_ms']:.1f}ms")
             print(f"   Adjusted to:     {result['target_sla_ms']:.1f}ms ✓")
             print(f"   Reason: Hardware cannot guarantee {result['original_target_sla_ms']:.1f}ms")
+
+        # Show calibration workload
+        print(f"\n🔧 Calibration Configuration:")
+        print(f"   Concurrent channels: {self.num_channels}")
+        if self.num_channels > 1:
+            print(f"   Note: Using multi-threaded profiling to simulate realistic GPU contention")
 
         print(f"\n📊 Profiled Performance:")
         low = result['low_power_stats']

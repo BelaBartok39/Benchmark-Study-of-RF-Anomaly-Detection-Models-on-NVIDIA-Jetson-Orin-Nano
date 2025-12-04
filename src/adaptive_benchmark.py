@@ -1002,7 +1002,8 @@ def main():
             target_sla_ms=args.target_sla,
             safety_margin=0.9,
             verbose=True,
-            auto_adjust_sla=args.auto_adjust_sla
+            auto_adjust_sla=args.auto_adjust_sla,
+            num_channels=args.num_channels
         )
 
         try:
