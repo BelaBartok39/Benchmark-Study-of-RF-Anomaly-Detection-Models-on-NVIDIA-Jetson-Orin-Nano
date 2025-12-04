@@ -7,10 +7,11 @@
 #   ./run_adaptive_experiments.sh [MODEL] [USE_TENSORRT] [USE_MODEL_DEFAULTS]
 #
 # Optional environment variables:
-#   BATCH_SIZE=N         - Batch size for batched inference (default: 1)
-#   NUM_CHANNELS=N       - Number of concurrent channels (default: 1)
-#   AUTO_CALIBRATE=true  - Automatically calibrate thresholds (default: false)
-#   TARGET_SLA=X         - Target SLA in ms for auto-calibration (default: 10.0)
+#   BATCH_SIZE=N          - Batch size for batched inference (default: 1)
+#   NUM_CHANNELS=N        - Number of concurrent channels (default: 1)
+#   AUTO_CALIBRATE=true   - Automatically calibrate thresholds (default: false)
+#   TARGET_SLA=X          - Target SLA in ms for auto-calibration (default: 10.0)
+#   AUTO_ADJUST_SLA=true  - Auto-adjust SLA if unreachable (default: false)
 #
 # Examples:
 #   # Default: single-channel, single-sample
@@ -31,6 +32,12 @@
 #   # Auto-calibrate with custom SLA target
 #   AUTO_CALIBRATE=true TARGET_SLA=15.0 ./run_adaptive_experiments.sh lstm_ae
 #
+#   # Auto-adjust SLA if target is unreachable (discovers minimum achievable)
+#   AUTO_CALIBRATE=true AUTO_ADJUST_SLA=true ./run_adaptive_experiments.sh lstm_ae
+#
+#   # Multi-channel with auto-adjustment (realistic workload scaling)
+#   AUTO_CALIBRATE=true AUTO_ADJUST_SLA=true NUM_CHANNELS=10 ./run_adaptive_experiments.sh lstm_ae
+#
 
 set -e  # Exit on error
 
@@ -42,6 +49,7 @@ BATCH_SIZE=${BATCH_SIZE:-1}    # Default: single-sample
 NUM_CHANNELS=${NUM_CHANNELS:-1}  # Default: single-channel
 AUTO_CALIBRATE=${AUTO_CALIBRATE:-false}  # Default: use fixed/model-defaults
 TARGET_SLA=${TARGET_SLA:-10.0}  # Default: 10ms SLA
+AUTO_ADJUST_SLA=${AUTO_ADJUST_SLA:-false}  # Default: don't auto-adjust
 OUTPUT_BASE="adaptive_experiments_$(date +%Y%m%d_%H%M%S)"
 
 echo "========================================"
@@ -53,6 +61,7 @@ echo "Use Model Defaults: $USE_MODEL_DEFAULTS"
 echo "Auto Calibrate: $AUTO_CALIBRATE"
 if [ "$AUTO_CALIBRATE" = "true" ]; then
     echo "Target SLA: ${TARGET_SLA}ms"
+    echo "Auto Adjust SLA: $AUTO_ADJUST_SLA"
 fi
 echo "Batch Size: $BATCH_SIZE"
 echo "Num Channels: $NUM_CHANNELS"
@@ -121,6 +130,9 @@ fi
 # Build auto-calibrate flag
 if [ "$AUTO_CALIBRATE" = "true" ]; then
     CALIBRATE_FLAG="--auto-calibrate --target-sla $TARGET_SLA"
+    if [ "$AUTO_ADJUST_SLA" = "true" ]; then
+        CALIBRATE_FLAG="$CALIBRATE_FLAG --auto-adjust-sla"
+    fi
 else
     CALIBRATE_FLAG=""
 fi

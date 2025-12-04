@@ -21,18 +21,22 @@ class ThresholdCalibrator:
     """
 
     def __init__(self, benchmark, target_sla_ms: float = 10.0,
-                 safety_margin: float = 0.9, verbose: bool = True):
+                 safety_margin: float = 0.9, verbose: bool = True,
+                 auto_adjust_sla: bool = False):
         """
         Args:
             benchmark: AdaptiveBenchmark instance with loaded model
             target_sla_ms: Target latency SLA to maintain (e.g., 10ms)
             safety_margin: Safety factor (0.9 = use 90% of measured capacity)
             verbose: Print calibration progress
+            auto_adjust_sla: Automatically adjust SLA if target is unreachable
         """
         self.benchmark = benchmark
         self.target_sla_ms = target_sla_ms
         self.safety_margin = safety_margin
         self.verbose = verbose
+        self.auto_adjust_sla = auto_adjust_sla
+        self.original_target_sla_ms = target_sla_ms  # Keep original for reporting
 
     def profile_power_mode(self, power_mode: PowerMode,
                           num_samples: int = 100) -> Dict:
@@ -128,13 +132,50 @@ class ThresholdCalibrator:
         medium_stats = self.profile_power_mode(PowerMode.MEDIUM_POWER)
         high_stats = self.profile_power_mode(PowerMode.HIGH_POWER)
 
-        # Check if SLA is achievable
-        if high_stats['p95_ms'] * self.safety_margin > self.target_sla_ms:
-            raise ValueError(
-                f"❌ Cannot meet {self.target_sla_ms}ms SLA!\n"
-                f"   Even MAXN P95 latency is {high_stats['p95_ms']:.2f}ms\n"
-                f"   Suggestion: Increase target SLA or use TensorRT optimization"
-            )
+        # Check if SLA is achievable and handle intelligently
+        sla_achievable = high_stats['p95_ms'] * self.safety_margin <= self.target_sla_ms
+
+        if not sla_achievable:
+            # Calculate minimum achievable SLA based on MAXN performance
+            # Use P99 with 10% margin for realistic minimum
+            min_achievable_sla = high_stats['p99_ms'] * 1.1
+
+            if self.verbose:
+                print("\n" + "⚠️ "*30)
+                print(f"⚠️  TARGET SLA UNREACHABLE")
+                print("⚠️ "*30)
+                print(f"\n📊 Hardware Analysis:")
+                print(f"   Target SLA:        {self.target_sla_ms:.2f}ms")
+                print(f"   MAXN P95 latency:  {high_stats['p95_ms']:.2f}ms")
+                print(f"   MAXN P99 latency:  {high_stats['p99_ms']:.2f}ms")
+                print(f"   With safety margin: {high_stats['p95_ms'] * self.safety_margin:.2f}ms")
+
+                print(f"\n💡 Recommended Actions:")
+                print(f"   1. ✅ Use TARGET_SLA={min_achievable_sla:.1f} (minimum achievable)")
+                print(f"   2. 🔧 Reduce workload (fewer channels, smaller batch)")
+                print(f"   3. ⚡ Use TensorRT optimization")
+                print(f"   4. 🎯 Run best-effort mode (track SLA violations)")
+
+            if self.auto_adjust_sla:
+                # Auto-adjust to achievable SLA
+                self.target_sla_ms = min_achievable_sla
+                if self.verbose:
+                    print(f"\n✓ AUTO-ADJUSTED: Using SLA={min_achievable_sla:.1f}ms")
+                    print(f"  (Original target: {self.original_target_sla_ms:.1f}ms)")
+                    print("")
+            else:
+                # Provide suggestion and abort
+                if self.verbose:
+                    print(f"\n❌ Cannot proceed with {self.target_sla_ms}ms SLA")
+                    print(f"   Run with: AUTO_ADJUST_SLA=true TARGET_SLA={self.target_sla_ms}")
+                    print(f"   Or use:   TARGET_SLA={min_achievable_sla:.1f}")
+                    print("")
+
+                raise ValueError(
+                    f"SLA {self.target_sla_ms}ms unreachable. "
+                    f"Minimum achievable: {min_achievable_sla:.1f}ms. "
+                    f"Use --auto-adjust-sla flag to auto-adjust."
+                )
 
         if strategy == 'sla_based':
             result = self._calibrate_sla_based(low_stats, medium_stats, high_stats)
@@ -147,12 +188,15 @@ class ThresholdCalibrator:
         result.update({
             'calibration_timestamp': time.time(),
             'target_sla_ms': self.target_sla_ms,
+            'original_target_sla_ms': self.original_target_sla_ms,
+            'sla_was_adjusted': self.target_sla_ms != self.original_target_sla_ms,
             'safety_margin': self.safety_margin,
             'strategy': strategy,
             'low_power_stats': low_stats,
             'medium_power_stats': medium_stats,
             'high_power_stats': high_stats,
-            'can_meet_sla': True
+            'can_meet_sla': sla_achievable,
+            'auto_adjust_sla': self.auto_adjust_sla
         })
 
         if self.verbose:
@@ -251,6 +295,13 @@ class ThresholdCalibrator:
         print("\n" + "="*60)
         print("CALIBRATION RESULTS")
         print("="*60)
+
+        # Show SLA adjustment if it occurred
+        if result.get('sla_was_adjusted', False):
+            print(f"\n🔄 SLA Adjustment:")
+            print(f"   Original target: {result['original_target_sla_ms']:.1f}ms")
+            print(f"   Adjusted to:     {result['target_sla_ms']:.1f}ms ✓")
+            print(f"   Reason: Hardware cannot guarantee {result['original_target_sla_ms']:.1f}ms")
 
         print(f"\n📊 Profiled Performance:")
         low = result['low_power_stats']
