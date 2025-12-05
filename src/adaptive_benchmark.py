@@ -761,6 +761,8 @@ class AdaptiveBenchmark:
                                workload_pattern: WorkloadPattern,
                                duration_s: float = 60.0,
                                latency_threshold_ms: float = 10.0,
+                               latency_threshold_medium_ms: float = None,
+                               latency_threshold_high_ms: float = None,
                                hysteresis_time_s: float = 5.0,
                                use_model_defaults: bool = False,
                                enable_three_tier: bool = True,
@@ -772,7 +774,9 @@ class AdaptiveBenchmark:
         Args:
             workload_pattern: Workload pattern
             duration_s: Duration of experiment
-            latency_threshold_ms: Latency threshold for mode switching (ignored if use_model_defaults=True)
+            latency_threshold_ms: Legacy single threshold (for backward compatibility)
+            latency_threshold_medium_ms: Threshold for 15W → 25W (three-tier mode, overrides latency_threshold_ms)
+            latency_threshold_high_ms: Threshold for 25W → MAXN (three-tier mode, overrides latency_threshold_ms)
             hysteresis_time_s: Hysteresis time before switching back to low power (ignored if use_model_defaults=True)
             use_model_defaults: If True, use model-specific thresholds and hysteresis
             enable_three_tier: Enable three-tier power management (15W/25W/MAXN)
@@ -785,7 +789,13 @@ class AdaptiveBenchmark:
         if self.verbose:
             print(f"\n{'='*60}")
             print(f"ADAPTIVE: {workload_pattern.value}")
-            print(f"  Threshold: {latency_threshold_ms}ms, Hysteresis: {hysteresis_time_s}s")
+            if enable_three_tier and latency_threshold_medium_ms is not None and latency_threshold_high_ms is not None:
+                print(f"  Three-Tier Thresholds:")
+                print(f"    15W → 25W: {latency_threshold_medium_ms}ms")
+                print(f"    25W → MAXN: {latency_threshold_high_ms}ms")
+            else:
+                print(f"  Threshold: {latency_threshold_ms}ms")
+            print(f"  Hysteresis: {hysteresis_time_s}s")
             if batch_size > 1:
                 print(f"  Batch Size: {batch_size}")
             if num_channels > 1:
@@ -795,6 +805,8 @@ class AdaptiveBenchmark:
         # Initialize adaptive power manager
         apm = AdaptivePowerManager(
             latency_threshold_ms=latency_threshold_ms,
+            latency_threshold_medium_ms=latency_threshold_medium_ms,
+            latency_threshold_high_ms=latency_threshold_high_ms,
             hysteresis_time_s=hysteresis_time_s,
             initial_mode=PowerMode.LOW_POWER,
             enable_switching=True,
@@ -1010,12 +1022,12 @@ def main():
             calibration_results = calibrator.calibrate(strategy='sla_based')
 
             # Override thresholds with calibrated values
-            args.latency_threshold = calibration_results['high_threshold_ms']
+            args.latency_threshold_medium = calibration_results['medium_threshold_ms']
+            args.latency_threshold_high = calibration_results['high_threshold_ms']
             args.hysteresis_time = calibration_results['hysteresis_time_s']
 
-            # For three-tier, we need the medium threshold too
-            # We'll store it in a way that adaptive_power_manager can access
-            # For now, pass high_threshold (25W→MAXN threshold) to latency_threshold
+            # Legacy single threshold (for backward compatibility, use high threshold)
+            args.latency_threshold = calibration_results['high_threshold_ms']
 
             print(f"\n✅ Calibration complete!")
             print(f"   Using calibrated thresholds:")
@@ -1106,16 +1118,32 @@ def main():
             time.sleep(30)
 
         # Run adaptive experiment
-        adaptive_results = benchmark.run_adaptive_experiment(
-            workload_pattern=pattern,
-            duration_s=args.duration,
-            latency_threshold_ms=args.latency_threshold,
-            hysteresis_time_s=args.hysteresis_time,
-            use_model_defaults=args.use_model_defaults,
-            enable_three_tier=args.enable_three_tier,
-            batch_size=args.batch_size,
-            num_channels=args.num_channels
-        )
+        # Pass calibrated thresholds if available, otherwise use args.latency_threshold
+        if hasattr(args, 'latency_threshold_medium') and hasattr(args, 'latency_threshold_high'):
+            adaptive_results = benchmark.run_adaptive_experiment(
+                workload_pattern=pattern,
+                duration_s=args.duration,
+                latency_threshold_ms=args.latency_threshold,
+                latency_threshold_medium_ms=args.latency_threshold_medium,
+                latency_threshold_high_ms=args.latency_threshold_high,
+                hysteresis_time_s=args.hysteresis_time,
+                use_model_defaults=args.use_model_defaults,
+                enable_three_tier=args.enable_three_tier,
+                batch_size=args.batch_size,
+                num_channels=args.num_channels
+            )
+        else:
+            # Legacy mode: single threshold
+            adaptive_results = benchmark.run_adaptive_experiment(
+                workload_pattern=pattern,
+                duration_s=args.duration,
+                latency_threshold_ms=args.latency_threshold,
+                hysteresis_time_s=args.hysteresis_time,
+                use_model_defaults=args.use_model_defaults,
+                enable_three_tier=args.enable_three_tier,
+                batch_size=args.batch_size,
+                num_channels=args.num_channels
+            )
         all_results.append(adaptive_results)
         benchmark.save_results(
             adaptive_results,
