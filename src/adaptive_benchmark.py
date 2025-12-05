@@ -367,11 +367,16 @@ class AdaptiveBenchmark:
             sample_idx = channel_id * 10000  # Offset to avoid sample overlap
             schedule_idx = 0
 
+            # Stagger channel start times to avoid GPU contention
+            # Offset each channel by 100ms * channel_id to distribute load
+            channel_offset = channel_id * 0.1  # 100ms per channel
+
             if batch_size == 1:
                 # Single-sample per channel
                 for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
-                    # Wait until scheduled time
-                    while (time.time() - global_start_time) < scheduled_time:
+                    # Wait until scheduled time (with channel-specific offset)
+                    target_time = scheduled_time + channel_offset
+                    while (time.time() - global_start_time) < target_time:
                         time.sleep(0.0001)
 
                     # Run inference
@@ -394,8 +399,9 @@ class AdaptiveBenchmark:
                 batch_indices = []
 
                 for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
-                    # Wait until scheduled time
-                    while (time.time() - global_start_time) < scheduled_time:
+                    # Wait until scheduled time (with channel-specific offset)
+                    target_time = scheduled_time + channel_offset
+                    while (time.time() - global_start_time) < target_time:
                         time.sleep(0.0001)
 
                     # Accumulate samples for batch
@@ -564,10 +570,15 @@ class AdaptiveBenchmark:
             sample_idx = channel_id * 10000
             schedule_idx = 0
 
+            # Stagger channel start times to avoid GPU contention
+            # Offset each channel by 100ms * channel_id to distribute load
+            channel_offset = channel_id * 0.1  # 100ms per channel
+
             if batch_size == 1:
                 # Single-sample per channel
                 for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
-                    while (time.time() - global_start_time) < scheduled_time:
+                    target_time = scheduled_time + channel_offset
+                    while (time.time() - global_start_time) < target_time:
                         time.sleep(0.0001)
 
                     latency = self.run_inference(sample_idx)
@@ -586,7 +597,8 @@ class AdaptiveBenchmark:
                 batch_indices = []
 
                 for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
-                    while (time.time() - global_start_time) < scheduled_time:
+                    target_time = scheduled_time + channel_offset
+                    while (time.time() - global_start_time) < target_time:
                         time.sleep(0.0001)
 
                     batch_indices.append(sample_idx)
