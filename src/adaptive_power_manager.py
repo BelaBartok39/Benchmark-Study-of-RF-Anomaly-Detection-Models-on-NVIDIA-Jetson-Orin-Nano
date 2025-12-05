@@ -123,11 +123,23 @@ class AdaptivePowerManager:
                 print(f"   Hysteresis: {self.hysteresis_time_s}s")
         else:
             # Manual configuration
-            if enable_three_tier and latency_threshold_medium_ms is not None and latency_threshold_high_ms is not None:
-                self.latency_threshold_medium_ms = latency_threshold_medium_ms
-                self.latency_threshold_high_ms = latency_threshold_high_ms
+            if enable_three_tier:
+                if latency_threshold_medium_ms is not None and latency_threshold_high_ms is not None:
+                    # Explicit three-tier thresholds provided
+                    self.latency_threshold_medium_ms = latency_threshold_medium_ms
+                    self.latency_threshold_high_ms = latency_threshold_high_ms
+                else:
+                    # Three-tier requested but only single threshold provided
+                    # Derive medium/high thresholds from the single threshold
+                    # Strategy: medium = threshold, high = threshold * 2.5
+                    self.latency_threshold_medium_ms = latency_threshold_ms
+                    self.latency_threshold_high_ms = latency_threshold_ms * 2.5
+                    if verbose:
+                        print(f"ℹ️  Three-tier mode: Derived thresholds from {latency_threshold_ms}ms")
+                        print(f"   Medium (15W→25W): {self.latency_threshold_medium_ms}ms")
+                        print(f"   High (25W→MAXN): {self.latency_threshold_high_ms}ms")
             else:
-                # Legacy single threshold or two-tier mode
+                # Two-tier mode explicitly requested
                 self.latency_threshold_medium_ms = None
                 self.latency_threshold_high_ms = latency_threshold_ms
                 self.enable_three_tier = False
