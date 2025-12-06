@@ -450,21 +450,35 @@ def plot_adaptive_behavior_dashboard(results: Dict, output_path: Path):
     fig = plt.figure(figsize=(14, 10))
     gs = fig.add_gridspec(3, 2, hspace=0.3, wspace=0.3)
 
-    # 1. Power vs Time
+    # 1. Workload Rate vs Time (Derived from timestamps)
     ax1 = fig.add_subplot(gs[0, :])
-    if 'power_samples' in adaptive and 'power_timestamps' in adaptive:
-        ax1.plot(adaptive['power_timestamps'], adaptive['power_samples'],
-                'g-', linewidth=1, alpha=0.7)
-        ax1.set_xlabel('Time (s)')
-        ax1.set_ylabel('Power (W)')
-        ax1.set_title('Power Consumption Over Time', fontweight='bold')
-        ax1.grid(True, alpha=0.3)
-
-        # Add average line
-        avg_power = adaptive.get('avg_power_w', 0)
-        ax1.axhline(y=avg_power, color='r', linestyle='--',
-                   label=f'Average: {avg_power:.2f}W')
-        ax1.legend()
+    timestamps = np.array(adaptive.get('timestamps', []))
+    
+    if len(timestamps) > 1:
+        # Calculate instantaneous FPS using 1-second bins
+        duration = timestamps[-1] - timestamps[0]
+        if duration > 0:
+            bins = np.arange(np.floor(timestamps[0]), np.ceil(timestamps[-1]) + 1, 1.0)
+            if len(bins) > 1:
+                hist, bin_edges = np.histogram(timestamps, bins=bins)
+                bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+                
+                ax1.plot(bin_centers, hist, 'b-', linewidth=1.5, alpha=0.8, label='Inference Rate')
+                ax1.fill_between(bin_centers, hist, alpha=0.2, color='blue')
+                
+                # Plot average rate
+                avg_rate = len(timestamps) / duration
+                ax1.axhline(y=avg_rate, color='r', linestyle='--', alpha=0.8, 
+                           label=f'Avg Rate: {avg_rate:.1f} FPS')
+                
+                ax1.set_xlabel('Time (s)')
+                ax1.set_ylabel('Inferences / sec (FPS)')
+                ax1.set_title('Workload Pattern (Inference Rate)', fontweight='bold')
+                ax1.grid(True, alpha=0.3)
+                ax1.legend(loc='upper right')
+    else:
+        ax1.text(0.5, 0.5, 'Insufficient data for workload plot', 
+                ha='center', va='center', transform=ax1.transAxes)
 
     # 2. Latency Distribution
     ax2 = fig.add_subplot(gs[1, 0])
@@ -487,13 +501,16 @@ def plot_adaptive_behavior_dashboard(results: Dict, output_path: Path):
     # 3. Mode Switching Timeline
     ax3 = fig.add_subplot(gs[1, 1])
     power_modes = adaptive.get('power_modes', [])
-    timestamps = adaptive.get('timestamps', [])
+    # Re-use timestamps from above
     if len(power_modes) > 0 and len(timestamps) > 0:
         # Convert mode names to numbers for plotting
         mode_map = {'15W': 0, '25W': 1, 'MAXN': 2}
         mode_values = [mode_map.get(m, 0) for m in power_modes]
-
-        ax3.plot(timestamps, mode_values, 'b-', linewidth=2, drawstyle='steps-post')
+        
+        # Align lengths if necessary (sometimes one might be off by 1)
+        min_len = min(len(timestamps), len(mode_values))
+        
+        ax3.plot(timestamps[:min_len], mode_values[:min_len], 'g-', linewidth=2, drawstyle='steps-post')
         ax3.set_xlabel('Time (s)')
         ax3.set_ylabel('Power Mode')
         ax3.set_yticks([0, 1, 2])
@@ -524,11 +541,20 @@ def plot_adaptive_behavior_dashboard(results: Dict, output_path: Path):
     ax5 = fig.add_subplot(gs[2, 1])
     ax5.axis('off')
 
+    # Safely get metrics with correct keys
+    total_inferences = adaptive.get('total_inferences', adaptive.get('num_inferences', 0))
+    avg_latency = adaptive.get('avg_latency_ms', adaptive.get('mean_latency_ms', 0))
+    
+    # Calculate duration if missing
+    duration_s = adaptive.get('duration_s', 0)
+    if duration_s == 0 and len(timestamps) > 0:
+        duration_s = timestamps[-1] - timestamps[0]
+
     summary_text = f"""
     📊 ADAPTIVE PERFORMANCE SUMMARY
 
-    Total Inferences: {adaptive.get('num_inferences', 0)}
-    Duration: {adaptive.get('duration_s', 0):.1f}s
+    Total Inferences: {total_inferences}
+    Duration: {duration_s:.1f}s
 
     Power Management:
     • Mode Switches: {adaptive.get('total_mode_switches', 0)}
@@ -538,7 +564,7 @@ def plot_adaptive_behavior_dashboard(results: Dict, output_path: Path):
     • MAXN Time: {adaptive.get('high_power_percentage', 0):.1f}%
 
     Latency:
-    • Mean: {adaptive.get('mean_latency_ms', 0):.2f}ms
+    • Mean: {avg_latency:.2f}ms
     • P95: {adaptive.get('p95_latency_ms', 0):.2f}ms
     • Violations: {adaptive.get('threshold_violations', 0)} ({adaptive.get('violation_rate', 0)*100:.2f}%)
 
@@ -552,7 +578,7 @@ def plot_adaptive_behavior_dashboard(results: Dict, output_path: Path):
             fontsize=10, verticalalignment='top', fontfamily='monospace',
             bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.3))
 
-    plt.suptitle('Adaptive Power Management Dashboard',
+    plt.suptitle(f'Adaptive Power Management Dashboard\nWorkload: {results.get("workload_pattern", "Unknown")}',
                  fontsize=16, fontweight='bold', y=0.995)
 
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
