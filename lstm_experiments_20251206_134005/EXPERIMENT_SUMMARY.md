@@ -1,6 +1,6 @@
 # Adaptive Power Management Experiment Summary
 
-**Date**: Sat Dec  6 01:15:18 PM CST 2025
+**Date**: Sat Dec  6 01:48:06 PM CST 2025
 **Model**: lstm_ae
 **TensorRT**: false
 **Model-Specific Defaults**: false
@@ -12,13 +12,13 @@
 - **Batch Size**: 1 (single-sample)
 - **Channels**: 10 (multi-channel concurrent)
 - **Duration per Workload**: 60 seconds
-- **Workload Patterns**: bursty continuous variable periodic
+- **Workload Patterns**: periodic
 - **Test Samples**: 200
 
 ## Directory Structure
 
 ```
-adaptive_experiments_20251206_120610/
+adaptive_experiments_20251206_134005/
 ├── switching_overhead/    # Mode switching characterization results
 ├── results/               # Raw benchmark results (JSON)
 ├── figures/              # Visualizations (PNG + summary tables)
@@ -33,9 +33,6 @@ See: `switching_overhead/characterization_results.json`
 
 ### Workload Benchmarks
 
-- **bursty**: `results/lstm_ae_adaptive_bursty_results.json`
-- **continuous**: `results/lstm_ae_adaptive_continuous_results.json`
-- **variable**: `results/lstm_ae_adaptive_variable_results.json`
 - **periodic**: `results/lstm_ae_adaptive_periodic_results.json`
 
 ### Visualizations
