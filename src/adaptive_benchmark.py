@@ -239,6 +239,19 @@ class AdaptiveBenchmark:
 
         return total_latency, per_sample_latencies
 
+    def _wait_until(self, target_time: float, start_time: float, apm: Optional[AdaptivePowerManager] = None):
+        """Wait until specific relative time, periodically checking APM maintenance."""
+        while (time.time() - start_time) < target_time:
+            # If we have a long wait (e.g. idle period), check maintenance and sleep longer
+            remaining = target_time - (time.time() - start_time)
+            if remaining > 0.2:
+                time.sleep(0.1)
+                if apm:
+                    apm.check_maintenance()
+            else:
+                # Precision wait
+                time.sleep(0.0001)
+
     def _run_single_channel_adaptive(self,
                                      apm: AdaptivePowerManager,
                                      schedule: Dict,
@@ -294,8 +307,7 @@ class AdaptiveBenchmark:
 
             for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
                 # Wait until scheduled time
-                while (time.time() - start_time) < scheduled_time:
-                    time.sleep(0.0001)  # 0.1ms sleep
+                self._wait_until(scheduled_time, start_time, apm)
 
                 # Accumulate samples for batch
                 batch_indices.append(sample_idx)
@@ -376,8 +388,7 @@ class AdaptiveBenchmark:
                 for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
                     # Wait until scheduled time (with channel-specific offset)
                     target_time = scheduled_time + channel_offset
-                    while (time.time() - global_start_time) < target_time:
-                        time.sleep(0.0001)
+                    self._wait_until(target_time, global_start_time, apm)
 
                     # Run inference
                     latency = self.run_inference(sample_idx)
@@ -401,8 +412,7 @@ class AdaptiveBenchmark:
                 for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
                     # Wait until scheduled time (with channel-specific offset)
                     target_time = scheduled_time + channel_offset
-                    while (time.time() - global_start_time) < target_time:
-                        time.sleep(0.0001)
+                    self._wait_until(target_time, global_start_time, apm)
 
                     # Accumulate samples for batch
                     batch_indices.append(sample_idx)

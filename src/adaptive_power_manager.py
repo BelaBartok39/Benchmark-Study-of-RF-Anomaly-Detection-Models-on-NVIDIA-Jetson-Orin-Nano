@@ -163,6 +163,7 @@ class AdaptivePowerManager:
             PowerMode.HIGH_POWER: 0.0
         }
         self.last_mode_change_time = time.time()
+        self.last_inference_time = time.time()
 
         # Statistics
         self.total_inferences = 0
@@ -188,6 +189,7 @@ class AdaptivePowerManager:
             Status message if mode was changed, None otherwise
         """
         with self.lock:
+            self.last_inference_time = time.time()
             self.latency_history.append(latency_ms)
             self.total_inferences += 1
 
@@ -198,6 +200,28 @@ class AdaptivePowerManager:
                 return self._record_inference_three_tier(latency_ms)
             else:
                 return self._record_inference_two_tier(latency_ms)
+
+    def check_maintenance(self) -> Optional[str]:
+        """
+        Perform maintenance checks (e.g., idle timeout).
+        Should be called periodically by the benchmark runner.
+        """
+        with self.lock:
+            if not self.enable_switching:
+                return None
+            
+            # Check for idle timeout
+            time_since_last = time.time() - self.last_inference_time
+            
+            # If idle for longer than hysteresis, downshift to lowest power
+            if time_since_last > self.hysteresis_time_s:
+                if self.current_mode != PowerMode.LOW_POWER:
+                    return self._set_power_mode(
+                        PowerMode.LOW_POWER, 
+                        reason=f"system idle for {time_since_last:.1f}s"
+                    )
+            
+            return None
 
     def _record_inference_three_tier(self, latency_ms: float) -> Optional[str]:
         """Three-tier power management: 15W → 25W → MAXN."""

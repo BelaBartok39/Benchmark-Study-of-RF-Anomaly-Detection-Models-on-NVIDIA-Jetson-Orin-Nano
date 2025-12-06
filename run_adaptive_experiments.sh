@@ -293,7 +293,7 @@ cat > "$SUMMARY_FILE" << EOF
 ## Experiment Configuration
 
 - **Power Management**: Three-tier adaptive (15W/25W/MAXN)
-- **Threshold Mode**: $(if [ "$USE_MODEL_DEFAULTS" = "true" ]; then echo "Model-specific (auto-configured)"; else echo "Manual (10.0ms threshold, 5.0s hysteresis)"; fi)
+- **Threshold Mode**: $(if [ "$AUTO_CALIBRATE" = "true" ]; then echo "Auto-calibrated (SLA: ${TARGET_SLA}ms)"; elif [ "$USE_MODEL_DEFAULTS" = "true" ]; then echo "Model-specific (auto-configured)"; else echo "Manual (20.0ms threshold, 3.0s hysteresis)"; fi)
 - **Batch Size**: $BATCH_SIZE $(if [ "$BATCH_SIZE" -gt 1 ]; then echo "(batched inference)"; else echo "(single-sample)"; fi)
 - **Channels**: $NUM_CHANNELS $(if [ "$NUM_CHANNELS" -gt 1 ]; then echo "(multi-channel concurrent)"; else echo "(single-channel)"; fi)
 - **Duration per Workload**: 60 seconds
