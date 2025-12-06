@@ -92,3 +92,6 @@ new_experiments/
 
 # System monitoring
 tegrastats*.log
+
+# LLM configs
+.gemini/

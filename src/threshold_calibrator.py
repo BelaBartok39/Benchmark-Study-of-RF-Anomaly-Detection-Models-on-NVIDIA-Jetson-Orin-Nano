@@ -266,14 +266,25 @@ class ThresholdCalibrator:
         # Calculate thresholds
         if low_can_meet_sla:
             # 15W can meet SLA - stay there most of the time
-            # Switch to 25W conservatively (e.g., at P90)
-            medium_threshold = low_stats['p90_ms'] * self.safety_margin
-            high_threshold = medium_stats['p90_ms'] * self.safety_margin if medium_can_meet_sla else self.target_sla_ms * 0.95
+            # Threshold should be high enough to avoid false positives during normal operation
+            # Use max of (P99 * 1.05) and (SLA * 0.8) to ensure we don't switch on normal noise
+            medium_threshold = max(low_stats['p99_ms'] * 1.05, self.target_sla_ms * 0.8)
+            
+            # High threshold (25W -> MAXN)
+            # If 25W is also good, use its P99; otherwise use SLA limit
+            if medium_can_meet_sla:
+                high_threshold = max(medium_stats['p99_ms'] * 1.05, self.target_sla_ms * 0.9)
+            else:
+                high_threshold = self.target_sla_ms * 0.95
+
         elif medium_can_meet_sla:
             # Need 25W for SLA - switch from 15W early
             # Use P75 of 15W to switch to 25W proactively
             medium_threshold = low_stats['p75_ms'] * self.safety_margin
-            high_threshold = medium_stats['p95_ms'] * self.safety_margin
+            
+            # High threshold can be higher since 25W is safe
+            high_threshold = max(medium_stats['p99_ms'] * 1.05, self.target_sla_ms * 0.9)
+            
         else:
             # Need MAXN for SLA - switch aggressively
             medium_threshold = low_stats['p75_ms'] * 0.8  # Very conservative
@@ -284,13 +295,13 @@ class ThresholdCalibrator:
             medium_threshold = high_threshold * 0.75
 
         # Calculate hysteresis (time to stay in high power before downshifting)
-        # More aggressive switching = shorter hysteresis
+        # Optimized for energy efficiency: recover quickly when load drops
         if low_can_meet_sla:
-            hysteresis = 10.0  # Long hysteresis, 15W is fine
+            hysteresis = 3.0  # Fast recovery to 15W since it's capable
         elif medium_can_meet_sla:
-            hysteresis = 5.0   # Medium hysteresis
+            hysteresis = 3.0   # Fast recovery
         else:
-            hysteresis = 3.0   # Short hysteresis, need MAXN often
+            hysteresis = 2.0   # Very fast recovery, try to save power where possible
 
         return {
             'medium_threshold_ms': medium_threshold,

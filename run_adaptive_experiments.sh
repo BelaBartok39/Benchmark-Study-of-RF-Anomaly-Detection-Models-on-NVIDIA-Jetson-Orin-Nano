@@ -234,8 +234,8 @@ for workload in "${WORKLOADS[@]}"; do
             $TRT_FLAG \
             --workload "$workload" \
             --duration "$DURATION" \
-            --latency-threshold 10.0 \
-            --hysteresis-time 5.0 \
+            --latency-threshold 20.0 \
+            --hysteresis-time 3.0 \
             --run-baselines \
             --max-samples 200 \
             --batch-size "$BATCH_SIZE" \

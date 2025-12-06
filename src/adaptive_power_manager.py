@@ -23,7 +23,7 @@ MODEL_THRESHOLDS_MEDIUM = {
     'aae': 7.0,         # Medium-fast
     'cnn_ae': 10.0,     # Medium complexity
     'resnet_ae': 12.0,  # Medium-slow
-    'lstm_ae': 15.0     # Slow model - 15W→25W at 15ms
+    'lstm_ae': 20.0     # Slow model - adjusted to 20ms to match 14ms baseline
 }
 
 MODEL_THRESHOLDS_HIGH = {
@@ -32,7 +32,7 @@ MODEL_THRESHOLDS_HIGH = {
     'aae': 15.0,        # Medium-fast
     'cnn_ae': 25.0,     # Medium complexity
     'resnet_ae': 30.0,  # Medium-slow
-    'lstm_ae': 35.0     # Slow model - only MAXN for extreme bursts
+    'lstm_ae': 40.0     # Slow model - adjusted high threshold
 }
 
 # Legacy single-threshold support (maps to HIGH threshold)
@@ -46,7 +46,7 @@ MODEL_HYSTERESIS = {
     'aae': 4.0,         # Moderate variance
     'cnn_ae': 5.0,      # Moderate variance
     'resnet_ae': 6.0,   # Higher variance
-    'lstm_ae': 8.0      # High variance, conservative downshift
+    'lstm_ae': 3.0      # High variance, adjusted for efficiency
 }
 
 
