@@ -146,7 +146,7 @@ class AdaptivePowerManager:
             self.hysteresis_time_s = hysteresis_time_s
 
         self.model_name = model_name
-        self.current_mode = initial_mode
+        self.current_mode = None
         self.enable_switching = enable_switching
         self.verbose = verbose
 
@@ -174,6 +174,8 @@ class AdaptivePowerManager:
         # Initialize to desired mode
         if enable_switching:
             self._set_power_mode(initial_mode, reason="initialization")
+        else:
+            self.current_mode = initial_mode
 
     def record_inference(self, latency_ms: float) -> Optional[str]:
         """
@@ -297,7 +299,7 @@ class AdaptivePowerManager:
         Returns:
             Status message
         """
-        if mode == self.current_mode:
+        if self.current_mode is not None and mode == self.current_mode:
             return f"Already in {mode.value} mode"
 
         old_mode = self.current_mode
@@ -335,14 +337,15 @@ class AdaptivePowerManager:
             self.mode_switch_times.append(switch_time)
 
             # Update time spent in previous mode
-            time_in_previous = time.time() - self.last_mode_change_time
-            self.time_in_modes[old_mode] += time_in_previous
+            if old_mode is not None:
+                time_in_previous = time.time() - self.last_mode_change_time
+                self.time_in_modes[old_mode] += time_in_previous
             self.last_mode_change_time = time.time()
 
             # Record switch
             self.mode_switches.append({
                 'timestamp': time.time(),
-                'from_mode': old_mode.value,
+                'from_mode': old_mode.value if old_mode else "UNKNOWN",
                 'to_mode': mode.value,
                 'reason': reason,
                 'switch_time_s': switch_time,
@@ -351,7 +354,8 @@ class AdaptivePowerManager:
 
             self.current_mode = mode
 
-            msg = f"🔄 Power mode: {old_mode.value} → {mode.value} ({reason}) [switch time: {switch_time*1000:.0f}ms]"
+            from_mode_str = old_mode.value if old_mode else "UNKNOWN"
+            msg = f"🔄 Power mode: {from_mode_str} → {mode.value} ({reason}) [switch time: {switch_time*1000:.0f}ms]" 
             if self.verbose:
                 print(msg)
 
