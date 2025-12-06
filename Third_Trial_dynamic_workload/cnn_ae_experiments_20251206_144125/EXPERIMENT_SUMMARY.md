@@ -1,14 +1,14 @@
 # Adaptive Power Management Experiment Summary
 
-**Date**: Sat Dec  6 01:48:06 PM CST 2025
-**Model**: lstm_ae
+**Date**: Sat Dec  6 03:03:09 PM CST 2025
+**Model**: cnn_ae
 **TensorRT**: false
 **Model-Specific Defaults**: false
 
 ## Experiment Configuration
 
 - **Power Management**: Three-tier adaptive (15W/25W/MAXN)
-- **Threshold Mode**: Manual (10.0ms threshold, 5.0s hysteresis)
+- **Threshold Mode**: Auto-calibrated (SLA: 10.0ms)
 - **Batch Size**: 1 (single-sample)
 - **Channels**: 10 (multi-channel concurrent)
 - **Duration per Workload**: 60 seconds
@@ -18,7 +18,7 @@
 ## Directory Structure
 
 ```
-adaptive_experiments_20251206_134005/
+adaptive_experiments_20251206_144125/
 ├── switching_overhead/    # Mode switching characterization results
 ├── results/               # Raw benchmark results (JSON)
 ├── figures/              # Visualizations (PNG + summary tables)
@@ -33,16 +33,16 @@ See: `switching_overhead/characterization_results.json`
 
 ### Workload Benchmarks
 
-- **periodic**: `results/lstm_ae_adaptive_periodic_results.json`
+- **periodic**: `results/cnn_ae_adaptive_periodic_results.json`
 
 ### Visualizations
 
-- Energy-Latency Trade-off: `figures/lstm_ae_*_energy_latency.png`
-- Latency Timeline: `figures/lstm_ae_*_timeline.png`
-- Efficiency Comparison: `figures/lstm_ae_efficiency_comparison.png`
-- Energy Comparison: `figures/lstm_ae_energy_comparison.png`
-- Latency Comparison: `figures/lstm_ae_latency_comparison.png`
-- Detailed Summary: `figures/lstm_ae_summary.md`
+- Energy-Latency Trade-off: `figures/cnn_ae_*_energy_latency.png`
+- Latency Timeline: `figures/cnn_ae_*_timeline.png`
+- Efficiency Comparison: `figures/cnn_ae_efficiency_comparison.png`
+- Energy Comparison: `figures/cnn_ae_energy_comparison.png`
+- Latency Comparison: `figures/cnn_ae_latency_comparison.png`
+- Detailed Summary: `figures/cnn_ae_summary.md`
 
 ## Next Steps
 
