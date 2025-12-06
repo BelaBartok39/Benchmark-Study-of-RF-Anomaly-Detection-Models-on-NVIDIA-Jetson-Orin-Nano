@@ -279,8 +279,7 @@ class AdaptiveBenchmark:
             # Single-sample mode (backward compatible)
             for scheduled_time, rate in zip(schedule['timestamps'], schedule['rates']):
                 # Wait until scheduled time
-                while (time.time() - start_time) < scheduled_time:
-                    time.sleep(0.0001)  # 0.1ms sleep
+                self._wait_until(scheduled_time, start_time, apm)
 
                 # Run single inference
                 latency = self.run_inference(sample_idx)

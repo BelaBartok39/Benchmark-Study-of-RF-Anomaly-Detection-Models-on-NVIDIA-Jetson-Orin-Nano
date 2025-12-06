@@ -273,9 +273,9 @@ echo ""
 
 # Phase 3: Visualization
 echo ""
-echo "========================"
+echo "======================="
 echo "PHASE 3: Visualization"
-echo "========================"
+echo "======================="
 echo ""
 
 python src/visualize_adaptive_results.py \
@@ -378,21 +378,4 @@ echo "✅ Summary report created: $SUMMARY_FILE"
 
 # Final summary
 echo ""
-echo "========================================"
-echo "🎉 ALL EXPERIMENTS COMPLETE!"
-echo "========================================"
-echo ""
-echo "Results directory: $OUTPUT_BASE/"
-echo ""
-echo "Key files:"
-echo "  - Summary report: $SUMMARY_FILE"
-echo "  - Detailed results: $OUTPUT_BASE/results/"
-echo "  - Figures: $OUTPUT_BASE/figures/"
-echo ""
-echo "Next steps:"
-echo "  1. Review figures: ls -lh $OUTPUT_BASE/figures/"
-echo "  2. Check summary table: cat $OUTPUT_BASE/figures/${MODEL}_summary.md"
-echo "  3. Analyze energy savings and latency impact"
-echo ""
-echo "For detailed documentation, see: ADAPTIVE_POWER_MANAGEMENT.md"
-echo ""
+echo "========================================
