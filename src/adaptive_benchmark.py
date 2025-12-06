@@ -678,7 +678,12 @@ class AdaptiveBenchmark:
             print(f"{'='*60}")
 
         # Set static power mode (JetPack 6.1: 0=15W, 1=25W, 2=MAXN)
-        mode_num = 0 if power_mode == PowerMode.LOW_POWER else 2
+        if power_mode == PowerMode.LOW_POWER:
+            mode_num = 0
+        elif power_mode == PowerMode.MEDIUM_POWER:
+            mode_num = 1
+        else:
+            mode_num = 2
         try:
             import subprocess
             subprocess.run(['sudo', 'nvpmodel', '-m', str(mode_num)],
