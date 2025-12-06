@@ -793,6 +793,7 @@ class AdaptiveBenchmark:
                                hysteresis_time_s: float = 5.0,
                                use_model_defaults: bool = False,
                                enable_three_tier: bool = True,
+                               enable_frequency_scaling: bool = False,
                                batch_size: int = 1,
                                num_channels: int = 1) -> Dict:
         """
@@ -807,6 +808,7 @@ class AdaptiveBenchmark:
             hysteresis_time_s: Hysteresis time before switching back to low power (ignored if use_model_defaults=True)
             use_model_defaults: If True, use model-specific thresholds and hysteresis
             enable_three_tier: Enable three-tier power management (15W/25W/MAXN)
+            enable_frequency_scaling: Enable fine-grained GPU frequency scaling (default: False)
             batch_size: Batch size for batched inference (default: 1 for single-sample)
             num_channels: Number of concurrent channels to simulate (default: 1 for single-channel)
 
@@ -823,6 +825,7 @@ class AdaptiveBenchmark:
             else:
                 print(f"  Threshold: {latency_threshold_ms}ms")
             print(f"  Hysteresis: {hysteresis_time_s}s")
+            print(f"  Frequency Scaling: {enable_frequency_scaling}")
             if batch_size > 1:
                 print(f"  Batch Size: {batch_size}")
             if num_channels > 1:
@@ -838,6 +841,7 @@ class AdaptiveBenchmark:
             initial_mode=PowerMode.LOW_POWER,
             enable_switching=True,
             enable_three_tier=enable_three_tier,
+            enable_frequency_scaling=enable_frequency_scaling,
             verbose=self.verbose,
             model_name=self.model_name,
             use_model_defaults=use_model_defaults
@@ -1001,6 +1005,8 @@ def main():
                        help='Enable three-tier power management (15W/25W/MAXN) instead of two-tier (15W/MAXN)')
     parser.add_argument('--disable-three-tier', dest='enable_three_tier', action='store_false',
                        help='Disable three-tier mode and use two-tier (15W/MAXN) only')
+    parser.add_argument('--enable-frequency-scaling', action='store_true',
+                       help='Enable fine-grained GPU frequency scaling within power modes')
 
     parser.add_argument('--batch-size', type=int, default=1,
                        help='Batch size for batched inference (default: 1 for single-sample)')
@@ -1159,6 +1165,7 @@ def main():
                 hysteresis_time_s=args.hysteresis_time,
                 use_model_defaults=args.use_model_defaults,
                 enable_three_tier=args.enable_three_tier,
+                enable_frequency_scaling=args.enable_frequency_scaling,
                 batch_size=args.batch_size,
                 num_channels=args.num_channels
             )
@@ -1171,6 +1178,7 @@ def main():
                 hysteresis_time_s=args.hysteresis_time,
                 use_model_defaults=args.use_model_defaults,
                 enable_three_tier=args.enable_three_tier,
+                enable_frequency_scaling=args.enable_frequency_scaling,
                 batch_size=args.batch_size,
                 num_channels=args.num_channels
             )

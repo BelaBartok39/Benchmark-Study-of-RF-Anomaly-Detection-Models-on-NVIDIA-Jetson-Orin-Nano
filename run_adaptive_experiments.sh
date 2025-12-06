@@ -14,6 +14,7 @@
 #   AUTO_CALIBRATE=true       - Automatically calibrate thresholds (default: false)
 #   TARGET_SLA=X              - Target SLA in ms for auto-calibration (default: 10.0)
 #   AUTO_ADJUST_SLA=true      - Auto-adjust SLA if unreachable (default: false)
+#   ENABLE_FREQUENCY_SCALING=true - Enable fine-grained GPU frequency scaling (default: false)
 #   SKIP_SWITCHING=true       - Skip switching characterization phase (default: false)
 #   THERMAL_COOLDOWN=X        - Thermal cooldown seconds between workloads (default: 60)
 #   SWITCHING_TRIALS=X        - Number of switching trials (default: 20)
@@ -76,6 +77,7 @@ WORKLOAD=${WORKLOAD:-all}  # Default: run all workloads (or specify: bursty, con
 AUTO_CALIBRATE=${AUTO_CALIBRATE:-false}  # Default: use fixed/model-defaults
 TARGET_SLA=${TARGET_SLA:-10.0}  # Default: 10ms SLA
 AUTO_ADJUST_SLA=${AUTO_ADJUST_SLA:-false}  # Default: don't auto-adjust
+ENABLE_FREQUENCY_SCALING=${ENABLE_FREQUENCY_SCALING:-false} # Default: disable frequency scaling
 SKIP_SWITCHING=${SKIP_SWITCHING:-false}  # Default: run switching characterization
 THERMAL_COOLDOWN=${THERMAL_COOLDOWN:-60}  # Default: 60 seconds between workloads
 SWITCHING_TRIALS=${SWITCHING_TRIALS:-20}  # Default: 20 trials for switching overhead
@@ -93,6 +95,7 @@ if [ "$AUTO_CALIBRATE" = "true" ]; then
     echo "Target SLA: ${TARGET_SLA}ms"
     echo "Auto Adjust SLA: $AUTO_ADJUST_SLA"
 fi
+echo "Frequency Scaling: $ENABLE_FREQUENCY_SCALING"
 echo "Batch Size: $BATCH_SIZE"
 echo "Num Channels: $NUM_CHANNELS"
 echo "Duration: ${DURATION}s"
@@ -191,6 +194,13 @@ else
     CALIBRATE_FLAG=""
 fi
 
+# Build frequency scaling flag
+if [ "$ENABLE_FREQUENCY_SCALING" = "true" ]; then
+    FREQ_FLAG="--enable-frequency-scaling"
+else
+    FREQ_FLAG=""
+fi
+
 # Run benchmark for each workload
 for workload in "${WORKLOADS[@]}"; do
     echo ""
@@ -207,6 +217,7 @@ for workload in "${WORKLOADS[@]}"; do
             --workload "$workload" \
             --duration "$DURATION" \
             $CALIBRATE_FLAG \
+            $FREQ_FLAG \
             --run-baselines \
             --max-samples 200 \
             --batch-size "$BATCH_SIZE" \
@@ -221,6 +232,7 @@ for workload in "${WORKLOADS[@]}"; do
             --workload "$workload" \
             --duration "$DURATION" \
             --use-model-defaults \
+            $FREQ_FLAG \
             --run-baselines \
             --max-samples 200 \
             --batch-size "$BATCH_SIZE" \
@@ -236,6 +248,7 @@ for workload in "${WORKLOADS[@]}"; do
             --duration "$DURATION" \
             --latency-threshold 20.0 \
             --hysteresis-time 3.0 \
+            $FREQ_FLAG \
             --run-baselines \
             --max-samples 200 \
             --batch-size "$BATCH_SIZE" \
@@ -292,7 +305,7 @@ cat > "$SUMMARY_FILE" << EOF
 
 ## Experiment Configuration
 
-- **Power Management**: Three-tier adaptive (15W/25W/MAXN)
+- **Power Management**: Three-tier adaptive (15W/25W/MAXN) $(if [ "$ENABLE_FREQUENCY_SCALING" = "true" ]; then echo "+ Frequency Scaling"; fi)
 - **Threshold Mode**: $(if [ "$AUTO_CALIBRATE" = "true" ]; then echo "Auto-calibrated (SLA: ${TARGET_SLA}ms)"; elif [ "$USE_MODEL_DEFAULTS" = "true" ]; then echo "Model-specific (auto-configured)"; else echo "Manual (20.0ms threshold, 3.0s hysteresis)"; fi)
 - **Batch Size**: $BATCH_SIZE $(if [ "$BATCH_SIZE" -gt 1 ]; then echo "(batched inference)"; else echo "(single-sample)"; fi)
 - **Channels**: $NUM_CHANNELS $(if [ "$NUM_CHANNELS" -gt 1 ]; then echo "(multi-channel concurrent)"; else echo "(single-channel)"; fi)

@@ -12,6 +12,7 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple
 from collections import deque
 from enum import Enum
+from gpu_frequency_manager import GPUFrequencyManager
 
 
 # Model-specific latency thresholds (ms) for three-tier power management
@@ -81,6 +82,7 @@ class AdaptivePowerManager:
                  initial_mode: PowerMode = PowerMode.LOW_POWER,
                  enable_switching: bool = True,
                  enable_three_tier: bool = True,
+                 enable_frequency_scaling: bool = False,
                  verbose: bool = True,
                  model_name: Optional[str] = None,
                  use_model_defaults: bool = False):
@@ -95,11 +97,16 @@ class AdaptivePowerManager:
             initial_mode: Starting power mode (default: LOW_POWER)
             enable_switching: Enable automatic power mode switching (default: True)
             enable_three_tier: Use three-tier mode (15W/25W/MAXN) vs two-tier (15W/MAXN) (default: True)
+            enable_frequency_scaling: Enable fine-grained GPU frequency scaling within modes (default: False)
             verbose: Print detailed status messages (default: True)
             model_name: Model name for auto-configuration (e.g., 'ae', 'lstm_ae')
             use_model_defaults: If True, use model-specific thresholds and hysteresis (default: False)
         """
         self.enable_three_tier = enable_three_tier
+        self.enable_frequency_scaling = enable_frequency_scaling
+        self.gpu_manager = GPUFrequencyManager(verbose=verbose) if enable_frequency_scaling else None
+        self.last_freq_change_time = time.time()
+        self.freq_cooldown_s = 0.5  # Minimum time between frequency changes
 
         # Auto-configure based on model if requested
         if use_model_defaults and model_name is not None:
@@ -197,9 +204,49 @@ class AdaptivePowerManager:
                 return None
 
             if self.enable_three_tier:
-                return self._record_inference_three_tier(latency_ms)
+                msg = self._record_inference_three_tier(latency_ms)
             else:
-                return self._record_inference_two_tier(latency_ms)
+                msg = self._record_inference_two_tier(latency_ms)
+                
+            # Fine-grained frequency scaling (if no mode switch happened)
+            if msg is None and self.enable_frequency_scaling:
+                self._optimize_frequency(latency_ms)
+                
+            return msg
+
+    def _optimize_frequency(self, latency_ms: float):
+        """Adjust GPU frequency within the current power mode based on latency."""
+        if not self.gpu_manager or (time.time() - self.last_freq_change_time) < self.freq_cooldown_s:
+            return
+
+        # Determine relevant threshold for current mode
+        if self.current_mode == PowerMode.LOW_POWER:
+            threshold = self.latency_threshold_medium_ms if self.latency_threshold_medium_ms else self.latency_threshold_high_ms
+        else:
+            threshold = self.latency_threshold_high_ms
+
+        # Logic:
+        # 1. If latency is very low (< 50% threshold), try pinning to min frequency to save power
+        # 2. If latency is rising (> 75% threshold), reset to auto (max freq for mode)
+        
+        if latency_ms < (threshold * 0.5):
+            # Safe to reduce frequency
+            freqs = self.gpu_manager.available_freqs
+            if freqs:
+                # Target lowest frequency (usually efficient enough for simple models)
+                # or maybe 2nd lowest to be safe? Let's try lowest first.
+                target_freq = freqs[0]
+                current_freq = self.gpu_manager.get_current_frequency()
+                
+                # Only change if not already at target (approx check)
+                if abs(current_freq - target_freq) > 1000000: # 1MHz tolerance
+                    self.gpu_manager.set_frequency(target_freq)
+                    self.last_freq_change_time = time.time()
+                    
+        elif latency_ms > (threshold * 0.75):
+            # Risk of violation, boost to max (Auto)
+            self.gpu_manager.reset_to_auto()
+            self.last_freq_change_time = time.time()
 
     def check_maintenance(self) -> Optional[str]:
         """
@@ -377,6 +424,11 @@ class AdaptivePowerManager:
             })
 
             self.current_mode = mode
+            
+            # Reset frequency scaling when switching modes to ensure performance
+            if self.enable_frequency_scaling and self.gpu_manager:
+                self.gpu_manager.reset_to_auto()
+                self.last_freq_change_time = time.time()
 
             from_mode_str = old_mode.value if old_mode else "UNKNOWN"
             msg = f"🔄 Power mode: {from_mode_str} → {mode.value} ({reason}) [switch time: {switch_time*1000:.0f}ms]" 
