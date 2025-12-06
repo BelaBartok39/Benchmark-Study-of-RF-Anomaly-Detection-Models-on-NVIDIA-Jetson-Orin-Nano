@@ -913,8 +913,11 @@ class AdaptiveBenchmark:
             'total_mode_switches': apm_stats['total_mode_switches'],
             'avg_switch_time_ms': apm_stats['avg_switch_time_ms'],
             'time_in_low_power_s': apm_stats['time_in_low_power_s'],
+            'time_in_medium_power_s': apm_stats['time_in_medium_power_s'],
             'time_in_high_power_s': apm_stats['time_in_high_power_s'],
             'low_power_percentage': apm_stats['low_power_percentage'],
+            'medium_power_percentage': apm_stats['medium_power_percentage'],
+            'high_power_percentage': apm_stats['high_power_percentage'],
 
             # Efficiency
             'throughput_fps': len(latencies) / duration_s,

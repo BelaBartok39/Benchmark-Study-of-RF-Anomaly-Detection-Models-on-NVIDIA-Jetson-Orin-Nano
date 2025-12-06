@@ -135,171 +135,65 @@ def plot_energy_latency_tradeoff(results: Dict, output_path: Path):
     plt.close()
 
 
-def plot_latency_timeline(results: Dict, output_path: Path):
+def plot_benchmark_summary(results_all_workloads: Dict, output_path: Path):
     """
-    Plot latency over time showing adaptive behavior.
-    """
-    if 'adaptive' not in results:
-        print("⚠️  No adaptive results available for timeline plot")
-        return
-
-    adaptive = results['adaptive']
-
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True,
-                                    gridspec_kw={'height_ratios': [3, 1]})
-
-    timestamps = np.array(adaptive['timestamps'])
-    latencies = np.array(adaptive['latencies'])
-    power_modes = adaptive['power_modes']
-
-    # Plot 1: Latency over time
-    ax1.plot(timestamps, latencies, 'b-', linewidth=1, alpha=0.6, label='Latency')
-
-    # Mark threshold
-    threshold = adaptive.get('latency_threshold_ms', 10.0)
-    ax1.axhline(y=threshold, color='r', linestyle='--', linewidth=2,
-               label=f'Threshold ({threshold}ms)')
-
-    # Color background based on violations
-    violations = latencies > threshold
-    if violations.any():
-        violation_regions = []
-        in_violation = False
-        start_idx = 0
-
-        for i, v in enumerate(violations):
-            if v and not in_violation:
-                start_idx = i
-                in_violation = True
-            elif not v and in_violation:
-                violation_regions.append((timestamps[start_idx], timestamps[i-1]))
-                in_violation = False
-
-        if in_violation:
-            violation_regions.append((timestamps[start_idx], timestamps[-1]))
-
-        for start, end in violation_regions:
-            ax1.axvspan(start, end, alpha=0.2, color='red')
-
-    ax1.set_ylabel('Latency (ms)', fontweight='bold')
-    ax1.set_title('Latency Timeline with Adaptive Power Management', fontweight='bold', pad=15)
-    ax1.grid(True, alpha=0.3, linestyle='--')
-    ax1.legend(loc='upper right')
-
-    # Plot 2: Power mode over time
-    mode_numeric = [1 if mode == 'MAXN' else 0 for mode in power_modes]
-    ax2.fill_between(timestamps, mode_numeric, step='post', alpha=0.5, color='orange')
-    ax2.set_ylabel('Power Mode', fontweight='bold')
-    ax2.set_xlabel('Time (s)', fontweight='bold')
-    ax2.set_yticks([0, 1])
-    ax2.set_yticklabels(['15W', 'MAXN'])
-    ax2.grid(True, alpha=0.3, linestyle='--', axis='x')
-
-    # Mark mode switches
-    mode_switches = adaptive.get('mode_switches', [])
-    for switch in mode_switches:
-        switch_time = switch['timestamp'] - (timestamps[0] if len(timestamps) > 0 else 0)
-        ax2.axvline(x=switch_time, color='red', linestyle=':', alpha=0.5, linewidth=1)
-
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"📊 Saved: {output_path}")
-    plt.close()
-
-
-def plot_comparison_bars(results_all_workloads: Dict, metric: str,
-                        output_path: Path, ylabel: str):
-    """
-    Create grouped bar chart comparing metrics across workloads.
-
-    Args:
-        results_all_workloads: Dict mapping workload -> results dict
-        metric: Metric key to plot
-        ylabel: Y-axis label
+    Create a comprehensive 3-panel summary plot (Latency, Energy, Efficiency).
+    Replaces individual comparison bar charts.
     """
     workloads = list(results_all_workloads.keys())
     n_workloads = len(workloads)
-
+    
     if n_workloads == 0:
-        print(f"⚠️  No workload results available for {metric} plot")
+        print("⚠️  No workload results available for summary plot")
         return
 
-    # Prepare data
-    static_low_values = []
-    static_medium_values = []
-    static_high_values = []
-    adaptive_values = []
-
-    for workload in workloads:
-        results = results_all_workloads[workload]
-        static_low_values.append(results.get('static_low', {}).get(metric, 0))
-        static_medium_values.append(results.get('static_medium', {}).get(metric, 0))
-        static_high_values.append(results.get('static_high', {}).get(metric, 0))
-        adaptive_values.append(results.get('adaptive', {}).get(metric, 0))
-
-    # Create bar chart
-    fig, ax = plt.subplots(figsize=(14, 6))
-
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
+    
+    # Metrics to plot
+    metrics_config = [
+        (ax1, 'p95_latency_ms', 'P95 Latency (ms)', 'Lower is better'),
+        (ax2, 'total_energy_j', 'Total Energy (J)', 'Lower is better'),
+        (ax3, 'fps_per_watt', 'Efficiency (FPS/Watt)', 'Higher is better')
+    ]
+    
+    bar_width = 0.2
     x = np.arange(n_workloads)
-    width = 0.20  # Narrower bars to fit 4 groups
+    
+    modes = [
+        ('static_low', 'Static 15W', '#3498db'),
+        ('static_medium', 'Static 25W', '#f39c12'),
+        ('static_high', 'Static MAXN', '#e74c3c'),
+        ('adaptive', 'Adaptive', '#2ecc71')
+    ]
+    
+    for ax, metric_key, ylabel, note in metrics_config:
+        for i, (mode_key, label, color) in enumerate(modes):
+            values = []
+            for w in workloads:
+                val = results_all_workloads[w].get(mode_key, {}).get(metric_key, 0)
+                values.append(val)
+            
+            offset = (i - 1.5) * bar_width
+            ax.bar(x + offset, values, bar_width, label=label, color=color,
+                  edgecolor='black', alpha=0.8)
+            
+        ax.set_xticks(x)
+        ax.set_xticklabels([w.capitalize() for w in workloads])
+        ax.set_ylabel(ylabel, fontweight='bold')
+        ax.set_title(f'{ylabel}\n({note})', fontweight='bold')
+        ax.grid(True, alpha=0.3, axis='y', linestyle='--')
+        
+        # Add legend only to the first plot or bottom
+        if ax == ax1:
+             ax.legend(loc='upper left', frameon=True, fontsize=9)
 
-    bars1 = ax.bar(x - 1.5*width, static_low_values, width, label='Static 15W',
-                   color='#3498db', alpha=0.8, edgecolor='black')
-    bars2 = ax.bar(x - 0.5*width, static_medium_values, width, label='Static 25W',
-                   color='#f39c12', alpha=0.8, edgecolor='black')
-    bars3 = ax.bar(x + 0.5*width, static_high_values, width, label='Static MAXN',
-                   color='#e74c3c', alpha=0.8, edgecolor='black')
-    bars4 = ax.bar(x + 1.5*width, adaptive_values, width, label='Adaptive',
-                   color='#2ecc71', alpha=0.8, edgecolor='black')
-
-    ax.set_xlabel('Workload Pattern', fontweight='bold')
-    ax.set_ylabel(ylabel, fontweight='bold')
-    ax.set_title(f'{ylabel} Comparison Across Workloads', fontweight='bold', pad=20)
-    ax.set_xticks(x)
-    ax.set_xticklabels([w.capitalize() for w in workloads])
-    ax.legend(loc='best', frameon=True, shadow=True)
-    ax.grid(True, alpha=0.3, linestyle='--', axis='y')
-
+    plt.suptitle('Benchmark Summary: Static vs Adaptive Power Management', 
+                fontsize=16, fontweight='bold', y=1.05)
+    
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"📊 Saved: {output_path}")
     plt.close()
-
-
-def plot_efficiency_comparison(results_all_workloads: Dict, output_path: Path):
-    """
-    Create efficiency comparison chart (FPS/Watt).
-    """
-    plot_comparison_bars(
-        results_all_workloads,
-        metric='fps_per_watt',
-        output_path=output_path,
-        ylabel='Energy Efficiency (FPS/Watt)'
-    )
-
-
-def plot_energy_comparison(results_all_workloads: Dict, output_path: Path):
-    """
-    Create energy consumption comparison chart.
-    """
-    plot_comparison_bars(
-        results_all_workloads,
-        metric='total_energy_j',
-        output_path=output_path,
-        ylabel='Total Energy Consumption (J)'
-    )
-
-
-def plot_latency_comparison(results_all_workloads: Dict, output_path: Path):
-    """
-    Create P95 latency comparison chart.
-    """
-    plot_comparison_bars(
-        results_all_workloads,
-        metric='p95_latency_ms',
-        output_path=output_path,
-        ylabel='P95 Latency (ms)'
-    )
 
 
 def create_summary_table(results_all_workloads: Dict, output_path: Path):
@@ -353,88 +247,19 @@ def create_summary_table(results_all_workloads: Dict, output_path: Path):
                 f.write(f"\n**Adaptive Statistics:**\n")
                 f.write(f"- Mode Switches: {adap.get('total_mode_switches', 0)}\n")
                 f.write(f"- Low Power Time (15W): {adap.get('low_power_percentage', 0):.1f}%\n")
+                
+                # Improved logic: check explicit keys first, calculate if missing
                 if 'medium_power_percentage' in adap:
                     f.write(f"- Medium Power Time (25W): {adap.get('medium_power_percentage', 0):.1f}%\n")
+                
+                if 'high_power_percentage' in adap:
                     f.write(f"- High Power Time (MAXN): {adap.get('high_power_percentage', 0):.1f}%\n")
+                    
                 f.write(f"- Avg Switch Time: {adap.get('avg_switch_time_ms', 0):.1f} ms\n")
 
             f.write("\n")
 
     print(f"📄 Saved: {output_path}")
-
-
-def plot_power_mode_distribution(results: Dict, output_path: Path):
-    """
-    Create pie chart showing time distribution across power modes.
-    """
-    if 'adaptive' not in results:
-        print("⚠️  No adaptive results available for power mode distribution")
-        return
-
-    adaptive = results['adaptive']
-
-    # Extract mode percentages
-    modes = []
-    percentages = []
-    colors = []
-
-    if adaptive.get('low_power_percentage', 0) > 0:
-        modes.append('15W')
-        percentages.append(adaptive['low_power_percentage'])
-        colors.append('#3498db')  # Blue
-
-    if adaptive.get('medium_power_percentage', 0) > 0:
-        modes.append('25W')
-        percentages.append(adaptive['medium_power_percentage'])
-        colors.append('#f39c12')  # Orange
-
-    if adaptive.get('high_power_percentage', 0) > 0:
-        modes.append('MAXN')
-        percentages.append(adaptive['high_power_percentage'])
-        colors.append('#e74c3c')  # Red
-
-    if not modes:
-        print("⚠️  No power mode data available")
-        return
-
-    fig, ax = plt.subplots(figsize=(8, 8))
-
-    wedges, texts, autotexts = ax.pie(
-        percentages,
-        labels=modes,
-        colors=colors,
-        autopct='%1.1f%%',
-        startangle=90,
-        textprops={'fontsize': 12}
-    )
-
-    # Make percentage text bold
-    for autotext in autotexts:
-        autotext.set_color('white')
-        autotext.set_weight('bold')
-        autotext.set_fontsize(14)
-
-    ax.set_title('Power Mode Time Distribution\n(Adaptive Management)',
-                 fontsize=14, fontweight='bold', pad=20)
-
-    # Add statistics box
-    stats_text = (
-        f"Mode Switches: {adaptive.get('total_mode_switches', 0)}\n"
-        f"Avg Switch Time: {adaptive.get('avg_switch_time_ms', 0):.1f}ms\n"
-        f"Energy/Inference: {adaptive.get('energy_per_inference_j', 0)*1000:.2f}mJ"
-    )
-
-    ax.text(0.5, -0.15, stats_text,
-            transform=ax.transAxes,
-            ha='center',
-            va='top',
-            fontsize=10,
-            bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"📊 Saved: {output_path}")
-    plt.close()
 
 
 def plot_adaptive_behavior_dashboard(results: Dict, output_path: Path):
@@ -638,18 +463,6 @@ def main():
             output_dir / f'{args.model}_{workload}_energy_latency.png'
         )
 
-        # Latency timeline (adaptive only)
-        plot_latency_timeline(
-            results,
-            output_dir / f'{args.model}_{workload}_timeline.png'
-        )
-
-        # Power mode distribution (adaptive only)
-        plot_power_mode_distribution(
-            results,
-            output_dir / f'{args.model}_{workload}_power_distribution.png'
-        )
-
         # Adaptive behavior dashboard (adaptive only)
         plot_adaptive_behavior_dashboard(
             results,
@@ -660,19 +473,9 @@ def main():
     if len(results_all) > 1:
         print(f"\nCreating cross-workload comparison plots...")
 
-        plot_efficiency_comparison(
+        plot_benchmark_summary(
             results_all,
-            output_dir / f'{args.model}_efficiency_comparison.png'
-        )
-
-        plot_energy_comparison(
-            results_all,
-            output_dir / f'{args.model}_energy_comparison.png'
-        )
-
-        plot_latency_comparison(
-            results_all,
-            output_dir / f'{args.model}_latency_comparison.png'
+            output_dir / f'{args.model}_benchmark_summary.png'
         )
 
     # Create summary table
