@@ -378,4 +378,4 @@ echo "✅ Summary report created: $SUMMARY_FILE"
 
 # Final summary
 echo ""
-echo "========================================
+echo "========================================"

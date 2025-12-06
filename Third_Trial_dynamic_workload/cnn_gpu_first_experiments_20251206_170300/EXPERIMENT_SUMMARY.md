@@ -1,13 +1,13 @@
 # Adaptive Power Management Experiment Summary
 
-**Date**: Sat Dec  6 03:03:09 PM CST 2025
+**Date**: Sat Dec  6 05:08:38 PM CST 2025
 **Model**: cnn_ae
 **TensorRT**: false
 **Model-Specific Defaults**: false
 
 ## Experiment Configuration
 
-- **Power Management**: Three-tier adaptive (15W/25W/MAXN)
+- **Power Management**: Three-tier adaptive (15W/25W/MAXN) + Frequency Scaling
 - **Threshold Mode**: Auto-calibrated (SLA: 10.0ms)
 - **Batch Size**: 1 (single-sample)
 - **Channels**: 10 (multi-channel concurrent)
@@ -18,7 +18,7 @@
 ## Directory Structure
 
 ```
-adaptive_experiments_20251206_144125/
+adaptive_experiments_20251206_170300/
 ├── switching_overhead/    # Mode switching characterization results
 ├── results/               # Raw benchmark results (JSON)
 ├── figures/              # Visualizations (PNG + summary tables)

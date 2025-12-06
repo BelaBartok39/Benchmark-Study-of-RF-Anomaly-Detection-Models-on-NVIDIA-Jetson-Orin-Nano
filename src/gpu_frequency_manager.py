@@ -11,11 +11,11 @@ from typing import List, Optional
 class GPUFrequencyManager:
     """
     Manages GPU frequency scaling on Jetson Orin Nano via sysfs.
-    Path: /sys/devices/17000000.ga10b/devfreq/17000000.ga10b/
+    Path: /sys/devices/platform/gpu.0/devfreq/17000000.gpu/
     """
     
     # Common path for Orin series (GA10B GPU)
-    SYSFS_PATH = "/sys/devices/17000000.ga10b/devfreq/17000000.ga10b"
+    SYSFS_PATH = "/sys/devices/platform/gpu.0/devfreq/17000000.gpu"
     
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
