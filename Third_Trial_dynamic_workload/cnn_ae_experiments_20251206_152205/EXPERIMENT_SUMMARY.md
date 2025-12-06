@@ -1,6 +1,6 @@
 # Adaptive Power Management Experiment Summary
 
-**Date**: Sat Dec  6 03:03:09 PM CST 2025
+**Date**: Sat Dec  6 03:27:48 PM CST 2025
 **Model**: cnn_ae
 **TensorRT**: false
 **Model-Specific Defaults**: false
@@ -18,7 +18,7 @@
 ## Directory Structure
 
 ```
-adaptive_experiments_20251206_144125/
+adaptive_experiments_20251206_152205/
 ├── switching_overhead/    # Mode switching characterization results
 ├── results/               # Raw benchmark results (JSON)
 ├── figures/              # Visualizations (PNG + summary tables)
