@@ -19,6 +19,7 @@
 set -e  # Exit on error
 
 # Configuration
+NUM_CHANNELS=${NUM_CHANNELS:-1}
 MODEL=${1:-lstm_ae}
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTPUT_BASE="workload_scaling_study_${MODEL}_${TIMESTAMP}"

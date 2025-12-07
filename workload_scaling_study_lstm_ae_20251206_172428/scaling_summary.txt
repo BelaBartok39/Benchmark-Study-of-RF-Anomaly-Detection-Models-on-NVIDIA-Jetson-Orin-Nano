@@ -1,0 +1,20 @@
+========================================================
+WORKLOAD SCALING STUDY RESULTS
+========================================================
+Model: lstm_ae
+Date: Sat Dec  6 05:24:28 PM CST 2025
+Jetson Model: NVIDIA Orin Nano
+
+This study evaluates adaptive power management across different
+workload intensities (number of concurrent RF channels).
+
+========================================================
+CONFIGURATION SUMMARY
+========================================================
+
+Configuration: 1 Channel(s)
+  Target SLA:      10.0ms
+  Achieved SLA:    15.8ms
+  Status:          ⚠ Auto-adjusted from 10.0ms
+  Results Dir:     workload_scaling_study_lstm_ae_20251206_172428/channels_1/experiment_results/
+
