@@ -37,7 +37,8 @@ class WorkloadGenerator:
                  pattern: WorkloadPattern,
                  duration_s: float = 60.0,
                  base_rate_fps: float = 100.0,
-                 seed: Optional[int] = None):
+                 seed: Optional[int] = None,
+                 sparsity_factor: float = 1.0):
         """
         Initialize workload generator.
 
@@ -46,19 +47,21 @@ class WorkloadGenerator:
             duration_s: Total duration of workload in seconds
             base_rate_fps: Base inference rate in frames per second
             seed: Random seed for reproducibility
+            sparsity_factor: Multiplier for idle/periodic intervals (default: 1.0)
         """
         self.pattern = pattern
         self.duration_s = duration_s
         self.base_rate_fps = base_rate_fps
         self.seed = seed
+        self.sparsity_factor = sparsity_factor
 
         if seed is not None:
             np.random.seed(seed)
 
         # Pattern-specific parameters
         self.burst_duration_s = 5.0    # Duration of each burst
-        self.idle_duration_s = 10.0     # Duration of idle period between bursts
-        self.periodic_interval_s = 15.0  # Interval for periodic pattern
+        self.idle_duration_s = 10.0 * sparsity_factor     # Duration of idle period between bursts
+        self.periodic_interval_s = 15.0 * sparsity_factor  # Interval for periodic pattern
         self.variable_complexity_levels = [0.5, 1.0, 2.0]  # Relative complexity multipliers
 
     def generate_schedule(self) -> Dict:
@@ -335,6 +338,7 @@ class WorkloadGenerator:
         print(f"WORKLOAD SCHEDULE: {schedule['pattern'].upper()}")
         print("="*60)
         print(f"Duration: {stats['duration_s']:.1f} seconds")
+        print(f"Sparsity Factor: {self.sparsity_factor:.1f}x")
         print(f"Total Inferences: {stats['total_inferences']}")
         print(f"Average Rate: {stats['avg_rate_fps']:.2f} FPS")
         print(f"Peak Rate: {stats['peak_rate_fps']:.2f} FPS")
@@ -359,7 +363,8 @@ if __name__ == "__main__":
             pattern=pattern,
             duration_s=60.0,
             base_rate_fps=100.0,
-            seed=42
+            seed=42,
+            sparsity_factor=1.0
         )
 
         generator.print_schedule_summary()

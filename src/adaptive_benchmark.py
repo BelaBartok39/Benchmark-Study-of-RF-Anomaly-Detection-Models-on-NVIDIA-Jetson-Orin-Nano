@@ -662,7 +662,8 @@ class AdaptiveBenchmark:
                            duration_s: float = 60.0,
                            batch_size: int = 1,
                            num_channels: int = 1,
-                           latency_threshold_ms: float = 10.0) -> Dict:
+                           latency_threshold_ms: float = 10.0,
+                           sparsity_factor: float = 1.0) -> Dict:
         """
         Run baseline experiment with static power mode.
 
@@ -673,6 +674,7 @@ class AdaptiveBenchmark:
             batch_size: Batch size for batched inference (default: 1)
             num_channels: Number of concurrent channels (default: 1)
             latency_threshold_ms: Latency threshold for violation counting (default: 10.0ms)
+            sparsity_factor: Multiplier for idle intervals (default: 1.0)
 
         Returns:
             Dictionary with experiment results
@@ -684,6 +686,8 @@ class AdaptiveBenchmark:
                 print(f"  Batch Size: {batch_size}")
             if num_channels > 1:
                 print(f"  Channels: {num_channels}")
+            if sparsity_factor != 1.0:
+                print(f"  Sparsity Factor: {sparsity_factor}x")
             print(f"{'='*60}")
 
         # Set static power mode (JetPack 6.1: 0=15W, 1=25W, 2=MAXN)
@@ -708,7 +712,8 @@ class AdaptiveBenchmark:
             pattern=workload_pattern,
             duration_s=duration_s,
             base_rate_fps=100.0,
-            seed=42
+            seed=42,
+            sparsity_factor=sparsity_factor
         )
         schedule = workload.generate_schedule()
 
@@ -794,7 +799,8 @@ class AdaptiveBenchmark:
                                enable_three_tier: bool = True,
                                enable_frequency_scaling: bool = False,
                                batch_size: int = 1,
-                               num_channels: int = 1) -> Dict:
+                               num_channels: int = 1,
+                               sparsity_factor: float = 1.0) -> Dict:
         """
         Run experiment with adaptive power management.
 
@@ -810,6 +816,7 @@ class AdaptiveBenchmark:
             enable_frequency_scaling: Enable fine-grained GPU frequency scaling (default: False)
             batch_size: Batch size for batched inference (default: 1 for single-sample)
             num_channels: Number of concurrent channels to simulate (default: 1 for single-channel)
+            sparsity_factor: Multiplier for idle intervals (default: 1.0)
 
         Returns:
             Dictionary with experiment results
@@ -829,6 +836,8 @@ class AdaptiveBenchmark:
                 print(f"  Batch Size: {batch_size}")
             if num_channels > 1:
                 print(f"  Channels: {num_channels}")
+            if sparsity_factor != 1.0:
+                print(f"  Sparsity Factor: {sparsity_factor}x")
             print(f"{'='*60}")
 
         # Initialize adaptive power manager
@@ -851,7 +860,8 @@ class AdaptiveBenchmark:
             pattern=workload_pattern,
             duration_s=duration_s,
             base_rate_fps=100.0,
-            seed=42
+            seed=42,
+            sparsity_factor=sparsity_factor
         )
         schedule = workload.generate_schedule()
 
@@ -1011,6 +1021,8 @@ def main():
                        help='Batch size for batched inference (default: 1 for single-sample)')
     parser.add_argument('--num-channels', type=int, default=1,
                        help='Number of concurrent channels to simulate multi-channel RF monitoring (default: 1)')
+    parser.add_argument('--sparsity-factor', type=float, default=1.0,
+                       help='Sparsity factor for workload generation (longer idle times) (default: 1.0)')
 
     parser.add_argument('--output-dir', type=str, default='adaptive_results',
                        help='Output directory for results')
@@ -1102,7 +1114,8 @@ def main():
                 duration_s=args.duration,
                 batch_size=args.batch_size,
                 num_channels=args.num_channels,
-                latency_threshold_ms=args.latency_threshold
+                latency_threshold_ms=args.latency_threshold,
+                sparsity_factor=args.sparsity_factor
             )
             all_results.append(low_power_results)
             benchmark.save_results(
@@ -1121,7 +1134,8 @@ def main():
                 duration_s=args.duration,
                 batch_size=args.batch_size,
                 num_channels=args.num_channels,
-                latency_threshold_ms=args.latency_threshold
+                latency_threshold_ms=args.latency_threshold,
+                sparsity_factor=args.sparsity_factor
             )
             all_results.append(medium_power_results)
             benchmark.save_results(
@@ -1140,7 +1154,8 @@ def main():
                 duration_s=args.duration,
                 batch_size=args.batch_size,
                 num_channels=args.num_channels,
-                latency_threshold_ms=args.latency_threshold
+                latency_threshold_ms=args.latency_threshold,
+                sparsity_factor=args.sparsity_factor
             )
             all_results.append(high_power_results)
             benchmark.save_results(
@@ -1166,7 +1181,8 @@ def main():
                 enable_three_tier=args.enable_three_tier,
                 enable_frequency_scaling=args.enable_frequency_scaling,
                 batch_size=args.batch_size,
-                num_channels=args.num_channels
+                num_channels=args.num_channels,
+                sparsity_factor=args.sparsity_factor
             )
         else:
             # Legacy mode: single threshold
@@ -1179,7 +1195,8 @@ def main():
                 enable_three_tier=args.enable_three_tier,
                 enable_frequency_scaling=args.enable_frequency_scaling,
                 batch_size=args.batch_size,
-                num_channels=args.num_channels
+                num_channels=args.num_channels,
+                sparsity_factor=args.sparsity_factor
             )
         all_results.append(adaptive_results)
         benchmark.save_results(
@@ -1203,6 +1220,7 @@ def main():
             'duration_s': args.duration,
             'batch_size': args.batch_size,
             'num_channels': args.num_channels,
+            'sparsity_factor': args.sparsity_factor,
             'enable_three_tier': args.enable_three_tier,
             'use_model_defaults': args.use_model_defaults,
             'auto_calibrate': args.auto_calibrate,
