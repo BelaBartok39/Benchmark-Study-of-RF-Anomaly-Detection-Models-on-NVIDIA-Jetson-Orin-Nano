@@ -20,6 +20,7 @@ set -e  # Exit on error
 
 # Configuration
 MODEL=${1:-lstm_ae}
+ENABLE_GPU_SCALING=${2:-false}
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTPUT_BASE="workload_scaling_study_${MODEL}_${TIMESTAMP}"
 RESULTS_FILE="$OUTPUT_BASE/scaling_summary.txt"
@@ -55,6 +56,7 @@ WORKLOAD SCALING STUDY RESULTS
 Model: $MODEL
 Date: $(date)
 Jetson Model: NVIDIA Orin Nano
+GPU Frequency Scaling: $ENABLE_GPU_SCALING
 
 This study evaluates adaptive power management across different
 workload intensities (number of concurrent RF channels).
@@ -86,6 +88,7 @@ for num_channels in "${CHANNEL_CONFIGS[@]}"; do
     # Redirect output to capture suggested SLA
     AUTO_CALIBRATE=true \
     AUTO_ADJUST_SLA=true \
+    ENABLE_FREQUENCY_SCALING=$ENABLE_GPU_SCALING \
     NUM_CHANNELS=$num_channels \
     TARGET_SLA=10.0 \
     ./run_adaptive_experiments.sh "$MODEL" false false \
