@@ -1,0 +1,125 @@
+/ssd/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano/src/data_loader.py:45: ComplexWarning: Casting complex values to real discards the imaginary part
+  all_signals = np.concatenate([clean_signals, jammed_signals], axis=0).astype(np.float32)
+📊 Initializing Adaptive Benchmark for resnet_ae
+   Output directory: endurance_study_resnet_ae_20251210_123043/calibration
+🔥 Loading PyTorch model from src/output/weights/resnet_ae_best.pth
+📁 Loading test data (max 1000 samples)
+Loading train data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+Loading test data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+   Loaded 1000 samples
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Running hardware profiling to determine optimal thresholds...
+
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Target SLA: 10.0ms
+Safety Margin: 90%
+Strategy: sla_based
+
+
+🔍 Profiling 15W...
+  25/100 samples, avg: 5.51ms
+  50/100 samples, avg: 5.39ms
+  75/100 samples, avg: 5.36ms
+  100/100 samples, avg: 5.34ms
+  ✓ Mean: 5.34ms, P95: 6.99ms, P99: 7.19ms
+
+🔍 Profiling 25W...
+  25/100 samples, avg: 6.89ms
+  50/100 samples, avg: 6.41ms
+  75/100 samples, avg: 6.32ms
+  100/100 samples, avg: 6.26ms
+  ✓ Mean: 6.26ms, P95: 7.87ms, P99: 8.12ms
+
+🔍 Profiling MAXN...
+  25/100 samples, avg: 6.49ms
+  50/100 samples, avg: 5.86ms
+  75/100 samples, avg: 5.42ms
+  100/100 samples, avg: 5.20ms
+  ✓ Mean: 5.20ms, P95: 7.35ms, P99: 8.06ms
+
+============================================================
+CALIBRATION RESULTS
+============================================================
+
+🔧 Calibration Configuration:
+   Concurrent channels: 1
+
+📊 Profiled Performance:
+   15W:  Mean=5.34ms, P95=6.99ms, P99=7.19ms
+   25W:  Mean=6.26ms, P95=7.87ms, P99=8.12ms
+   MAXN: Mean=5.20ms, P95=7.35ms, P99=8.06ms
+
+🎯 Calibrated Thresholds:
+   15W → 25W:  8.00ms
+   25W → MAXN: 9.00ms
+   Hysteresis: 3.0s
+
+💡 Expected Behavior:
+   ✓ 15W mode can meet 10.0ms SLA
+   → Will use 15W primarily, 25W for bursts
+============================================================
+
+
+✅ Calibration complete!
+   Using calibrated thresholds:
+   - 15W → 25W: 8.00ms
+   - 25W → MAXN: 9.00ms
+   - Hysteresis: 3.0s
+
+💾 Results saved to endurance_study_resnet_ae_20251210_123043/calibration/resnet_ae_calibration_results.json
+
+============================================================
+ADAPTIVE: periodic
+  Three-Tier Thresholds:
+    15W → 25W: 8.0ms
+    25W → MAXN: 9.0ms
+  Hysteresis: 3.0s
+  Frequency Scaling: False
+============================================================
+🔄 Power mode: UNKNOWN → 15W (initialization) [switch time: 23ms]
+🔋 Power monitoring started (sampling every 100ms)
+🔄 Power mode: 15W → 25W (latency 8.04ms > medium threshold 8.0ms) [switch time: 21ms]
+🔋 Sample 1: 5.8W, CPU: 15.2%, GPU: 45.0%
+  Progress: 100 inferences, 1.0s elapsed, mode: 25W, switches: 2, avg latency: 7.24ms
+🔄 Power mode: 25W → MAXN (latency 9.08ms > high threshold 9.0ms) [switch time: 22ms]
+  Progress: 200 inferences, 2.0s elapsed, mode: MAXN, switches: 3, avg latency: 6.86ms
+  Progress: 300 inferences, 3.0s elapsed, mode: MAXN, switches: 3, avg latency: 6.64ms
+  Progress: 400 inferences, 4.0s elapsed, mode: MAXN, switches: 3, avg latency: 6.53ms
+🔋 Sample 6: 5.4W, CPU: 5.5%, GPU: 7.0%
+🔄 Power mode: MAXN → 15W (system idle for 3.0s) [switch time: 24ms]
+🔋 Sample 11: 5.2W, CPU: 5.7%, GPU: 7.0%
+🔋 Sample 16: 5.3W, CPU: 4.8%, GPU: 7.0%
+🔄 Power mode: 15W → MAXN (latency 10.74ms > high threshold 9.0ms) [switch time: 21ms]
+  Progress: 500 inferences, 15.5s elapsed, mode: MAXN, switches: 5, avg latency: 6.60ms
+  Progress: 600 inferences, 16.5s elapsed, mode: MAXN, switches: 5, avg latency: 6.74ms
+  Progress: 700 inferences, 17.5s elapsed, mode: MAXN, switches: 5, avg latency: 6.80ms
+  Progress: 800 inferences, 18.5s elapsed, mode: MAXN, switches: 5, avg latency: 6.85ms
+🔋 Sample 21: 5.8W, CPU: 16.3%, GPU: 39.0%
+  Progress: 900 inferences, 19.5s elapsed, mode: MAXN, switches: 5, avg latency: 6.89ms
+🔋 Power monitoring stopped. Duration: 19.99s
+📊 Avg Power: 5.48W, Peak Power: 5.77W
+
+📊 Results:
+   Avg Latency: 6.89 ms
+   P95 Latency: 8.59 ms
+   Violations: 25 (2.78%)
+   Mode Switches: 5
+   Low Power Time: 38.7%
+   Avg Power: 5.48 W
+   Total Energy: 109.65 J
+   Energy/Inference: 0.1218 J
+💾 Results saved to endurance_study_resnet_ae_20251210_123043/calibration/resnet_ae_adaptive_periodic_results.json
+💾 Results saved to endurance_study_resnet_ae_20251210_123043/calibration/resnet_ae_adaptive_summary.json
+
+✅ Adaptive benchmark completed!
+📊 Results saved to endurance_study_resnet_ae_20251210_123043/calibration/

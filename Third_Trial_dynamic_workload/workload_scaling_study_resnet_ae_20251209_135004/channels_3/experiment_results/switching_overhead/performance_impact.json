@@ -1,0 +1,26 @@
+{
+  "samples_per_mode": 100,
+  "modes_tested": [
+    "15W",
+    "25W",
+    "MAXN SUPER"
+  ],
+  "15w_avg_latency_ms": 105.38435935974121,
+  "15w_median_latency_ms": 104.47263717651367,
+  "15w_std_latency_ms": 4.701246863943684,
+  "15w_min_latency_ms": 103.86323928833008,
+  "15w_max_latency_ms": 150.10571479797363,
+  "25w_avg_latency_ms": 116.91281795501709,
+  "25w_median_latency_ms": 116.17350578308105,
+  "25w_std_latency_ms": 2.7669556358127485,
+  "25w_min_latency_ms": 115.58008193969727,
+  "25w_max_latency_ms": 141.62111282348633,
+  "maxn_super_avg_latency_ms": 91.8088698387146,
+  "maxn_super_median_latency_ms": 91.17662906646729,
+  "maxn_super_std_latency_ms": 2.2898159216763863,
+  "maxn_super_min_latency_ms": 90.60263633728027,
+  "maxn_super_max_latency_ms": 108.62946510314941,
+  "speedup_maxn_vs_15w": 1.1478668623726158,
+  "speedup_maxn_vs_25w": 1.273437067250734,
+  "speedup_25w_vs_15w": 0.9013926890402084
+}
