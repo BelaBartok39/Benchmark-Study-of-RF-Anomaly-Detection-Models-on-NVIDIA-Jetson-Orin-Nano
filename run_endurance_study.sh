@@ -12,10 +12,11 @@
 #   - Long Hysteresis: 60s (to prevent thrashing)
 #
 # Usage:
-#   ./run_endurance_study.sh [MODEL] [ENABLE_GPU_SCALING]
+#   ./run_endurance_study.sh [MODEL] [ENABLE_GPU_SCALING] [NUM_CHANNELS]
 #
 # Example:
-#   ./run_endurance_study.sh lstm_ae true
+#   ./run_endurance_study.sh lstm_ae true 1
+#   ./run_endurance_study.sh resnet_ae false 4
 #
 
 set -e  # Exit on error
@@ -23,6 +24,7 @@ set -e  # Exit on error
 # Configuration
 MODEL=${1:-lstm_ae}
 ENABLE_GPU_SCALING=${2:-false}
+NUM_CHANNELS=${3:-1}
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTPUT_BASE="endurance_study_${MODEL}_${TIMESTAMP}"
 DURATION=3600  # 1 hour
@@ -40,6 +42,7 @@ echo "Timestamp: $TIMESTAMP"
 echo "Duration: ${DURATION}s (1 hour)"
 echo "Hysteresis: ${HYSTERESIS}s"
 echo "Sparsity Factor: ${SPARSITY}x"
+echo "Num Channels: $NUM_CHANNELS"
 echo "GPU Frequency Scaling: $ENABLE_GPU_SCALING"
 echo ""
 echo "This study simulates a realistic 'Guard Duty' cycle:"
@@ -70,8 +73,8 @@ else
     FREQ_FLAG=""
 fi
 
-# Run experiment for Bursty and Periodic workloads (most relevant for endurance)
-WORKLOADS=("bursty" "periodic")
+# Run experiment for all workload patterns
+WORKLOADS=("bursty" "periodic" "continuous" "variable")
 
 for workload in "${WORKLOADS[@]}"; do
     echo ""
@@ -111,7 +114,7 @@ for workload in "${WORKLOADS[@]}"; do
         $FREQ_FLAG \
         --run-baselines \
         --batch-size 1 \
-        --num-channels 1 \
+        --num-channels "$NUM_CHANNELS" \
         --output-dir "$OUTPUT_BASE/results"
 
     echo ""
