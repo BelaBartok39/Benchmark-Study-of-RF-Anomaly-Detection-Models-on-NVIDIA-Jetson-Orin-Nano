@@ -1,0 +1,121 @@
+/ssd/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano/src/data_loader.py:45: ComplexWarning: Casting complex values to real discards the imaginary part
+  all_signals = np.concatenate([clean_signals, jammed_signals], axis=0).astype(np.float32)
+📊 Initializing Adaptive Benchmark for lstm_ae
+   Output directory: endurance_study_lstm_ae_20251211_114436/calibration
+🔥 Loading PyTorch model from src/output/weights/lstm_ae_best.pth
+📁 Loading test data (max 1000 samples)
+Loading train data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+Loading test data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+   Loaded 1000 samples
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Running hardware profiling to determine optimal thresholds...
+
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Target SLA: 10.0ms
+Safety Margin: 90%
+Strategy: sla_based
+
+
+🔍 Profiling 15W...
+  25/100 samples, avg: 9.78ms
+  50/100 samples, avg: 9.28ms
+  75/100 samples, avg: 8.93ms
+  100/100 samples, avg: 8.65ms
+  ✓ Mean: 8.65ms, P95: 11.21ms, P99: 14.90ms
+
+🔍 Profiling 25W...
+  25/100 samples, avg: 9.28ms
+  50/100 samples, avg: 8.22ms
+  75/100 samples, avg: 7.83ms
+  100/100 samples, avg: 7.65ms
+  ✓ Mean: 7.65ms, P95: 11.77ms, P99: 14.33ms
+
+🔍 Profiling MAXN...
+  25/100 samples, avg: 10.68ms
+  50/100 samples, avg: 10.19ms
+  75/100 samples, avg: 9.34ms
+  100/100 samples, avg: 8.92ms
+  ✓ Mean: 8.92ms, P95: 14.31ms, P99: 14.36ms
+
+⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ 
+⚠️  TARGET SLA UNREACHABLE
+⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ 
+
+📊 Hardware Analysis:
+   Target SLA:        10.00ms
+   MAXN P95 latency:  14.31ms
+   MAXN P99 latency:  14.36ms
+   With safety margin: 12.88ms
+
+💡 Recommended Actions:
+   1. ✅ Use TARGET_SLA=15.8 (minimum achievable)
+   2. 🔧 Reduce workload (fewer channels, smaller batch)
+   3. ⚡ Use TensorRT optimization
+   4. 🎯 Run best-effort mode (track SLA violations)
+
+❌ Cannot proceed with 10.0ms SLA
+   Run with: AUTO_ADJUST_SLA=true TARGET_SLA=10.0
+   Or use:   TARGET_SLA=15.8
+
+
+❌ Calibration failed: SLA 10.0ms unreachable. Minimum achievable: 15.8ms. Use --auto-adjust-sla flag to auto-adjust.
+   Falling back to default thresholds
+
+============================================================
+ADAPTIVE: bursty
+  Threshold: 10.0ms
+  Hysteresis: 5.0s
+  Frequency Scaling: False
+============================================================
+ℹ️  Three-tier mode: Derived thresholds from 10.0ms
+   Medium (15W→25W): 10.0ms
+   High (25W→MAXN): 25.0ms
+🔄 Power mode: UNKNOWN → 15W (initialization) [switch time: 21ms]
+🔋 Power monitoring started (sampling every 100ms)
+🔋 Sample 1: 5.6W, CPU: 5.2%, GPU: 66.0%
+  Progress: 100 inferences, 1.0s elapsed, mode: 15W, switches: 1, avg latency: 7.67ms
+🔄 Power mode: 15W → 25W (latency 12.10ms > medium threshold 10.0ms) [switch time: 22ms]
+  Progress: 200 inferences, 2.0s elapsed, mode: 25W, switches: 2, avg latency: 7.68ms
+  Progress: 300 inferences, 3.0s elapsed, mode: 25W, switches: 2, avg latency: 7.38ms
+  Progress: 400 inferences, 4.0s elapsed, mode: 25W, switches: 2, avg latency: 7.23ms
+  Progress: 500 inferences, 5.0s elapsed, mode: 25W, switches: 2, avg latency: 7.12ms
+🔋 Sample 6: 5.5W, CPU: 3.5%, GPU: 0.0%
+🔋 Sample 11: 5.1W, CPU: 2.2%, GPU: 20.0%
+🔋 Sample 16: 5.1W, CPU: 4.7%, GPU: 0.0%
+  Progress: 600 inferences, 14.9s elapsed, mode: 25W, switches: 2, avg latency: 8.29ms
+  Progress: 700 inferences, 16.0s elapsed, mode: 25W, switches: 2, avg latency: 8.33ms
+  Progress: 800 inferences, 17.0s elapsed, mode: 25W, switches: 2, avg latency: 8.24ms
+  Progress: 900 inferences, 18.0s elapsed, mode: 25W, switches: 2, avg latency: 8.07ms
+🔋 Sample 21: 5.7W, CPU: 6.2%, GPU: 60.0%
+  Progress: 1000 inferences, 19.0s elapsed, mode: 25W, switches: 2, avg latency: 7.94ms
+  Progress: 1100 inferences, 20.0s elapsed, mode: 25W, switches: 2, avg latency: 7.82ms
+🔋 Sample 26: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 31: 5.1W, CPU: 1.5%, GPU: 0.0%
+  Progress: 1200 inferences, 29.9s elapsed, mode: 25W, switches: 2, avg latency: 8.34ms
+🔋 Power monitoring stopped. Duration: 29.98s
+📊 Avg Power: 5.25W, Peak Power: 5.73W
+
+📊 Results:
+   Avg Latency: 8.34 ms
+   P95 Latency: 14.33 ms
+   Violations: 0 (0.00%)
+   Mode Switches: 2
+   Low Power Time: 4.5%
+   Avg Power: 5.25 W
+   Total Energy: 157.32 J
+   Energy/Inference: 0.1311 J
+💾 Results saved to endurance_study_lstm_ae_20251211_114436/calibration/lstm_ae_adaptive_bursty_results.json
+💾 Results saved to endurance_study_lstm_ae_20251211_114436/calibration/lstm_ae_adaptive_summary.json
+
+✅ Adaptive benchmark completed!
+📊 Results saved to endurance_study_lstm_ae_20251211_114436/calibration/

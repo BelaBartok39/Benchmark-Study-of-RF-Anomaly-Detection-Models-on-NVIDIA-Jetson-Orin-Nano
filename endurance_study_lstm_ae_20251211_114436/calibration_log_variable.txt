@@ -1,0 +1,163 @@
+/ssd/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano/src/data_loader.py:45: ComplexWarning: Casting complex values to real discards the imaginary part
+  all_signals = np.concatenate([clean_signals, jammed_signals], axis=0).astype(np.float32)
+📊 Initializing Adaptive Benchmark for lstm_ae
+   Output directory: endurance_study_lstm_ae_20251211_114436/calibration
+🔥 Loading PyTorch model from src/output/weights/lstm_ae_best.pth
+📁 Loading test data (max 1000 samples)
+Loading train data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+Loading test data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+   Loaded 1000 samples
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Running hardware profiling to determine optimal thresholds...
+
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Target SLA: 10.0ms
+Safety Margin: 90%
+Strategy: sla_based
+
+
+🔍 Profiling 15W...
+  25/100 samples, avg: 10.09ms
+  50/100 samples, avg: 9.63ms
+  75/100 samples, avg: 9.03ms
+  100/100 samples, avg: 8.69ms
+  ✓ Mean: 8.69ms, P95: 11.71ms, P99: 14.64ms
+
+🔍 Profiling 25W...
+  25/100 samples, avg: 9.60ms
+  50/100 samples, avg: 8.47ms
+  75/100 samples, avg: 7.90ms
+  100/100 samples, avg: 7.59ms
+  ✓ Mean: 7.59ms, P95: 11.34ms, P99: 14.59ms
+
+🔍 Profiling MAXN...
+  25/100 samples, avg: 9.09ms
+  50/100 samples, avg: 8.08ms
+  75/100 samples, avg: 8.08ms
+  100/100 samples, avg: 7.81ms
+  ✓ Mean: 7.81ms, P95: 10.89ms, P99: 14.44ms
+
+============================================================
+CALIBRATION RESULTS
+============================================================
+
+🔧 Calibration Configuration:
+   Concurrent channels: 1
+
+📊 Profiled Performance:
+   15W:  Mean=8.69ms, P95=11.71ms, P99=14.64ms
+   25W:  Mean=7.59ms, P95=11.34ms, P99=14.59ms
+   MAXN: Mean=7.81ms, P95=10.89ms, P99=14.44ms
+
+🎯 Calibrated Thresholds:
+   15W → 25W:  7.32ms
+   25W → MAXN: 9.00ms
+   Hysteresis: 2.0s
+
+💡 Expected Behavior:
+   ⚠ Need MAXN to reliably meet 10.0ms SLA
+   → Will use 25W/MAXN primarily
+============================================================
+
+
+✅ Calibration complete!
+   Using calibrated thresholds:
+   - 15W → 25W: 7.32ms
+   - 25W → MAXN: 9.00ms
+   - Hysteresis: 2.0s
+
+💾 Results saved to endurance_study_lstm_ae_20251211_114436/calibration/lstm_ae_calibration_results.json
+
+============================================================
+ADAPTIVE: variable
+  Three-Tier Thresholds:
+    15W → 25W: 7.320690155029297ms
+    25W → MAXN: 9.0ms
+  Hysteresis: 2.0s
+  Frequency Scaling: False
+============================================================
+🔄 Power mode: UNKNOWN → 15W (initialization) [switch time: 27ms]
+🔋 Power monitoring started (sampling every 100ms)
+🔄 Power mode: 15W → 25W (latency 8.36ms > medium threshold 7.320690155029297ms) [switch time: 20ms]
+  Progress: 100 inferences, 0.8s elapsed, mode: 25W, switches: 2, avg latency: 6.67ms
+🔋 Sample 1: 5.8W, CPU: 8.2%, GPU: 83.0%
+  Progress: 200 inferences, 1.4s elapsed, mode: 25W, switches: 2, avg latency: 6.10ms
+  Progress: 300 inferences, 2.0s elapsed, mode: 25W, switches: 2, avg latency: 5.88ms
+  Progress: 400 inferences, 2.6s elapsed, mode: 25W, switches: 2, avg latency: 5.76ms
+  Progress: 500 inferences, 3.2s elapsed, mode: 25W, switches: 2, avg latency: 5.69ms
+  Progress: 600 inferences, 3.8s elapsed, mode: 25W, switches: 2, avg latency: 5.65ms
+  Progress: 700 inferences, 4.4s elapsed, mode: 25W, switches: 2, avg latency: 5.62ms
+  Progress: 800 inferences, 5.0s elapsed, mode: 25W, switches: 2, avg latency: 5.59ms
+🔋 Sample 6: 6.3W, CPU: 9.7%, GPU: 78.0%
+  Progress: 900 inferences, 5.6s elapsed, mode: 25W, switches: 2, avg latency: 5.57ms
+🔄 Power mode: 25W → MAXN (latency 9.09ms > high threshold 9.0ms) [switch time: 23ms]
+  Progress: 1000 inferences, 6.2s elapsed, mode: MAXN, switches: 3, avg latency: 5.53ms
+  Progress: 1100 inferences, 6.8s elapsed, mode: MAXN, switches: 3, avg latency: 5.48ms
+  Progress: 1200 inferences, 7.3s elapsed, mode: MAXN, switches: 3, avg latency: 5.44ms
+  Progress: 1300 inferences, 7.9s elapsed, mode: MAXN, switches: 3, avg latency: 5.41ms
+  Progress: 1400 inferences, 8.5s elapsed, mode: MAXN, switches: 3, avg latency: 5.38ms
+  Progress: 1500 inferences, 9.0s elapsed, mode: MAXN, switches: 3, avg latency: 5.35ms
+  Progress: 1600 inferences, 9.6s elapsed, mode: MAXN, switches: 3, avg latency: 5.33ms
+🔋 Sample 11: 6.6W, CPU: 8.3%, GPU: 73.0%
+  Progress: 1700 inferences, 10.2s elapsed, mode: MAXN, switches: 3, avg latency: 5.31ms
+  Progress: 1800 inferences, 10.7s elapsed, mode: MAXN, switches: 3, avg latency: 5.29ms
+  Progress: 1900 inferences, 11.3s elapsed, mode: MAXN, switches: 3, avg latency: 5.27ms
+  Progress: 2000 inferences, 11.8s elapsed, mode: MAXN, switches: 3, avg latency: 5.25ms
+  Progress: 2100 inferences, 12.4s elapsed, mode: MAXN, switches: 3, avg latency: 5.24ms
+  Progress: 2200 inferences, 14.0s elapsed, mode: MAXN, switches: 3, avg latency: 5.33ms
+🔋 Sample 16: 5.3W, CPU: 1.7%, GPU: 59.0%
+  Progress: 2300 inferences, 16.0s elapsed, mode: MAXN, switches: 3, avg latency: 5.58ms
+  Progress: 2400 inferences, 18.0s elapsed, mode: MAXN, switches: 3, avg latency: 5.80ms
+🔋 Sample 21: 5.3W, CPU: 1.5%, GPU: 51.0%
+  Progress: 2500 inferences, 20.0s elapsed, mode: MAXN, switches: 3, avg latency: 6.01ms
+  Progress: 2600 inferences, 20.8s elapsed, mode: MAXN, switches: 3, avg latency: 6.06ms
+  Progress: 2700 inferences, 21.4s elapsed, mode: MAXN, switches: 3, avg latency: 6.04ms
+  Progress: 2800 inferences, 22.0s elapsed, mode: MAXN, switches: 3, avg latency: 6.01ms
+  Progress: 2900 inferences, 22.6s elapsed, mode: MAXN, switches: 3, avg latency: 5.97ms
+  Progress: 3000 inferences, 23.1s elapsed, mode: MAXN, switches: 3, avg latency: 5.94ms
+🔋 Sample 26: 6.6W, CPU: 9.0%, GPU: 78.0%
+  Progress: 3100 inferences, 23.7s elapsed, mode: MAXN, switches: 3, avg latency: 5.91ms
+🔄 Power mode: MAXN → 25W (latency below high threshold for 2.0s) [switch time: 24ms]
+  Progress: 3200 inferences, 24.3s elapsed, mode: 25W, switches: 4, avg latency: 5.89ms
+  Progress: 3300 inferences, 24.9s elapsed, mode: 25W, switches: 4, avg latency: 5.87ms
+🔄 Power mode: 25W → MAXN (latency 9.07ms > high threshold 9.0ms) [switch time: 21ms]
+  Progress: 3400 inferences, 25.5s elapsed, mode: MAXN, switches: 5, avg latency: 5.85ms
+  Progress: 3500 inferences, 26.1s elapsed, mode: MAXN, switches: 5, avg latency: 5.83ms
+  Progress: 3600 inferences, 26.6s elapsed, mode: MAXN, switches: 5, avg latency: 5.80ms
+  Progress: 3700 inferences, 27.2s elapsed, mode: MAXN, switches: 5, avg latency: 5.78ms
+  Progress: 3800 inferences, 27.8s elapsed, mode: MAXN, switches: 5, avg latency: 5.76ms
+🔋 Sample 31: 6.6W, CPU: 9.0%, GPU: 72.0%
+  Progress: 3900 inferences, 28.3s elapsed, mode: MAXN, switches: 5, avg latency: 5.74ms
+  Progress: 4000 inferences, 28.9s elapsed, mode: MAXN, switches: 5, avg latency: 5.72ms
+  Progress: 4100 inferences, 29.4s elapsed, mode: MAXN, switches: 5, avg latency: 5.70ms
+  Progress: 4200 inferences, 30.0s elapsed, mode: MAXN, switches: 5, avg latency: 5.69ms
+  Progress: 4300 inferences, 30.6s elapsed, mode: MAXN, switches: 5, avg latency: 5.67ms
+  Progress: 4400 inferences, 31.1s elapsed, mode: MAXN, switches: 5, avg latency: 5.66ms
+  Progress: 4500 inferences, 31.7s elapsed, mode: MAXN, switches: 5, avg latency: 5.64ms
+🔋 Power monitoring stopped. Duration: 31.79s
+📊 Avg Power: 6.17W, Peak Power: 6.62W
+
+📊 Results:
+   Avg Latency: 5.64 ms
+   P95 Latency: 10.85 ms
+   Violations: 325 (7.22%)
+   Mode Switches: 5
+   Low Power Time: 0.1%
+   Avg Power: 6.17 W
+   Total Energy: 196.20 J
+   Energy/Inference: 0.0436 J
+💾 Results saved to endurance_study_lstm_ae_20251211_114436/calibration/lstm_ae_adaptive_variable_results.json
+💾 Results saved to endurance_study_lstm_ae_20251211_114436/calibration/lstm_ae_adaptive_summary.json
+
+✅ Adaptive benchmark completed!
+📊 Results saved to endurance_study_lstm_ae_20251211_114436/calibration/
