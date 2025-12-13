@@ -1,0 +1,159 @@
+/ssd/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano/src/data_loader.py:45: ComplexWarning: Casting complex values to real discards the imaginary part
+  all_signals = np.concatenate([clean_signals, jammed_signals], axis=0).astype(np.float32)
+📊 Initializing Adaptive Benchmark for ae
+   Output directory: endurance_study_ae_20251212_115036/calibration
+🔥 Loading PyTorch model from src/output/weights/ae_best.pth
+📁 Loading test data (max 1000 samples)
+Loading train data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+Loading test data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+   Loaded 1000 samples
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Running hardware profiling to determine optimal thresholds...
+
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Target SLA: 10.0ms
+Safety Margin: 90%
+Strategy: sla_based
+
+
+🔍 Profiling 15W...
+  25/100 samples, avg: 1.72ms
+  50/100 samples, avg: 1.59ms
+  75/100 samples, avg: 1.52ms
+  100/100 samples, avg: 1.49ms
+  ✓ Mean: 1.49ms, P95: 1.72ms, P99: 1.81ms
+
+🔍 Profiling 25W...
+  25/100 samples, avg: 2.50ms
+  50/100 samples, avg: 2.51ms
+  75/100 samples, avg: 2.39ms
+  100/100 samples, avg: 2.24ms
+  ✓ Mean: 2.24ms, P95: 2.80ms, P99: 3.27ms
+
+🔍 Profiling MAXN...
+  25/100 samples, avg: 2.40ms
+  50/100 samples, avg: 2.49ms
+  75/100 samples, avg: 2.44ms
+  100/100 samples, avg: 2.30ms
+  ✓ Mean: 2.30ms, P95: 2.79ms, P99: 3.46ms
+
+============================================================
+CALIBRATION RESULTS
+============================================================
+
+🔧 Calibration Configuration:
+   Concurrent channels: 1
+
+📊 Profiled Performance:
+   15W:  Mean=1.49ms, P95=1.72ms, P99=1.81ms
+   25W:  Mean=2.24ms, P95=2.80ms, P99=3.27ms
+   MAXN: Mean=2.30ms, P95=2.79ms, P99=3.46ms
+
+🎯 Calibrated Thresholds:
+   15W → 25W:  8.00ms
+   25W → MAXN: 9.00ms
+   Hysteresis: 3.0s
+
+💡 Expected Behavior:
+   ✓ 15W mode can meet 10.0ms SLA
+   → Will use 15W primarily, 25W for bursts
+============================================================
+
+
+✅ Calibration complete!
+   Using calibrated thresholds:
+   - 15W → 25W: 8.00ms
+   - 25W → MAXN: 9.00ms
+   - Hysteresis: 3.0s
+
+💾 Results saved to endurance_study_ae_20251212_115036/calibration/ae_calibration_results.json
+
+============================================================
+ADAPTIVE: variable
+  Three-Tier Thresholds:
+    15W → 25W: 8.0ms
+    25W → MAXN: 9.0ms
+  Hysteresis: 3.0s
+  Frequency Scaling: False
+============================================================
+🔄 Power mode: UNKNOWN → 15W (initialization) [switch time: 23ms]
+🔋 Power monitoring started (sampling every 100ms)
+  Progress: 100 inferences, 0.5s elapsed, mode: 15W, switches: 1, avg latency: 2.22ms
+🔋 Sample 1: 5.6W, CPU: 12.7%, GPU: 14.0%
+  Progress: 200 inferences, 1.0s elapsed, mode: 15W, switches: 1, avg latency: 2.23ms
+  Progress: 300 inferences, 1.5s elapsed, mode: 15W, switches: 1, avg latency: 2.25ms
+  Progress: 400 inferences, 2.0s elapsed, mode: 15W, switches: 1, avg latency: 2.28ms
+  Progress: 500 inferences, 2.5s elapsed, mode: 15W, switches: 1, avg latency: 2.29ms
+  Progress: 600 inferences, 3.0s elapsed, mode: 15W, switches: 1, avg latency: 2.28ms
+  Progress: 700 inferences, 3.5s elapsed, mode: 15W, switches: 1, avg latency: 2.28ms
+  Progress: 800 inferences, 4.0s elapsed, mode: 15W, switches: 1, avg latency: 2.27ms
+  Progress: 900 inferences, 4.5s elapsed, mode: 15W, switches: 1, avg latency: 2.27ms
+  Progress: 1000 inferences, 5.0s elapsed, mode: 15W, switches: 1, avg latency: 2.27ms
+🔋 Sample 6: 5.6W, CPU: 9.3%, GPU: 14.0%
+  Progress: 1100 inferences, 5.5s elapsed, mode: 15W, switches: 1, avg latency: 2.27ms
+  Progress: 1200 inferences, 6.0s elapsed, mode: 15W, switches: 1, avg latency: 2.27ms
+  Progress: 1300 inferences, 6.5s elapsed, mode: 15W, switches: 1, avg latency: 2.28ms
+  Progress: 1400 inferences, 7.0s elapsed, mode: 15W, switches: 1, avg latency: 2.29ms
+  Progress: 1500 inferences, 7.5s elapsed, mode: 15W, switches: 1, avg latency: 2.29ms
+  Progress: 1600 inferences, 8.0s elapsed, mode: 15W, switches: 1, avg latency: 2.30ms
+  Progress: 1700 inferences, 8.5s elapsed, mode: 15W, switches: 1, avg latency: 2.31ms
+  Progress: 1800 inferences, 9.0s elapsed, mode: 15W, switches: 1, avg latency: 2.31ms
+  Progress: 1900 inferences, 9.5s elapsed, mode: 15W, switches: 1, avg latency: 2.31ms
+🔋 Sample 11: 5.6W, CPU: 9.2%, GPU: 15.0%
+  Progress: 2000 inferences, 10.0s elapsed, mode: 15W, switches: 1, avg latency: 2.31ms
+  Progress: 2100 inferences, 12.0s elapsed, mode: 15W, switches: 1, avg latency: 2.32ms
+  Progress: 2200 inferences, 14.0s elapsed, mode: 15W, switches: 1, avg latency: 2.32ms
+🔋 Sample 16: 5.1W, CPU: 2.5%, GPU: 8.0%
+  Progress: 2300 inferences, 16.0s elapsed, mode: 15W, switches: 1, avg latency: 2.32ms
+  Progress: 2400 inferences, 18.0s elapsed, mode: 15W, switches: 1, avg latency: 2.33ms
+🔋 Sample 21: 5.1W, CPU: 2.3%, GPU: 8.0%
+  Progress: 2500 inferences, 20.0s elapsed, mode: 15W, switches: 1, avg latency: 2.33ms
+  Progress: 2600 inferences, 20.5s elapsed, mode: 15W, switches: 1, avg latency: 2.33ms
+  Progress: 2700 inferences, 21.0s elapsed, mode: 15W, switches: 1, avg latency: 2.33ms
+  Progress: 2800 inferences, 21.5s elapsed, mode: 15W, switches: 1, avg latency: 2.33ms
+  Progress: 2900 inferences, 22.0s elapsed, mode: 15W, switches: 1, avg latency: 2.33ms
+  Progress: 3000 inferences, 22.5s elapsed, mode: 15W, switches: 1, avg latency: 2.33ms
+  Progress: 3100 inferences, 23.0s elapsed, mode: 15W, switches: 1, avg latency: 2.34ms
+  Progress: 3200 inferences, 23.5s elapsed, mode: 15W, switches: 1, avg latency: 2.34ms
+🔋 Sample 26: 5.5W, CPU: 10.7%, GPU: 16.0%
+  Progress: 3300 inferences, 24.0s elapsed, mode: 15W, switches: 1, avg latency: 2.34ms
+  Progress: 3400 inferences, 24.5s elapsed, mode: 15W, switches: 1, avg latency: 2.34ms
+  Progress: 3500 inferences, 25.0s elapsed, mode: 15W, switches: 1, avg latency: 2.34ms
+  Progress: 3600 inferences, 25.5s elapsed, mode: 15W, switches: 1, avg latency: 2.34ms
+  Progress: 3700 inferences, 26.0s elapsed, mode: 15W, switches: 1, avg latency: 2.34ms
+  Progress: 3800 inferences, 26.5s elapsed, mode: 15W, switches: 1, avg latency: 2.34ms
+  Progress: 3900 inferences, 27.0s elapsed, mode: 15W, switches: 1, avg latency: 2.35ms
+  Progress: 4000 inferences, 27.5s elapsed, mode: 15W, switches: 1, avg latency: 2.35ms
+  Progress: 4100 inferences, 28.0s elapsed, mode: 15W, switches: 1, avg latency: 2.35ms
+🔋 Sample 31: 5.5W, CPU: 9.2%, GPU: 16.0%
+  Progress: 4200 inferences, 28.5s elapsed, mode: 15W, switches: 1, avg latency: 2.35ms
+  Progress: 4300 inferences, 29.0s elapsed, mode: 15W, switches: 1, avg latency: 2.35ms
+  Progress: 4400 inferences, 29.5s elapsed, mode: 15W, switches: 1, avg latency: 2.35ms
+  Progress: 4500 inferences, 30.0s elapsed, mode: 15W, switches: 1, avg latency: 2.35ms
+🔋 Power monitoring stopped. Duration: 30.88s
+📊 Avg Power: 5.41W, Peak Power: 5.61W
+
+📊 Results:
+   Avg Latency: 2.35 ms
+   P95 Latency: 2.56 ms
+   Violations: 0 (0.00%)
+   Mode Switches: 1
+   Low Power Time: 100.0%
+   Avg Power: 5.41 W
+   Total Energy: 167.15 J
+   Energy/Inference: 0.0371 J
+💾 Results saved to endurance_study_ae_20251212_115036/calibration/ae_adaptive_variable_results.json
+💾 Results saved to endurance_study_ae_20251212_115036/calibration/ae_adaptive_summary.json
+
+✅ Adaptive benchmark completed!
+📊 Results saved to endurance_study_ae_20251212_115036/calibration/
