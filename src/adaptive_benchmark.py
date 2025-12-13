@@ -1001,11 +1001,11 @@ def main():
     parser.add_argument('--latency-threshold', type=float, default=10.0,
                        help='Latency threshold in milliseconds')
     parser.add_argument('--hysteresis-time', type=float, default=5.0,
-                       help='Hysteresis time in seconds')
+                       help='Hysteresis time in seconds (if non-default, overrides auto-calibrated value)')
     parser.add_argument('--use-model-defaults', action='store_true',
                        help='Use model-specific thresholds and hysteresis (overrides --latency-threshold and --hysteresis-time)')
     parser.add_argument('--auto-calibrate', action='store_true',
-                       help='Automatically calibrate thresholds based on hardware profiling (overrides --use-model-defaults)')
+                       help='Automatically calibrate thresholds based on hardware profiling (calibrates thresholds only; explicit --hysteresis-time takes precedence)')
     parser.add_argument('--target-sla', type=float, default=10.0,
                        help='Target SLA (latency) in milliseconds for auto-calibration (default: 10.0)')
     parser.add_argument('--auto-adjust-sla', action='store_true',
@@ -1056,6 +1056,11 @@ def main():
         print("Running hardware profiling to determine optimal thresholds...")
         print("")
 
+        # Check if user explicitly set hysteresis (non-default value)
+        default_hysteresis = 5.0
+        user_hysteresis = args.hysteresis_time
+        hysteresis_explicitly_set = (user_hysteresis != default_hysteresis)
+
         calibrator = ThresholdCalibrator(
             benchmark=benchmark,
             target_sla_ms=args.target_sla,
@@ -1068,19 +1073,28 @@ def main():
         try:
             calibration_results = calibrator.calibrate(strategy='sla_based')
 
-            # Override thresholds with calibrated values
+            # Override thresholds with calibrated values (ALWAYS)
             args.latency_threshold_medium = calibration_results['medium_threshold_ms']
             args.latency_threshold_high = calibration_results['high_threshold_ms']
-            args.hysteresis_time = calibration_results['hysteresis_time_s']
+
+            # Only override hysteresis if user didn't explicitly set it
+            if hysteresis_explicitly_set:
+                args.hysteresis_time = user_hysteresis
+                print(f"\n✅ Calibration complete!")
+                print(f"   Using calibrated thresholds:")
+                print(f"   - 15W → 25W: {calibration_results['medium_threshold_ms']:.2f}ms")
+                print(f"   - 25W → MAXN: {calibration_results['high_threshold_ms']:.2f}ms")
+                print(f"   - Hysteresis: {user_hysteresis:.1f}s (user override, calibrated: {calibration_results['hysteresis_time_s']:.1f}s)")
+            else:
+                args.hysteresis_time = calibration_results['hysteresis_time_s']
+                print(f"\n✅ Calibration complete!")
+                print(f"   Using calibrated thresholds:")
+                print(f"   - 15W → 25W: {calibration_results['medium_threshold_ms']:.2f}ms")
+                print(f"   - 25W → MAXN: {calibration_results['high_threshold_ms']:.2f}ms")
+                print(f"   - Hysteresis: {calibration_results['hysteresis_time_s']:.1f}s")
 
             # Legacy single threshold (for backward compatibility, use high threshold)
             args.latency_threshold = calibration_results['high_threshold_ms']
-
-            print(f"\n✅ Calibration complete!")
-            print(f"   Using calibrated thresholds:")
-            print(f"   - 15W → 25W: {calibration_results['medium_threshold_ms']:.2f}ms")
-            print(f"   - 25W → MAXN: {calibration_results['high_threshold_ms']:.2f}ms")
-            print(f"   - Hysteresis: {calibration_results['hysteresis_time_s']:.1f}s")
             print("")
 
             # Save calibration results

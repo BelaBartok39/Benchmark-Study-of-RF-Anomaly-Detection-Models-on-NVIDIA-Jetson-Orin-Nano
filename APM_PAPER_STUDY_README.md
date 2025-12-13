@@ -163,7 +163,10 @@ This study uses **automatic hardware-based calibration** to determine optimal th
    Thresholds are set to:
      - 15W → 25W: When 15W cannot sustain load within SLA
      - 25W → MAXN: When 25W cannot sustain load within SLA
-     - Hysteresis: Based on latency variance to prevent thrashing
+
+   NOTE: Hysteresis is NOT auto-calibrated. User-specified hysteresis
+         (--hysteresis-time) always takes precedence to allow workload-specific
+         tuning (e.g., 60s for guard duty cycles to prevent thrashing)
    ```
 
 3. **Apply calibrated thresholds**: Immediately used for the 60-minute endurance tests
@@ -196,7 +199,7 @@ This study uses **automatic hardware-based calibration** to determine optimal th
 ```
 
 **Academic Justification**:
-> "Power mode switching thresholds were automatically determined via hardware profiling with a target Service Level Agreement (SLA) of 10ms P95 latency and 90% safety margin. This approach eliminates manual tuning and ensures the adaptive system operates autonomously across different model architectures."
+> "Power mode switching thresholds were automatically determined via hardware profiling with a target Service Level Agreement (SLA) of 10ms P95 latency and 90% safety margin. This approach eliminates manual tuning of performance thresholds and ensures the adaptive system operates autonomously across different model architectures. The 60-second hysteresis parameter was explicitly chosen to prevent mode thrashing in guard duty workloads with sparse, bursty activity patterns—avoiding energy waste from rapid power mode transitions."
 
 ### Three-Tier Power Management
 
