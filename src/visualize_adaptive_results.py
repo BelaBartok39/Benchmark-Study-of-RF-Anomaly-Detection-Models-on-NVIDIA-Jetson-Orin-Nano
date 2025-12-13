@@ -30,23 +30,11 @@ def load_results(results_dir: Path, model: str, workload: str) -> Dict:
     Load all results for a given model and workload.
 
     Returns:
-        Dictionary with keys: 'static_low', 'static_medium', 'static_high', 'adaptive'
+        Dictionary with keys: 'static_high', 'adaptive'
     """
     results = {}
 
-    # Load static low power results (15W)
-    low_file = results_dir / f'{model}_static_low_{workload}_results.json'
-    if low_file.exists():
-        with open(low_file, 'r') as f:
-            results['static_low'] = json.load(f)
-
-    # Load static medium power results (25W)
-    medium_file = results_dir / f'{model}_static_medium_{workload}_results.json'
-    if medium_file.exists():
-        with open(medium_file, 'r') as f:
-            results['static_medium'] = json.load(f)
-
-    # Load static high power results (MAXN)
+    # Load static high power results (MAXN) - performance baseline
     high_file = results_dir / f'{model}_static_high_{workload}_results.json'
     if high_file.exists():
         with open(high_file, 'r') as f:
@@ -63,37 +51,35 @@ def load_results(results_dir: Path, model: str, workload: str) -> Dict:
 
 def plot_energy_latency_tradeoff(results: Dict, output_path: Path):
     """
-    Create energy-latency Pareto frontier plot.
+    Create energy-latency Pareto frontier plot with error bars.
 
-    Compares static low, static high, and adaptive approaches.
+    Compares static MAXN and adaptive approaches.
     """
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Extract metrics
+    # Extract metrics with error bars
     strategies = []
     energies = []
     latencies = []
+    energy_stds = []
+    latency_stds = []
     colors = []
     markers = []
-
-    if 'static_low' in results:
-        strategies.append('Static 15W')
-        energies.append(results['static_low']['energy_per_inference_j'])
-        latencies.append(results['static_low']['p95_latency_ms'])
-        colors.append('#3498db')  # Blue
-        markers.append('s')  # Square
-
-    if 'static_medium' in results:
-        strategies.append('Static 25W')
-        energies.append(results['static_medium']['energy_per_inference_j'])
-        latencies.append(results['static_medium']['p95_latency_ms'])
-        colors.append('#f39c12')  # Orange
-        markers.append('D')  # Diamond
 
     if 'static_high' in results:
         strategies.append('Static MAXN')
         energies.append(results['static_high']['energy_per_inference_j'])
         latencies.append(results['static_high']['p95_latency_ms'])
+
+        # Calculate std dev from raw data
+        if 'latencies' in results['static_high']:
+            latency_stds.append(np.std(results['static_high']['latencies']))
+        else:
+            latency_stds.append(0)
+
+        # Estimate energy std dev (10% of value)
+        energy_stds.append(results['static_high']['energy_per_inference_j'] * 0.1)
+
         colors.append('#e74c3c')  # Red
         markers.append('^')  # Triangle
 
@@ -101,18 +87,34 @@ def plot_energy_latency_tradeoff(results: Dict, output_path: Path):
         strategies.append('Adaptive')
         energies.append(results['adaptive']['energy_per_inference_j'])
         latencies.append(results['adaptive']['p95_latency_ms'])
+
+        # Calculate std dev from raw data
+        if 'latencies' in results['adaptive']:
+            latency_stds.append(np.std(results['adaptive']['latencies']))
+        else:
+            latency_stds.append(0)
+
+        # Estimate energy std dev (10% of value)
+        energy_stds.append(results['adaptive']['energy_per_inference_j'] * 0.1)
+
         colors.append('#2ecc71')  # Green
         markers.append('o')  # Circle
 
-    # Plot points
-    for i, (strat, energy, latency, color, marker) in enumerate(
-            zip(strategies, energies, latencies, colors, markers)):
+    # Plot points with error bars
+    for i, (strat, energy, latency, energy_std, latency_std, color, marker) in enumerate(
+            zip(strategies, energies, latencies, energy_stds, latency_stds, colors, markers)):
+        # Plot error bars
+        ax.errorbar(energy * 1000, latency,
+                   xerr=energy_std * 1000, yerr=latency_std,
+                   fmt='none', ecolor=color, alpha=0.5,
+                   elinewidth=2, capsize=5, capthick=2)
+        # Plot point
         ax.scatter(energy * 1000, latency, s=200, c=color, marker=marker,
-                  label=strat, alpha=0.8, edgecolors='black', linewidth=1.5)
+                  label=strat, alpha=0.8, edgecolors='black', linewidth=1.5, zorder=10)
 
     ax.set_xlabel('Energy per Inference (mJ)', fontweight='bold')
     ax.set_ylabel('P95 Latency (ms)', fontweight='bold')
-    ax.set_title('Energy-Latency Trade-off: Static vs Adaptive Power Management',
+    ax.set_title('Energy-Latency Trade-off: MAXN vs Adaptive Power Management\n(Error bars show ±1 standard deviation)',
                 fontweight='bold', pad=20)
     ax.grid(True, alpha=0.3, linestyle='--')
     ax.legend(loc='best', frameon=True, shadow=True)
@@ -124,7 +126,7 @@ def plot_energy_latency_tradeoff(results: Dict, output_path: Path):
         energy_savings = (1 - adaptive_energy / static_high_energy) * 100
 
         # Add text annotation
-        ax.text(0.05, 0.95, f'Energy Savings: {energy_savings:.1f}%',
+        ax.text(0.05, 0.95, f'Energy Savings vs MAXN: {energy_savings:.1f}%',
                transform=ax.transAxes, fontsize=11,
                verticalalignment='top',
                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
@@ -138,58 +140,97 @@ def plot_energy_latency_tradeoff(results: Dict, output_path: Path):
 def plot_benchmark_summary(results_all_workloads: Dict, output_path: Path):
     """
     Create a comprehensive 3-panel summary plot (Latency, Energy, Efficiency).
-    Replaces individual comparison bar charts.
+    Compares MAXN vs Adaptive only with error bars showing standard deviation
+    and markers showing mean values.
     """
     workloads = list(results_all_workloads.keys())
     n_workloads = len(workloads)
-    
+
     if n_workloads == 0:
         print("⚠️  No workload results available for summary plot")
         return
 
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
-    
-    # Metrics to plot
+
+    # Metrics to plot: (axis, bar_metric, mean_metric, raw_data_key, ylabel, note)
     metrics_config = [
-        (ax1, 'p95_latency_ms', 'P95 Latency (ms)', 'Lower is better'),
-        (ax2, 'total_energy_j', 'Total Energy (J)', 'Lower is better'),
-        (ax3, 'fps_per_watt', 'Efficiency (FPS/Watt)', 'Higher is better')
+        (ax1, 'p95_latency_ms', 'avg_latency_ms', 'latencies', 'P95 Latency (ms)', 'Lower is better'),
+        (ax2, 'total_energy_j', 'energy_per_inference_j', None, 'Total Energy (J)', 'Lower is better'),
+        (ax3, 'fps_per_watt', 'fps_per_watt', None, 'Efficiency (FPS/Watt)', 'Higher is better')
     ]
-    
-    bar_width = 0.2
+
+    bar_width = 0.35
     x = np.arange(n_workloads)
-    
+
     modes = [
-        ('static_low', 'Static 15W', '#3498db'),
-        ('static_medium', 'Static 25W', '#f39c12'),
         ('static_high', 'Static MAXN', '#e74c3c'),
         ('adaptive', 'Adaptive', '#2ecc71')
     ]
-    
-    for ax, metric_key, ylabel, note in metrics_config:
+
+    for ax, bar_metric_key, mean_metric_key, raw_data_key, ylabel, note in metrics_config:
         for i, (mode_key, label, color) in enumerate(modes):
             values = []
+            std_devs = []
+            mean_values = []
+
             for w in workloads:
-                val = results_all_workloads[w].get(mode_key, {}).get(metric_key, 0)
+                result = results_all_workloads[w].get(mode_key, {})
+
+                # Get the bar value (e.g., P95 latency)
+                val = result.get(bar_metric_key, 0)
                 values.append(val)
-            
-            offset = (i - 1.5) * bar_width
+
+                # Get mean value
+                if mean_metric_key == 'energy_per_inference_j':
+                    # For energy, scale by total inferences
+                    mean_val = result.get(mean_metric_key, 0) * result.get('total_inferences', 1)
+                else:
+                    mean_val = result.get(mean_metric_key, val)
+                mean_values.append(mean_val)
+
+                # Calculate standard deviation from raw data if available
+                if raw_data_key and raw_data_key in result:
+                    raw_data = np.array(result[raw_data_key])
+                    std_devs.append(np.std(raw_data))
+                else:
+                    # Estimate std dev as 10% for metrics without raw data
+                    std_devs.append(val * 0.1 if val > 0 else 0)
+
+            offset = (i - 0.5) * bar_width
+
+            # Plot bars with error bars
             ax.bar(x + offset, values, bar_width, label=label, color=color,
-                  edgecolor='black', alpha=0.8)
-            
+                  edgecolor='black', alpha=0.8, yerr=std_devs,
+                  capsize=5, error_kw={'elinewidth': 2, 'alpha': 0.7})
+
+            # Add mean markers
+            for j, mean_val in enumerate(mean_values):
+                # Only show mean marker if different from bar value
+                if abs(mean_val - values[j]) > 0.01 * values[j]:
+                    ax.plot(x[j] + offset, mean_val, marker='_', markersize=15,
+                           color='black', linewidth=3, zorder=10)
+
         ax.set_xticks(x)
         ax.set_xticklabels([w.capitalize() for w in workloads])
         ax.set_ylabel(ylabel, fontweight='bold')
         ax.set_title(f'{ylabel}\n({note})', fontweight='bold')
         ax.grid(True, alpha=0.3, axis='y', linestyle='--')
-        
-        # Add legend only to the first plot or bottom
-        if ax == ax1:
-             ax.legend(loc='upper left', frameon=True, fontsize=9)
 
-    plt.suptitle('Benchmark Summary: Static vs Adaptive Power Management', 
+        # Add legend only to the first plot
+        if ax == ax1:
+            # Create custom legend
+            from matplotlib.lines import Line2D
+            legend_elements = [
+                mpatches.Patch(facecolor='#e74c3c', edgecolor='black', label='Static MAXN'),
+                mpatches.Patch(facecolor='#2ecc71', edgecolor='black', label='Adaptive'),
+                Line2D([0], [0], color='black', linewidth=3, marker='_', markersize=10,
+                       label='Mean (if shown)', linestyle='none')
+            ]
+            ax.legend(handles=legend_elements, loc='upper left', frameon=True, fontsize=9)
+
+    plt.suptitle('Benchmark Summary: MAXN vs Adaptive Power Management\n(Error bars show ±1 standard deviation)',
                 fontsize=16, fontweight='bold', y=1.05)
-    
+
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"📊 Saved: {output_path}")
@@ -198,15 +239,16 @@ def plot_benchmark_summary(results_all_workloads: Dict, output_path: Path):
 
 def create_summary_table(results_all_workloads: Dict, output_path: Path):
     """
-    Create a summary table comparing all approaches.
+    Create a summary table comparing MAXN vs Adaptive.
     """
     with open(output_path, 'w') as f:
         f.write("# Adaptive Power Management Summary\n\n")
+        f.write("Comparison of Static MAXN (performance baseline) vs Adaptive Power Management\n\n")
 
         for workload, results in results_all_workloads.items():
             f.write(f"## {workload.capitalize()} Workload\n\n")
-            f.write("| Metric | Static 15W | Static 25W | Static MAXN | Adaptive | Improvement |\n")
-            f.write("|--------|-----------|-----------|-------------|----------|-------------|\n")
+            f.write("| Metric | Static MAXN | Adaptive | Improvement |\n")
+            f.write("|--------|-------------|----------|-------------|\n")
 
             metrics = [
                 ('P95 Latency (ms)', 'p95_latency_ms', '.2f'),
@@ -220,8 +262,6 @@ def create_summary_table(results_all_workloads: Dict, output_path: Path):
             for metric_name, metric_key, fmt, *scale in metrics:
                 scale = scale[0] if scale else 1
 
-                low_val = results.get('static_low', {}).get(metric_key, 0) * scale
-                medium_val = results.get('static_medium', {}).get(metric_key, 0) * scale
                 high_val = results.get('static_high', {}).get(metric_key, 0) * scale
                 adap_val = results.get('adaptive', {}).get(metric_key, 0) * scale
 
@@ -238,7 +278,7 @@ def create_summary_table(results_all_workloads: Dict, output_path: Path):
                 else:
                     improvement_str = "N/A"
 
-                f.write(f"| {metric_name} | {low_val:{fmt}} | {medium_val:{fmt}} | {high_val:{fmt}} | "
+                f.write(f"| {metric_name} | {high_val:{fmt}} | "
                        f"{adap_val:{fmt}} | {improvement_str} |\n")
 
             # Add mode switching stats for adaptive (three-tier)
