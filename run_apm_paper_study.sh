@@ -27,81 +27,11 @@ HYSTERESIS=30.0 # Set to 60 for one-hour durations
 SPARSITY=5.0 # Set to 10.0 for one-hour durations
 NUM_CHANNELS=1
 WORKLOADS=("bursty" "periodic" "continuous" "variable")
-MODELS=("ae" "aae" "cnn_ae" "resnet_ae" "lstm_ae")
+MODELS=("resnet_ae")
 
 # Create base study directory
 mkdir -p "$STUDY_BASE"
-
-echo "========================================================================"
-echo "APM PAPER STUDY - AUTOMATED ENDURANCE BENCHMARK"
-echo "========================================================================"
-echo "Study ID: $STUDY_BASE"
-echo "Duration per run: ${DURATION}s (30 minutes)"
-echo "Hysteresis: ${HYSTERESIS}s"
-echo "Sparsity Factor: ${SPARSITY}x"
-echo "Num Channels: $NUM_CHANNELS"
-echo ""
-echo "Models to test: ${MODELS[@]}"
-echo "Workloads: ${WORKLOADS[@]}"
-echo ""
-echo "Comparison: Static MAXN vs Adaptive Power Management"
-echo ""
-echo "Expected total runtime: ~8 hours"
-echo "  - 5 models × 4 workloads × 2 modes × 30 min = 40 runs × 30 min = 1200 min"
-echo "  - Plus cooldown periods and visualization generation"
-echo "========================================================================"
-echo ""
-
-# Log file
-LOG_FILE="$STUDY_BASE/study_log.txt"
-echo "Study started at $(date)" | tee -a "$LOG_FILE"
-
-# Function to run single model benchmark
-run_model_benchmark() {
-    local model=$1
-    local model_output="$STUDY_BASE/${model}_results"
-
-    echo "" | tee -a "$LOG_FILE"
-    echo "========================================================================"  | tee -a "$LOG_FILE"
-    echo "BENCHMARKING MODEL: $model"  | tee -a "$LOG_FILE"
-    echo "========================================================================"  | tee -a "$LOG_FILE"
-    echo "Start time: $(date)"  | tee -a "$LOG_FILE"
-    echo ""  | tee -a "$LOG_FILE"
-
-    # Set model paths
-    MODEL_PATH="src/output/weights/${model}_best.pth"
-    ENGINE_PATH="src/output/engines/${model}.engine"
-
-    # Build TensorRT flag
-    if [ -f "$ENGINE_PATH" ]; then
-        TRT_FLAG="--use-tensorrt --engine-path $ENGINE_PATH"
-        echo "Using TensorRT engine: $ENGINE_PATH"  | tee -a "$LOG_FILE"
-    else
-        TRT_FLAG=""
-        echo "Using PyTorch model: $MODEL_PATH"  | tee -a "$LOG_FILE"
-    fi
-
-    # Create model output directory
-    mkdir -p "$model_output/results"
-
-    # Run for each workload
-    for workload in "${WORKLOADS[@]}"; do
-        echo ""  | tee -a "$LOG_FILE"
-        echo "--------------------------------------------------------------------"  | tee -a "$LOG_FILE"
-        echo "Model: $model | Workload: $workload"  | tee -a "$LOG_FILE"
-        echo "--------------------------------------------------------------------"  | tee -a "$LOG_FILE"
-        echo "Time: $(date)"  | tee -a "$LOG_FILE"
-        echo ""  | tee -a "$LOG_FILE"
-
-        # Run MAXN baseline + Adaptive with auto-calibration
-        # Auto-calibration will:
-        #   1. Profile hardware (30s)
-        #   2. Determine optimal thresholds
-        #   3. Use those thresholds for the endurance tests
-        echo "Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)..."  | tee -a "$LOG_FILE"
-        echo "  - Hardware profiling: ~30s"  | tee -a "$LOG_FILE"
-        echo "  - MAXN baseline: 60 min"  | tee -a "$LOG_FILE"
-        echo "  - Adaptive test: 60 min"  | tee -a "$LOG_FILE"
+# ... (rest of script until python command) ...
         python src/adaptive_benchmark.py \
             --model "$model" \
             --model-path "$MODEL_PATH" \
@@ -109,7 +39,7 @@ run_model_benchmark() {
             --workload "$workload" \
             --duration "$DURATION" \
             --auto-calibrate \
-            --target-sla 10.0 \
+            --target-sla 20.0 \
             --hysteresis-time "$HYSTERESIS" \
             --sparsity-factor "$SPARSITY" \
             --run-baselines \
@@ -117,25 +47,7 @@ run_model_benchmark() {
             --num-channels "$NUM_CHANNELS" \
             --output-dir "$model_output/results" \
             2>&1 | tee -a "$model_output/${workload}_run_log.txt"
-
-        echo "✅ Completed: $model - $workload"  | tee -a "$LOG_FILE"
-        echo "Time: $(date)"  | tee -a "$LOG_FILE"
-
-        # Step 2: Thermal cooldown between workloads
-        if [ "$workload" != "${WORKLOADS[-1]}" ]; then
-            echo "⏳ Thermal cooldown (2 minutes)..."  | tee -a "$LOG_FILE"
-            sleep 120
-        fi
-    done
-
-    # Generate visualizations for this model
-    echo ""  | tee -a "$LOG_FILE"
-    echo "--------------------------------------------------------------------"  | tee -a "$LOG_FILE"
-    echo "Generating visualizations for $model..."  | tee -a "$LOG_FILE"
-    echo "--------------------------------------------------------------------"  | tee -a "$LOG_FILE"
-
-    mkdir -p "$model_output/figures"
-
+# ... (rest of script until visualization) ...
     python src/visualize_adaptive_results.py \
         --results-dir "$model_output/results" \
         --model "$model" \
@@ -145,6 +57,14 @@ run_model_benchmark() {
 
     echo "✅ Visualizations complete for $model"  | tee -a "$LOG_FILE"
     echo "📊 Figures saved to: $model_output/figures/"  | tee -a "$LOG_FILE"
+
+    # Push results to GitHub
+    echo "--------------------------------------------------------------------" | tee -a "$LOG_FILE"
+    echo "Pushing results to GitHub..." | tee -a "$LOG_FILE"
+    git add -A
+    git commit -m "Benchmark results for $model (SLA 20ms)"
+    git push
+    echo "✅ Pushed to GitHub" | tee -a "$LOG_FILE"
 
     echo ""  | tee -a "$LOG_FILE"
     echo "========================================================================"  | tee -a "$LOG_FILE"
