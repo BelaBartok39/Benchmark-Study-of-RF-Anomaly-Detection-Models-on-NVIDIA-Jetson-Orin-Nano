@@ -1,0 +1,384 @@
+Study started at Sat Dec 13 11:18:25 AM CST 2025
+Starting benchmark at Sat Dec 13 11:18:25 AM CST 2025
+
+
+========================================================================
+BENCHMARKING MODEL: ae
+========================================================================
+Start time: Sat Dec 13 11:18:25 AM CST 2025
+
+Using PyTorch model: src/output/weights/ae_best.pth
+
+--------------------------------------------------------------------
+Model: ae | Workload: bursty
+--------------------------------------------------------------------
+Time: Sat Dec 13 11:18:25 AM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: ae - bursty
+Time: Sat Dec 13 12:19:12 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: ae | Workload: periodic
+--------------------------------------------------------------------
+Time: Sat Dec 13 12:21:12 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: ae - periodic
+Time: Sat Dec 13 01:19:38 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: ae | Workload: continuous
+--------------------------------------------------------------------
+Time: Sat Dec 13 01:21:38 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: ae - continuous
+Time: Sat Dec 13 02:22:27 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: ae | Workload: variable
+--------------------------------------------------------------------
+Time: Sat Dec 13 02:24:27 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: ae - variable
+Time: Sat Dec 13 03:25:17 PM CST 2025
+
+--------------------------------------------------------------------
+Generating visualizations for ae...
+--------------------------------------------------------------------
+✅ Visualizations complete for ae
+📊 Figures saved to: apm_paper_study_20251213_111825/ae_results/figures/
+
+========================================================================
+✅ MODEL COMPLETE: ae
+End time: Sat Dec 13 03:25:34 PM CST 2025
+========================================================================
+
+⏳ Extended cooldown between models (5 minutes)...
+
+========================================================================
+BENCHMARKING MODEL: aae
+========================================================================
+Start time: Sat Dec 13 03:30:34 PM CST 2025
+
+Using PyTorch model: src/output/weights/aae_best.pth
+
+--------------------------------------------------------------------
+Model: aae | Workload: bursty
+--------------------------------------------------------------------
+Time: Sat Dec 13 03:30:34 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: aae - bursty
+Time: Sat Dec 13 04:31:21 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: aae | Workload: periodic
+--------------------------------------------------------------------
+Time: Sat Dec 13 04:33:21 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: aae - periodic
+Time: Sat Dec 13 05:31:47 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: aae | Workload: continuous
+--------------------------------------------------------------------
+Time: Sat Dec 13 05:33:47 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: aae - continuous
+Time: Sat Dec 13 06:34:36 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: aae | Workload: variable
+--------------------------------------------------------------------
+Time: Sat Dec 13 06:36:36 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: aae - variable
+Time: Sat Dec 13 07:37:26 PM CST 2025
+
+--------------------------------------------------------------------
+Generating visualizations for aae...
+--------------------------------------------------------------------
+✅ Visualizations complete for aae
+📊 Figures saved to: apm_paper_study_20251213_111825/aae_results/figures/
+
+========================================================================
+✅ MODEL COMPLETE: aae
+End time: Sat Dec 13 07:37:42 PM CST 2025
+========================================================================
+
+⏳ Extended cooldown between models (5 minutes)...
+
+========================================================================
+BENCHMARKING MODEL: cnn_ae
+========================================================================
+Start time: Sat Dec 13 07:42:42 PM CST 2025
+
+Using PyTorch model: src/output/weights/cnn_ae_best.pth
+
+--------------------------------------------------------------------
+Model: cnn_ae | Workload: bursty
+--------------------------------------------------------------------
+Time: Sat Dec 13 07:42:42 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: cnn_ae - bursty
+Time: Sat Dec 13 08:43:32 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: cnn_ae | Workload: periodic
+--------------------------------------------------------------------
+Time: Sat Dec 13 08:45:32 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: cnn_ae - periodic
+Time: Sat Dec 13 09:43:59 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: cnn_ae | Workload: continuous
+--------------------------------------------------------------------
+Time: Sat Dec 13 09:45:59 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: cnn_ae - continuous
+Time: Sat Dec 13 10:46:49 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: cnn_ae | Workload: variable
+--------------------------------------------------------------------
+Time: Sat Dec 13 10:48:49 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: cnn_ae - variable
+Time: Sat Dec 13 11:49:42 PM CST 2025
+
+--------------------------------------------------------------------
+Generating visualizations for cnn_ae...
+--------------------------------------------------------------------
+✅ Visualizations complete for cnn_ae
+📊 Figures saved to: apm_paper_study_20251213_111825/cnn_ae_results/figures/
+
+========================================================================
+✅ MODEL COMPLETE: cnn_ae
+End time: Sat Dec 13 11:50:01 PM CST 2025
+========================================================================
+
+⏳ Extended cooldown between models (5 minutes)...
+
+========================================================================
+BENCHMARKING MODEL: resnet_ae
+========================================================================
+Start time: Sat Dec 13 11:55:01 PM CST 2025
+
+Using PyTorch model: src/output/weights/resnet_ae_best.pth
+
+--------------------------------------------------------------------
+Model: resnet_ae | Workload: bursty
+--------------------------------------------------------------------
+Time: Sat Dec 13 11:55:01 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: resnet_ae - bursty
+Time: Sun Dec 14 12:55:50 AM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: resnet_ae | Workload: periodic
+--------------------------------------------------------------------
+Time: Sun Dec 14 12:57:50 AM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: resnet_ae - periodic
+Time: Sun Dec 14 01:56:17 AM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: resnet_ae | Workload: continuous
+--------------------------------------------------------------------
+Time: Sun Dec 14 01:58:17 AM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: resnet_ae - continuous
+Time: Sun Dec 14 02:59:07 AM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: resnet_ae | Workload: variable
+--------------------------------------------------------------------
+Time: Sun Dec 14 03:01:07 AM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: resnet_ae - variable
+Time: Sun Dec 14 04:01:58 AM CST 2025
+
+--------------------------------------------------------------------
+Generating visualizations for resnet_ae...
+--------------------------------------------------------------------
+✅ Visualizations complete for resnet_ae
+📊 Figures saved to: apm_paper_study_20251213_111825/resnet_ae_results/figures/
+
+========================================================================
+✅ MODEL COMPLETE: resnet_ae
+End time: Sun Dec 14 04:02:13 AM CST 2025
+========================================================================
+
+⏳ Extended cooldown between models (5 minutes)...
+
+========================================================================
+BENCHMARKING MODEL: lstm_ae
+========================================================================
+Start time: Sun Dec 14 04:07:13 AM CST 2025
+
+Using PyTorch model: src/output/weights/lstm_ae_best.pth
+
+--------------------------------------------------------------------
+Model: lstm_ae | Workload: bursty
+--------------------------------------------------------------------
+Time: Sun Dec 14 04:07:13 AM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: lstm_ae - bursty
+Time: Sun Dec 14 05:08:01 AM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: lstm_ae | Workload: periodic
+--------------------------------------------------------------------
+Time: Sun Dec 14 05:10:01 AM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: lstm_ae - periodic
+Time: Sun Dec 14 06:08:29 AM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: lstm_ae | Workload: continuous
+--------------------------------------------------------------------
+Time: Sun Dec 14 06:10:29 AM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: lstm_ae - continuous
+Time: Sun Dec 14 07:11:22 AM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: lstm_ae | Workload: variable
+--------------------------------------------------------------------
+Time: Sun Dec 14 07:13:22 AM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 60 min
+  - Adaptive test: 60 min
+✅ Completed: lstm_ae - variable
+Time: Sun Dec 14 08:14:14 AM CST 2025
+
+--------------------------------------------------------------------
+Generating visualizations for lstm_ae...
+--------------------------------------------------------------------
+✅ Visualizations complete for lstm_ae
+📊 Figures saved to: apm_paper_study_20251213_111825/lstm_ae_results/figures/
+
+========================================================================
+✅ MODEL COMPLETE: lstm_ae
+End time: Sun Dec 14 08:14:32 AM CST 2025
+========================================================================
+
+
+========================================================================
+🎉 STUDY COMPLETE!
+========================================================================
+Completion time: Sun Dec 14 08:14:32 AM CST 2025
+
+Results organized by model in: apm_paper_study_20251213_111825/
+
+Directory structure:
+  apm_paper_study_20251213_111825/ae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+  apm_paper_study_20251213_111825/aae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+  apm_paper_study_20251213_111825/cnn_ae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+  apm_paper_study_20251213_111825/resnet_ae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+  apm_paper_study_20251213_111825/lstm_ae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+
+📊 All visualizations have been generated automatically.
+========================================================================

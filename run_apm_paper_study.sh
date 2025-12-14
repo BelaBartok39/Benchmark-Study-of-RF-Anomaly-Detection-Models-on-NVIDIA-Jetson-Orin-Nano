@@ -22,9 +22,9 @@ set -e  # Exit on error
 # Configuration
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 STUDY_BASE="apm_paper_study_${TIMESTAMP}"
-DURATION=3600  # 60 minutes (1 hour)
-HYSTERESIS=60.0
-SPARSITY=10.0
+DURATION=1800  # 30 minutes
+HYSTERESIS=30.0 # Set to 60 for one-hour durations
+SPARSITY=5.0 # Set to 10.0 for one-hour durations
 NUM_CHANNELS=1
 WORKLOADS=("bursty" "periodic" "continuous" "variable")
 MODELS=("ae" "aae" "cnn_ae" "resnet_ae" "lstm_ae")
@@ -36,7 +36,7 @@ echo "========================================================================"
 echo "APM PAPER STUDY - AUTOMATED ENDURANCE BENCHMARK"
 echo "========================================================================"
 echo "Study ID: $STUDY_BASE"
-echo "Duration per run: ${DURATION}s (60 minutes)"
+echo "Duration per run: ${DURATION}s (30 minutes)"
 echo "Hysteresis: ${HYSTERESIS}s"
 echo "Sparsity Factor: ${SPARSITY}x"
 echo "Num Channels: $NUM_CHANNELS"
@@ -47,7 +47,7 @@ echo ""
 echo "Comparison: Static MAXN vs Adaptive Power Management"
 echo ""
 echo "Expected total runtime: ~8 hours"
-echo "  - 5 models × 4 workloads × 2 modes × 60 min = 40 runs × 60 min = 2400 min"
+echo "  - 5 models × 4 workloads × 2 modes × 30 min = 40 runs × 30 min = 1200 min"
 echo "  - Plus cooldown periods and visualization generation"
 echo "========================================================================"
 echo ""
