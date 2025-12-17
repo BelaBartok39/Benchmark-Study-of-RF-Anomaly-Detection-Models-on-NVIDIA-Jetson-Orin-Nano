@@ -27,8 +27,8 @@ HYSTERESIS=30.0 # Set to 60 for one-hour durations
 SPARSITY=5.0 # Set to 10.0 for one-hour durations
 NUM_CHANNELS=1
 WORKLOADS=("bursty" "periodic" "continuous" "variable")
-# MODELS=("ae" "aae" "cnn_ae" "resnet_ae" "lstm_ae")
-MODELS=("resnet_ae") # Running only ResNet for the 20ms SLA experiment
+MODELS=("ae" "aae" "cnn_ae" "resnet_ae" "lstm_ae")
+# MODELS=("resnet_ae") # Running only ResNet for the 20ms SLA experiment
 
 # Create base study directory
 mkdir -p "$STUDY_BASE"
@@ -48,7 +48,7 @@ echo ""
 echo "Comparison: Static MAXN vs Adaptive Power Management"
 echo ""
 echo "Expected total runtime: ~2 hours (Single Model)"
-echo "  - 1 model × 4 workloads × 2 modes × 30 min = 4 runs × 30 min = 120 min"
+echo "  - 5 models × 4 workloads × 2 modes × 30 min = 4 runs × 30 min = 1200 min"
 echo "  - Plus cooldown periods and visualization generation"
 echo "========================================================================"
 echo ""
@@ -101,8 +101,8 @@ run_model_benchmark() {
         #   3. Use those thresholds for the endurance tests
         echo "Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)..."  | tee -a "$LOG_FILE"
         echo "  - Hardware profiling: ~30s"  | tee -a "$LOG_FILE"
-        echo "  - MAXN baseline: 60 min"  | tee -a "$LOG_FILE"
-        echo "  - Adaptive test: 60 min"  | tee -a "$LOG_FILE"
+        echo "  - MAXN baseline: 30 min"  | tee -a "$LOG_FILE"
+        echo "  - Adaptive test: 30 min"  | tee -a "$LOG_FILE"
         python src/adaptive_benchmark.py \
             --model "$model" \
             --model-path "$MODEL_PATH" \
@@ -110,7 +110,7 @@ run_model_benchmark() {
             --workload "$workload" \
             --duration "$DURATION" \
             --auto-calibrate \
-            --target-sla 20.0 \
+            --target-sla 10.0 \
             --hysteresis-time "$HYSTERESIS" \
             --sparsity-factor "$SPARSITY" \
             --run-baselines \
@@ -151,7 +151,7 @@ run_model_benchmark() {
     echo "--------------------------------------------------------------------" | tee -a "$LOG_FILE"
     echo "Pushing results to GitHub..." | tee -a "$LOG_FILE"
     git add -A
-    git commit -m "Benchmark results for $model (SLA 20ms)"
+    git commit -m "Benchmark results for $model (SLA 10ms)"
     git push
     echo "✅ Pushed to GitHub" | tee -a "$LOG_FILE"
 
