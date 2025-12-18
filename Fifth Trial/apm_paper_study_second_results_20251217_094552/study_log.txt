@@ -363,3 +363,37 @@ Generating visualizations for lstm_ae...
 📊 Figures saved to: apm_paper_study_20251217_094552/lstm_ae_results/figures/
 --------------------------------------------------------------------
 Pushing results to GitHub...
+✅ Pushed to GitHub
+
+========================================================================
+✅ MODEL COMPLETE: lstm_ae
+End time: Thu Dec 18 06:44:06 AM CST 2025
+========================================================================
+
+
+========================================================================
+🎉 STUDY COMPLETE!
+========================================================================
+Completion time: Thu Dec 18 06:44:06 AM CST 2025
+
+Results organized by model in: apm_paper_study_20251217_094552/
+
+Directory structure:
+  apm_paper_study_20251217_094552/ae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+  apm_paper_study_20251217_094552/aae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+  apm_paper_study_20251217_094552/cnn_ae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+  apm_paper_study_20251217_094552/resnet_ae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+  apm_paper_study_20251217_094552/lstm_ae_results/
+    ├── results/           (JSON result files + calibration data)
+    └── figures/           (Visualization plots)
+
+📊 All visualizations have been generated automatically.
+========================================================================
