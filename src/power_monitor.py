@@ -209,25 +209,26 @@ class JetsonPowerMonitor:
                     used_mem = float(ram_section.split('/')[0])
                     data['memory_mb'] = used_mem
 
-            # Extract temperature readings - format "CPU@45C", "GPU@52.5C", "SOC0@48C"
-            if 'CPU@' in line:
-                temp_section = line.split('CPU@')[1].split('C')[0]
+            # Extract temperature readings - format "cpu@48.812C", "gpu@46.562C", "soc0@47.937C"
+            # Note: tegrastats uses lowercase for temp labels
+            if 'cpu@' in line:
+                temp_section = line.split('cpu@')[1].split('C')[0]
                 data['temp_cpu_c'] = float(temp_section)
 
-            if 'GPU@' in line:
-                temp_section = line.split('GPU@')[1].split('C')[0]
+            if 'gpu@' in line:
+                temp_section = line.split('gpu@')[1].split('C')[0]
                 data['temp_gpu_c'] = float(temp_section)
 
-            if 'SOC' in line and '@' in line:
-                # Handle SOC0@48C, SOC2@50C, etc.
-                # Extract first SOC reading
-                soc_parts = line.split('SOC')
-                if len(soc_parts) > 1:
-                    for part in soc_parts[1:]:
-                        if '@' in part:
-                            temp_str = part.split('@')[1].split('C')[0]
-                            data['temp_soc_c'] = float(temp_str)
-                            break  # Use first SOC reading
+            if 'soc' in line and '@' in line:
+                # Handle soc0@47.937C, soc1@46.968C, soc2@47.25C
+                # Use soc0 as the primary SOC temperature
+                if 'soc0@' in line:
+                    temp_str = line.split('soc0@')[1].split('C')[0]
+                    data['temp_soc_c'] = float(temp_str)
+                elif 'soc1@' in line and data['temp_soc_c'] == 0.0:
+                    # Fallback to soc1 if soc0 not present
+                    temp_str = line.split('soc1@')[1].split('C')[0]
+                    data['temp_soc_c'] = float(temp_str)
 
         except (ValueError, IndexError, AttributeError) as e:
             # Debug: print parsing errors for troubleshooting
