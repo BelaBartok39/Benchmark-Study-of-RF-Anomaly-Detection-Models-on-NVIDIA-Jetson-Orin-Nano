@@ -1,0 +1,1582 @@
+/ssd/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano/src/data_loader.py:45: ComplexWarning: Casting complex values to real discards the imaginary part
+  all_signals = np.concatenate([clean_signals, jammed_signals], axis=0).astype(np.float32)
+📊 Initializing Adaptive Benchmark for aae
+   Output directory: apm_paper_study_20251218_150806/aae_results/results
+🔥 Loading PyTorch model from src/output/weights/aae_best.pth
+📁 Loading test data (max 1000 samples)
+Loading train data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+Loading test data...
+Clean signals: (500, 1024), Jammed signals: (500, 1024)
+Dataset initialized with 1000 samples, shape: torch.Size([1000, 2, 1024])
+   Loaded 1000 samples
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Running hardware profiling to determine optimal thresholds...
+
+
+============================================================
+AUTOMATIC THRESHOLD CALIBRATION
+============================================================
+Target SLA: 10.0ms
+Safety Margin: 90%
+Strategy: sla_based
+
+
+🔍 Profiling 15W...
+  25/100 samples, avg: 0.95ms
+  50/100 samples, avg: 0.91ms
+  75/100 samples, avg: 0.89ms
+  100/100 samples, avg: 0.88ms
+  ✓ Mean: 0.88ms, P95: 1.04ms, P99: 1.11ms
+
+🔍 Profiling 25W...
+  25/100 samples, avg: 1.62ms
+  50/100 samples, avg: 1.63ms
+  75/100 samples, avg: 1.57ms
+  100/100 samples, avg: 1.57ms
+  ✓ Mean: 1.57ms, P95: 1.93ms, P99: 2.04ms
+
+🔍 Profiling MAXN...
+  25/100 samples, avg: 1.65ms
+  50/100 samples, avg: 1.62ms
+  75/100 samples, avg: 1.60ms
+  100/100 samples, avg: 1.57ms
+  ✓ Mean: 1.57ms, P95: 1.80ms, P99: 2.20ms
+
+============================================================
+CALIBRATION RESULTS
+============================================================
+
+🔧 Calibration Configuration:
+   Concurrent channels: 1
+
+📊 Profiled Performance:
+   15W:  Mean=0.88ms, P95=1.04ms, P99=1.11ms
+   25W:  Mean=1.57ms, P95=1.93ms, P99=2.04ms
+   MAXN: Mean=1.57ms, P95=1.80ms, P99=2.20ms
+
+🎯 Calibrated Thresholds:
+   15W → 25W:  8.00ms
+   25W → MAXN: 9.00ms
+   Hysteresis: 3.0s
+
+💡 Expected Behavior:
+   ✓ 15W mode can meet 10.0ms SLA
+   → Will use 15W primarily, 25W for bursts
+============================================================
+
+
+✅ Calibration complete!
+   Using calibrated thresholds:
+   - 15W → 25W: 8.00ms
+   - 25W → MAXN: 9.00ms
+   - Hysteresis: 30.0s (user override, calibrated: 3.0s)
+
+💾 Results saved to apm_paper_study_20251218_150806/aae_results/results/aae_calibration_results.json
+
+============================================================
+STATIC BASELINE: MAXN - bursty
+  Sparsity Factor: 5.0x
+============================================================
+✓ Power mode set to MAXN
+🔋 Power monitoring started (sampling every 100ms)
+🔋 Sample 1: 5.3W, CPU: 3.8%, GPU: 11.0%
+  Progress: 100 inferences, 1.0s elapsed, avg latency: 1.52ms
+  Progress: 200 inferences, 2.0s elapsed, avg latency: 1.53ms
+  Progress: 300 inferences, 3.0s elapsed, avg latency: 1.53ms
+  Progress: 400 inferences, 4.0s elapsed, avg latency: 1.53ms
+  Progress: 500 inferences, 5.0s elapsed, avg latency: 1.54ms
+🔋 Sample 6: 5.1W, CPU: 3.0%, GPU: 0.0%
+🔋 Sample 11: 5.0W, CPU: 0.0%, GPU: 36.0%
+🔋 Sample 16: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 600 inferences, 14.9s elapsed, avg latency: 1.56ms
+🔋 Sample 21: 5.1W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 26: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 700 inferences, 24.9s elapsed, avg latency: 1.59ms
+🔋 Sample 31: 5.1W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 36: 5.1W, CPU: 2.3%, GPU: 5.0%
+  Progress: 800 inferences, 34.9s elapsed, avg latency: 1.60ms
+🔋 Sample 41: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 46: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 900 inferences, 44.9s elapsed, avg latency: 1.61ms
+🔋 Sample 51: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 56: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 1000 inferences, 54.9s elapsed, avg latency: 1.60ms
+🔋 Sample 61: 5.1W, CPU: 5.2%, GPU: 11.0%
+  Progress: 1100 inferences, 56.0s elapsed, avg latency: 1.60ms
+  Progress: 1200 inferences, 57.0s elapsed, avg latency: 1.60ms
+  Progress: 1300 inferences, 58.0s elapsed, avg latency: 1.60ms
+  Progress: 1400 inferences, 59.0s elapsed, avg latency: 1.59ms
+🔋 Sample 66: 5.2W, CPU: 4.7%, GPU: 3.0%
+  Progress: 1500 inferences, 60.0s elapsed, avg latency: 1.59ms
+🔋 Sample 71: 5.0W, CPU: 3.0%, GPU: 0.0%
+🔋 Sample 76: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 1600 inferences, 69.9s elapsed, avg latency: 1.59ms
+🔋 Sample 81: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 86: 5.0W, CPU: 2.2%, GPU: 5.0%
+  Progress: 1700 inferences, 79.9s elapsed, avg latency: 1.59ms
+🔋 Sample 91: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 96: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 1800 inferences, 89.9s elapsed, avg latency: 1.59ms
+🔋 Sample 101: 5.1W, CPU: 1.5%, GPU: 8.0%
+🔋 Sample 106: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 1900 inferences, 99.9s elapsed, avg latency: 1.59ms
+🔋 Sample 111: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 116: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 121: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 2000 inferences, 109.9s elapsed, avg latency: 1.59ms
+  Progress: 2100 inferences, 111.0s elapsed, avg latency: 1.59ms
+  Progress: 2200 inferences, 112.0s elapsed, avg latency: 1.59ms
+  Progress: 2300 inferences, 113.0s elapsed, avg latency: 1.59ms
+  Progress: 2400 inferences, 114.0s elapsed, avg latency: 1.59ms
+🔋 Sample 126: 5.2W, CPU: 3.8%, GPU: 3.0%
+  Progress: 2500 inferences, 115.0s elapsed, avg latency: 1.59ms
+🔋 Sample 131: 5.1W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 136: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 2600 inferences, 124.9s elapsed, avg latency: 1.59ms
+🔋 Sample 141: 5.0W, CPU: 1.3%, GPU: 5.0%
+🔋 Sample 146: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 2700 inferences, 134.9s elapsed, avg latency: 1.59ms
+🔋 Sample 151: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 156: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 2800 inferences, 144.9s elapsed, avg latency: 1.59ms
+🔋 Sample 161: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 166: 5.0W, CPU: 1.5%, GPU: 5.0%
+  Progress: 2900 inferences, 154.9s elapsed, avg latency: 1.59ms
+🔋 Sample 171: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 176: 5.0W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 181: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 3000 inferences, 164.9s elapsed, avg latency: 1.59ms
+  Progress: 3100 inferences, 166.0s elapsed, avg latency: 1.59ms
+  Progress: 3200 inferences, 167.0s elapsed, avg latency: 1.59ms
+  Progress: 3300 inferences, 168.0s elapsed, avg latency: 1.59ms
+🔋 Sample 186: 5.2W, CPU: 3.5%, GPU: 3.0%
+  Progress: 3400 inferences, 169.0s elapsed, avg latency: 1.58ms
+  Progress: 3500 inferences, 170.0s elapsed, avg latency: 1.58ms
+🔋 Sample 191: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 196: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 3600 inferences, 179.9s elapsed, avg latency: 1.58ms
+🔋 Sample 201: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 206: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 3700 inferences, 189.9s elapsed, avg latency: 1.59ms
+🔋 Sample 211: 5.0W, CPU: 3.0%, GPU: 0.0%
+🔋 Sample 216: 5.0W, CPU: 0.8%, GPU: 2.0%
+  Progress: 3800 inferences, 199.9s elapsed, avg latency: 1.59ms
+🔋 Sample 221: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 226: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 231: 5.0W, CPU: 3.5%, GPU: 5.0%
+  Progress: 3900 inferences, 209.9s elapsed, avg latency: 1.59ms
+🔋 Sample 236: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 241: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 4000 inferences, 219.9s elapsed, avg latency: 1.59ms
+  Progress: 4100 inferences, 221.0s elapsed, avg latency: 1.59ms
+  Progress: 4200 inferences, 222.0s elapsed, avg latency: 1.59ms
+  Progress: 4300 inferences, 223.0s elapsed, avg latency: 1.59ms
+🔋 Sample 246: 5.2W, CPU: 6.0%, GPU: 3.0%
+  Progress: 4400 inferences, 224.0s elapsed, avg latency: 1.59ms
+  Progress: 4500 inferences, 225.0s elapsed, avg latency: 1.59ms
+🔋 Sample 251: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 256: 5.0W, CPU: 0.7%, GPU: 3.0%
+  Progress: 4600 inferences, 234.9s elapsed, avg latency: 1.59ms
+🔋 Sample 261: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 266: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 4700 inferences, 244.9s elapsed, avg latency: 1.59ms
+🔋 Sample 271: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 276: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 4800 inferences, 254.9s elapsed, avg latency: 1.59ms
+🔋 Sample 281: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 286: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 291: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 4900 inferences, 264.9s elapsed, avg latency: 1.59ms
+🔋 Sample 296: 5.0W, CPU: 1.3%, GPU: 5.0%
+🔋 Sample 301: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 5000 inferences, 274.9s elapsed, avg latency: 1.59ms
+  Progress: 5100 inferences, 276.0s elapsed, avg latency: 1.59ms
+  Progress: 5200 inferences, 277.0s elapsed, avg latency: 1.59ms
+🔋 Sample 306: 5.2W, CPU: 3.8%, GPU: 3.0%
+  Progress: 5300 inferences, 278.0s elapsed, avg latency: 1.59ms
+  Progress: 5400 inferences, 279.0s elapsed, avg latency: 1.59ms
+  Progress: 5500 inferences, 280.0s elapsed, avg latency: 1.59ms
+🔋 Sample 311: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 316: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 5600 inferences, 289.9s elapsed, avg latency: 1.59ms
+🔋 Sample 321: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 326: 5.0W, CPU: 3.0%, GPU: 24.0%
+  Progress: 5700 inferences, 299.9s elapsed, avg latency: 1.59ms
+🔋 Sample 331: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 336: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 341: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 5800 inferences, 309.9s elapsed, avg latency: 1.59ms
+🔋 Sample 346: 5.0W, CPU: 1.5%, GPU: 8.0%
+🔋 Sample 351: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 5900 inferences, 319.9s elapsed, avg latency: 1.59ms
+🔋 Sample 356: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 361: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 6000 inferences, 329.9s elapsed, avg latency: 1.59ms
+  Progress: 6100 inferences, 331.0s elapsed, avg latency: 1.59ms
+  Progress: 6200 inferences, 332.0s elapsed, avg latency: 1.59ms
+🔋 Sample 366: 5.2W, CPU: 4.5%, GPU: 2.0%
+  Progress: 6300 inferences, 333.0s elapsed, avg latency: 1.59ms
+  Progress: 6400 inferences, 334.0s elapsed, avg latency: 1.59ms
+  Progress: 6500 inferences, 335.0s elapsed, avg latency: 1.59ms
+🔋 Sample 371: 5.1W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 376: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 6600 inferences, 344.9s elapsed, avg latency: 1.59ms
+🔋 Sample 381: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 386: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 391: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 6700 inferences, 354.9s elapsed, avg latency: 1.59ms
+🔋 Sample 396: 5.0W, CPU: 0.8%, GPU: 8.0%
+🔋 Sample 401: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 6800 inferences, 364.9s elapsed, avg latency: 1.59ms
+🔋 Sample 406: 5.0W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 411: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 6900 inferences, 374.9s elapsed, avg latency: 1.59ms
+🔋 Sample 416: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 421: 5.0W, CPU: 1.5%, GPU: 8.0%
+  Progress: 7000 inferences, 384.9s elapsed, avg latency: 1.59ms
+  Progress: 7100 inferences, 386.0s elapsed, avg latency: 1.59ms
+🔋 Sample 426: 5.2W, CPU: 4.7%, GPU: 10.0%
+  Progress: 7200 inferences, 387.0s elapsed, avg latency: 1.59ms
+  Progress: 7300 inferences, 388.0s elapsed, avg latency: 1.59ms
+  Progress: 7400 inferences, 389.0s elapsed, avg latency: 1.59ms
+  Progress: 7500 inferences, 390.0s elapsed, avg latency: 1.59ms
+🔋 Sample 431: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 436: 5.0W, CPU: 1.7%, GPU: 5.0%
+  Progress: 7600 inferences, 399.9s elapsed, avg latency: 1.59ms
+🔋 Sample 441: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 446: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 451: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 7700 inferences, 409.9s elapsed, avg latency: 1.59ms
+🔋 Sample 456: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 461: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 7800 inferences, 419.9s elapsed, avg latency: 1.59ms
+🔋 Sample 466: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 471: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 7900 inferences, 429.9s elapsed, avg latency: 1.59ms
+🔋 Sample 476: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 481: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 8000 inferences, 439.9s elapsed, avg latency: 1.59ms
+  Progress: 8100 inferences, 441.0s elapsed, avg latency: 1.59ms
+🔋 Sample 486: 5.1W, CPU: 4.5%, GPU: 9.0%
+  Progress: 8200 inferences, 442.0s elapsed, avg latency: 1.59ms
+  Progress: 8300 inferences, 443.0s elapsed, avg latency: 1.59ms
+  Progress: 8400 inferences, 444.0s elapsed, avg latency: 1.59ms
+  Progress: 8500 inferences, 445.0s elapsed, avg latency: 1.59ms
+🔋 Sample 491: 5.1W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 496: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 501: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 8600 inferences, 454.9s elapsed, avg latency: 1.59ms
+🔋 Sample 506: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 511: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 8700 inferences, 464.9s elapsed, avg latency: 1.59ms
+🔋 Sample 516: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 521: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 8800 inferences, 474.9s elapsed, avg latency: 1.59ms
+🔋 Sample 526: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 531: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 8900 inferences, 484.9s elapsed, avg latency: 1.59ms
+🔋 Sample 536: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 541: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 9000 inferences, 494.9s elapsed, avg latency: 1.59ms
+🔋 Sample 546: 5.1W, CPU: 4.8%, GPU: 11.0%
+  Progress: 9100 inferences, 496.0s elapsed, avg latency: 1.59ms
+  Progress: 9200 inferences, 497.0s elapsed, avg latency: 1.59ms
+  Progress: 9300 inferences, 498.0s elapsed, avg latency: 1.59ms
+  Progress: 9400 inferences, 499.0s elapsed, avg latency: 1.59ms
+  Progress: 9500 inferences, 500.0s elapsed, avg latency: 1.59ms
+🔋 Sample 551: 5.2W, CPU: 3.3%, GPU: 2.0%
+🔋 Sample 556: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 561: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 9600 inferences, 509.9s elapsed, avg latency: 1.59ms
+🔋 Sample 566: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 571: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 9700 inferences, 519.9s elapsed, avg latency: 1.59ms
+🔋 Sample 576: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 581: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 9800 inferences, 529.9s elapsed, avg latency: 1.59ms
+🔋 Sample 586: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 591: 5.0W, CPU: 2.0%, GPU: 4.0%
+  Progress: 9900 inferences, 539.9s elapsed, avg latency: 1.59ms
+🔋 Sample 596: 5.1W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 601: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 10000 inferences, 549.9s elapsed, avg latency: 1.59ms
+🔋 Sample 606: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 10100 inferences, 551.0s elapsed, avg latency: 1.59ms
+  Progress: 10200 inferences, 552.0s elapsed, avg latency: 1.59ms
+  Progress: 10300 inferences, 553.0s elapsed, avg latency: 1.59ms
+  Progress: 10400 inferences, 554.0s elapsed, avg latency: 1.59ms
+🔋 Sample 611: 5.2W, CPU: 4.2%, GPU: 2.0%
+  Progress: 10500 inferences, 555.0s elapsed, avg latency: 1.59ms
+🔋 Sample 616: 5.0W, CPU: 0.8%, GPU: 8.0%
+🔋 Sample 621: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 10600 inferences, 564.9s elapsed, avg latency: 1.59ms
+🔋 Sample 626: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 631: 5.0W, CPU: 0.7%, GPU: 2.0%
+  Progress: 10700 inferences, 574.9s elapsed, avg latency: 1.59ms
+🔋 Sample 636: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 641: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 10800 inferences, 584.9s elapsed, avg latency: 1.59ms
+🔋 Sample 646: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 651: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 10900 inferences, 594.9s elapsed, avg latency: 1.59ms
+🔋 Sample 656: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 661: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 666: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 11000 inferences, 604.9s elapsed, avg latency: 1.59ms
+  Progress: 11100 inferences, 606.0s elapsed, avg latency: 1.59ms
+  Progress: 11200 inferences, 607.0s elapsed, avg latency: 1.59ms
+  Progress: 11300 inferences, 608.0s elapsed, avg latency: 1.59ms
+  Progress: 11400 inferences, 609.0s elapsed, avg latency: 1.59ms
+🔋 Sample 671: 5.2W, CPU: 3.3%, GPU: 1.0%
+  Progress: 11500 inferences, 610.0s elapsed, avg latency: 1.59ms
+🔋 Sample 676: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 681: 5.0W, CPU: 2.2%, GPU: 4.0%
+  Progress: 11600 inferences, 619.9s elapsed, avg latency: 1.59ms
+🔋 Sample 686: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 691: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 11700 inferences, 629.9s elapsed, avg latency: 1.59ms
+🔋 Sample 696: 5.1W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 701: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 11800 inferences, 639.9s elapsed, avg latency: 1.59ms
+🔋 Sample 706: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 711: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 716: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 11900 inferences, 649.9s elapsed, avg latency: 1.59ms
+🔋 Sample 721: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 726: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 12000 inferences, 659.9s elapsed, avg latency: 1.59ms
+  Progress: 12100 inferences, 661.0s elapsed, avg latency: 1.59ms
+  Progress: 12200 inferences, 662.0s elapsed, avg latency: 1.59ms
+  Progress: 12300 inferences, 663.0s elapsed, avg latency: 1.59ms
+🔋 Sample 731: 5.2W, CPU: 5.5%, GPU: 3.0%
+  Progress: 12400 inferences, 664.0s elapsed, avg latency: 1.59ms
+  Progress: 12500 inferences, 665.0s elapsed, avg latency: 1.59ms
+🔋 Sample 736: 5.1W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 741: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 12600 inferences, 674.9s elapsed, avg latency: 1.59ms
+🔋 Sample 746: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 751: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 12700 inferences, 684.9s elapsed, avg latency: 1.59ms
+🔋 Sample 756: 5.1W, CPU: 0.0%, GPU: 5.0%
+🔋 Sample 761: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 12800 inferences, 694.9s elapsed, avg latency: 1.59ms
+🔋 Sample 766: 5.1W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 771: 5.1W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 776: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 12900 inferences, 704.9s elapsed, avg latency: 1.59ms
+🔋 Sample 781: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 786: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 13000 inferences, 714.9s elapsed, avg latency: 1.59ms
+  Progress: 13100 inferences, 716.0s elapsed, avg latency: 1.59ms
+  Progress: 13200 inferences, 717.0s elapsed, avg latency: 1.59ms
+🔋 Sample 791: 5.2W, CPU: 4.3%, GPU: 1.0%
+  Progress: 13300 inferences, 718.0s elapsed, avg latency: 1.59ms
+  Progress: 13400 inferences, 719.0s elapsed, avg latency: 1.59ms
+  Progress: 13500 inferences, 720.0s elapsed, avg latency: 1.59ms
+🔋 Sample 796: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 801: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 13600 inferences, 729.9s elapsed, avg latency: 1.59ms
+🔋 Sample 806: 5.0W, CPU: 0.8%, GPU: 8.0%
+🔋 Sample 811: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 13700 inferences, 739.9s elapsed, avg latency: 1.59ms
+🔋 Sample 816: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 821: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 826: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 13800 inferences, 749.9s elapsed, avg latency: 1.59ms
+🔋 Sample 831: 5.0W, CPU: 0.7%, GPU: 5.0%
+🔋 Sample 836: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 13900 inferences, 759.9s elapsed, avg latency: 1.59ms
+🔋 Sample 841: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 846: 5.0W, CPU: 3.0%, GPU: 5.0%
+  Progress: 14000 inferences, 769.9s elapsed, avg latency: 1.59ms
+  Progress: 14100 inferences, 771.0s elapsed, avg latency: 1.59ms
+  Progress: 14200 inferences, 772.0s elapsed, avg latency: 1.59ms
+🔋 Sample 851: 5.2W, CPU: 4.5%, GPU: 3.0%
+  Progress: 14300 inferences, 773.0s elapsed, avg latency: 1.59ms
+  Progress: 14400 inferences, 774.0s elapsed, avg latency: 1.59ms
+  Progress: 14500 inferences, 775.0s elapsed, avg latency: 1.59ms
+🔋 Sample 856: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 861: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 14600 inferences, 784.9s elapsed, avg latency: 1.59ms
+🔋 Sample 866: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 871: 5.0W, CPU: 3.7%, GPU: 0.0%
+  Progress: 14700 inferences, 794.9s elapsed, avg latency: 1.59ms
+🔋 Sample 876: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 881: 5.0W, CPU: 3.5%, GPU: 0.0%
+🔋 Sample 886: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 14800 inferences, 804.9s elapsed, avg latency: 1.59ms
+🔋 Sample 891: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 896: 5.0W, CPU: 0.7%, GPU: 5.0%
+  Progress: 14900 inferences, 814.9s elapsed, avg latency: 1.59ms
+🔋 Sample 901: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 906: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 15000 inferences, 824.9s elapsed, avg latency: 1.59ms
+  Progress: 15100 inferences, 826.0s elapsed, avg latency: 1.59ms
+🔋 Sample 911: 5.2W, CPU: 3.3%, GPU: 3.0%
+  Progress: 15200 inferences, 827.0s elapsed, avg latency: 1.59ms
+  Progress: 15300 inferences, 828.0s elapsed, avg latency: 1.59ms
+  Progress: 15400 inferences, 829.0s elapsed, avg latency: 1.59ms
+  Progress: 15500 inferences, 830.0s elapsed, avg latency: 1.59ms
+🔋 Sample 916: 5.1W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 921: 5.0W, CPU: 2.2%, GPU: 2.0%
+  Progress: 15600 inferences, 839.9s elapsed, avg latency: 1.59ms
+🔋 Sample 926: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 931: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 936: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 15700 inferences, 849.9s elapsed, avg latency: 1.59ms
+🔋 Sample 941: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 946: 5.0W, CPU: 1.5%, GPU: 8.0%
+  Progress: 15800 inferences, 859.9s elapsed, avg latency: 1.59ms
+🔋 Sample 951: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 956: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 15900 inferences, 869.9s elapsed, avg latency: 1.59ms
+🔋 Sample 961: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 966: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 16000 inferences, 879.9s elapsed, avg latency: 1.59ms
+  Progress: 16100 inferences, 881.0s elapsed, avg latency: 1.59ms
+🔋 Sample 971: 5.2W, CPU: 3.8%, GPU: 1.0%
+  Progress: 16200 inferences, 882.0s elapsed, avg latency: 1.59ms
+  Progress: 16300 inferences, 883.0s elapsed, avg latency: 1.59ms
+  Progress: 16400 inferences, 884.0s elapsed, avg latency: 1.59ms
+  Progress: 16500 inferences, 885.0s elapsed, avg latency: 1.59ms
+🔋 Sample 976: 5.1W, CPU: 1.5%, GPU: 1.0%
+🔋 Sample 981: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 16600 inferences, 894.9s elapsed, avg latency: 1.59ms
+🔋 Sample 986: 5.0W, CPU: 0.8%, GPU: 8.0%
+🔋 Sample 991: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 996: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 16700 inferences, 904.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1001: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1006: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 16800 inferences, 914.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1011: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 1016: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 16900 inferences, 924.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1021: 5.0W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 1026: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 17000 inferences, 934.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1031: 5.1W, CPU: 7.2%, GPU: 10.0%
+  Progress: 17100 inferences, 936.0s elapsed, avg latency: 1.59ms
+  Progress: 17200 inferences, 937.0s elapsed, avg latency: 1.59ms
+  Progress: 17300 inferences, 938.0s elapsed, avg latency: 1.59ms
+  Progress: 17400 inferences, 939.0s elapsed, avg latency: 1.59ms
+  Progress: 17500 inferences, 940.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1036: 5.1W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1041: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1046: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 17600 inferences, 949.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1051: 5.0W, CPU: 2.2%, GPU: 5.0%
+🔋 Sample 1056: 5.1W, CPU: 2.3%, GPU: 0.0%
+  Progress: 17700 inferences, 959.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1061: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1066: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 17800 inferences, 969.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1071: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1076: 5.0W, CPU: 3.5%, GPU: 5.0%
+  Progress: 17900 inferences, 979.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1081: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1086: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 18000 inferences, 989.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1091: 5.1W, CPU: 3.2%, GPU: 16.0%
+  Progress: 18100 inferences, 991.0s elapsed, avg latency: 1.59ms
+  Progress: 18200 inferences, 992.0s elapsed, avg latency: 1.59ms
+  Progress: 18300 inferences, 993.0s elapsed, avg latency: 1.59ms
+  Progress: 18400 inferences, 994.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1096: 5.2W, CPU: 6.2%, GPU: 2.0%
+  Progress: 18500 inferences, 995.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1101: 5.0W, CPU: 2.0%, GPU: 0.0%
+🔋 Sample 1106: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 18600 inferences, 1004.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1111: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1116: 5.0W, CPU: 0.7%, GPU: 5.0%
+  Progress: 18700 inferences, 1014.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1121: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1126: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 18800 inferences, 1024.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1131: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 1136: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 18900 inferences, 1034.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1141: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 1146: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1151: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 19000 inferences, 1044.9s elapsed, avg latency: 1.59ms
+  Progress: 19100 inferences, 1046.0s elapsed, avg latency: 1.59ms
+  Progress: 19200 inferences, 1047.0s elapsed, avg latency: 1.59ms
+  Progress: 19300 inferences, 1048.0s elapsed, avg latency: 1.59ms
+  Progress: 19400 inferences, 1049.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1156: 5.2W, CPU: 4.7%, GPU: 3.0%
+  Progress: 19500 inferences, 1050.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1161: 5.1W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 1166: 5.1W, CPU: 1.5%, GPU: 16.0%
+  Progress: 19600 inferences, 1059.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1171: 5.1W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1176: 5.1W, CPU: 3.0%, GPU: 0.0%
+  Progress: 19700 inferences, 1069.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1181: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1186: 5.1W, CPU: 0.8%, GPU: 0.0%
+  Progress: 19800 inferences, 1079.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1191: 5.0W, CPU: 0.8%, GPU: 8.0%
+🔋 Sample 1196: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 19900 inferences, 1089.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1201: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 1206: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1211: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 20000 inferences, 1099.9s elapsed, avg latency: 1.59ms
+  Progress: 20100 inferences, 1101.0s elapsed, avg latency: 1.59ms
+  Progress: 20200 inferences, 1102.0s elapsed, avg latency: 1.59ms
+  Progress: 20300 inferences, 1103.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1216: 5.2W, CPU: 4.2%, GPU: 3.0%
+  Progress: 20400 inferences, 1104.0s elapsed, avg latency: 1.59ms
+  Progress: 20500 inferences, 1105.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1221: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1226: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 20600 inferences, 1114.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1231: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 1236: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 20700 inferences, 1124.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1241: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1246: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 20800 inferences, 1134.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1251: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1256: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 1261: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 20900 inferences, 1144.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1266: 5.0W, CPU: 1.5%, GPU: 1.0%
+🔋 Sample 1271: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 21000 inferences, 1154.9s elapsed, avg latency: 1.59ms
+  Progress: 21100 inferences, 1156.0s elapsed, avg latency: 1.59ms
+  Progress: 21200 inferences, 1157.0s elapsed, avg latency: 1.59ms
+  Progress: 21300 inferences, 1158.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1276: 5.2W, CPU: 4.0%, GPU: 3.0%
+  Progress: 21400 inferences, 1159.0s elapsed, avg latency: 1.59ms
+  Progress: 21500 inferences, 1160.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1281: 5.0W, CPU: 2.2%, GPU: 5.0%
+🔋 Sample 1286: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 21600 inferences, 1169.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1291: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1296: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 21700 inferences, 1179.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1301: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1306: 5.0W, CPU: 0.0%, GPU: 6.0%
+  Progress: 21800 inferences, 1189.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1311: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1316: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1321: 5.1W, CPU: 0.8%, GPU: 0.0%
+  Progress: 21900 inferences, 1199.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1326: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 1331: 5.0W, CPU: 0.0%, GPU: 5.0%
+  Progress: 22000 inferences, 1209.9s elapsed, avg latency: 1.59ms
+  Progress: 22100 inferences, 1211.0s elapsed, avg latency: 1.59ms
+  Progress: 22200 inferences, 1212.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1336: 5.2W, CPU: 3.3%, GPU: 3.0%
+  Progress: 22300 inferences, 1213.0s elapsed, avg latency: 1.59ms
+  Progress: 22400 inferences, 1214.0s elapsed, avg latency: 1.59ms
+  Progress: 22500 inferences, 1215.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1341: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1346: 5.0W, CPU: 1.5%, GPU: 1.0%
+  Progress: 22600 inferences, 1224.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1351: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1356: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 22700 inferences, 1234.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1361: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1366: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1371: 5.0W, CPU: 1.5%, GPU: 5.0%
+  Progress: 22800 inferences, 1244.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1376: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1381: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 22900 inferences, 1254.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1386: 5.0W, CPU: 0.8%, GPU: 2.0%
+🔋 Sample 1391: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 23000 inferences, 1264.9s elapsed, avg latency: 1.59ms
+  Progress: 23100 inferences, 1266.0s elapsed, avg latency: 1.59ms
+  Progress: 23200 inferences, 1267.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1396: 5.2W, CPU: 5.5%, GPU: 3.0%
+  Progress: 23300 inferences, 1268.0s elapsed, avg latency: 1.59ms
+  Progress: 23400 inferences, 1269.0s elapsed, avg latency: 1.59ms
+  Progress: 23500 inferences, 1270.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1401: 5.1W, CPU: 0.8%, GPU: 1.0%
+🔋 Sample 1406: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 23600 inferences, 1279.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1411: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1416: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 1421: 5.0W, CPU: 1.7%, GPU: 5.0%
+  Progress: 23700 inferences, 1289.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1426: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1431: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 23800 inferences, 1299.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1436: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 1441: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 23900 inferences, 1309.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1446: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 1451: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 24000 inferences, 1319.9s elapsed, avg latency: 1.59ms
+  Progress: 24100 inferences, 1321.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1456: 5.2W, CPU: 5.8%, GPU: 3.0%
+  Progress: 24200 inferences, 1322.0s elapsed, avg latency: 1.59ms
+  Progress: 24300 inferences, 1323.0s elapsed, avg latency: 1.59ms
+  Progress: 24400 inferences, 1324.0s elapsed, avg latency: 1.59ms
+  Progress: 24500 inferences, 1325.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1461: 5.1W, CPU: 1.5%, GPU: 4.0%
+🔋 Sample 1466: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 24600 inferences, 1334.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1471: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 1476: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1481: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 24700 inferences, 1344.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1486: 5.0W, CPU: 0.7%, GPU: 8.0%
+🔋 Sample 1491: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 24800 inferences, 1354.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1496: 5.0W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 1501: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 24900 inferences, 1364.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1506: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1511: 5.0W, CPU: 1.5%, GPU: 2.0%
+  Progress: 25000 inferences, 1374.9s elapsed, avg latency: 1.59ms
+  Progress: 25100 inferences, 1376.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1516: 5.2W, CPU: 5.8%, GPU: 9.0%
+  Progress: 25200 inferences, 1377.0s elapsed, avg latency: 1.59ms
+  Progress: 25300 inferences, 1378.0s elapsed, avg latency: 1.59ms
+  Progress: 25400 inferences, 1379.0s elapsed, avg latency: 1.59ms
+  Progress: 25500 inferences, 1380.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1521: 5.1W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1526: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1531: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 25600 inferences, 1389.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1536: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 1541: 5.1W, CPU: 0.0%, GPU: 0.0%
+  Progress: 25700 inferences, 1399.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1546: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1551: 5.1W, CPU: 0.7%, GPU: 0.0%
+  Progress: 25800 inferences, 1409.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1556: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1561: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 25900 inferences, 1419.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1566: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 1571: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 26000 inferences, 1429.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1576: 5.1W, CPU: 4.8%, GPU: 11.0%
+  Progress: 26100 inferences, 1431.0s elapsed, avg latency: 1.59ms
+  Progress: 26200 inferences, 1432.0s elapsed, avg latency: 1.59ms
+  Progress: 26300 inferences, 1433.0s elapsed, avg latency: 1.59ms
+  Progress: 26400 inferences, 1434.0s elapsed, avg latency: 1.59ms
+  Progress: 26500 inferences, 1435.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1581: 5.2W, CPU: 3.8%, GPU: 2.0%
+🔋 Sample 1586: 5.1W, CPU: 3.5%, GPU: 5.0%
+🔋 Sample 1591: 5.1W, CPU: 0.0%, GPU: 0.0%
+  Progress: 26600 inferences, 1444.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1596: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1601: 5.0W, CPU: 2.2%, GPU: 4.0%
+  Progress: 26700 inferences, 1454.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1606: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1611: 5.0W, CPU: 1.7%, GPU: 0.0%
+  Progress: 26800 inferences, 1464.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1616: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1621: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 26900 inferences, 1474.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1626: 5.0W, CPU: 1.5%, GPU: 8.0%
+🔋 Sample 1631: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 27000 inferences, 1484.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1636: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 27100 inferences, 1486.0s elapsed, avg latency: 1.59ms
+  Progress: 27200 inferences, 1487.0s elapsed, avg latency: 1.59ms
+  Progress: 27300 inferences, 1488.0s elapsed, avg latency: 1.59ms
+  Progress: 27400 inferences, 1489.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1641: 5.2W, CPU: 3.2%, GPU: 1.0%
+  Progress: 27500 inferences, 1490.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1646: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1651: 5.1W, CPU: 0.0%, GPU: 0.0%
+  Progress: 27600 inferences, 1499.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1656: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1661: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 27700 inferences, 1509.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1666: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 1671: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 27800 inferences, 1519.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1676: 5.0W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 1681: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 27900 inferences, 1529.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1686: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1691: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 1696: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 28000 inferences, 1539.9s elapsed, avg latency: 1.59ms
+  Progress: 28100 inferences, 1541.0s elapsed, avg latency: 1.59ms
+  Progress: 28200 inferences, 1542.0s elapsed, avg latency: 1.59ms
+  Progress: 28300 inferences, 1543.0s elapsed, avg latency: 1.59ms
+  Progress: 28400 inferences, 1544.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1701: 5.2W, CPU: 4.2%, GPU: 3.0%
+  Progress: 28500 inferences, 1545.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1706: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1711: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 28600 inferences, 1554.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1716: 5.0W, CPU: 2.2%, GPU: 6.0%
+🔋 Sample 1721: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 28700 inferences, 1564.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1726: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1731: 5.0W, CPU: 2.2%, GPU: 5.0%
+  Progress: 28800 inferences, 1574.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1736: 5.0W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 1741: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 28900 inferences, 1584.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1746: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1751: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1756: 5.0W, CPU: 1.7%, GPU: 3.0%
+  Progress: 29000 inferences, 1594.9s elapsed, avg latency: 1.59ms
+  Progress: 29100 inferences, 1596.0s elapsed, avg latency: 1.59ms
+  Progress: 29200 inferences, 1597.0s elapsed, avg latency: 1.59ms
+  Progress: 29300 inferences, 1598.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1761: 5.2W, CPU: 4.5%, GPU: 3.0%
+  Progress: 29400 inferences, 1599.0s elapsed, avg latency: 1.59ms
+  Progress: 29500 inferences, 1600.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1766: 5.1W, CPU: 2.3%, GPU: 2.0%
+🔋 Sample 1771: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 29600 inferences, 1609.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1776: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1781: 5.0W, CPU: 1.7%, GPU: 5.0%
+  Progress: 29700 inferences, 1619.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1786: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1791: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 29800 inferences, 1629.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1796: 5.0W, CPU: 0.8%, GPU: 3.0%
+🔋 Sample 1801: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 1806: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 29900 inferences, 1639.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1811: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1816: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 30000 inferences, 1649.9s elapsed, avg latency: 1.59ms
+  Progress: 30100 inferences, 1651.0s elapsed, avg latency: 1.59ms
+  Progress: 30200 inferences, 1652.0s elapsed, avg latency: 1.59ms
+  Progress: 30300 inferences, 1653.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1821: 5.2W, CPU: 5.8%, GPU: 1.0%
+  Progress: 30400 inferences, 1654.0s elapsed, avg latency: 1.59ms
+  Progress: 30500 inferences, 1655.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1826: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 1831: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 30600 inferences, 1664.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1836: 5.1W, CPU: 11.3%, GPU: 0.0%
+🔋 Sample 1841: 5.0W, CPU: 2.0%, GPU: 0.0%
+  Progress: 30700 inferences, 1674.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1846: 5.0W, CPU: 2.2%, GPU: 5.0%
+🔋 Sample 1851: 5.0W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 1856: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 30800 inferences, 1684.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1861: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1866: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 30900 inferences, 1694.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1871: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1876: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 31000 inferences, 1704.9s elapsed, avg latency: 1.59ms
+  Progress: 31100 inferences, 1706.0s elapsed, avg latency: 1.59ms
+  Progress: 31200 inferences, 1707.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1881: 5.2W, CPU: 4.8%, GPU: 3.0%
+  Progress: 31300 inferences, 1708.0s elapsed, avg latency: 1.59ms
+  Progress: 31400 inferences, 1709.0s elapsed, avg latency: 1.59ms
+  Progress: 31500 inferences, 1710.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1886: 5.0W, CPU: 1.5%, GPU: 1.0%
+🔋 Sample 1891: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 31600 inferences, 1719.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1896: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 1901: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 31700 inferences, 1729.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1906: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1911: 5.0W, CPU: 2.0%, GPU: 0.0%
+🔋 Sample 1916: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 31800 inferences, 1739.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1921: 5.0W, CPU: 1.3%, GPU: 3.0%
+🔋 Sample 1926: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 31900 inferences, 1749.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1931: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1936: 5.0W, CPU: 1.5%, GPU: 5.0%
+  Progress: 32000 inferences, 1759.9s elapsed, avg latency: 1.59ms
+  Progress: 32100 inferences, 1761.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1941: 5.2W, CPU: 1.8%, GPU: 3.0%
+  Progress: 32200 inferences, 1762.0s elapsed, avg latency: 1.59ms
+  Progress: 32300 inferences, 1763.0s elapsed, avg latency: 1.59ms
+  Progress: 32400 inferences, 1764.0s elapsed, avg latency: 1.59ms
+  Progress: 32500 inferences, 1765.0s elapsed, avg latency: 1.59ms
+🔋 Sample 1946: 5.1W, CPU: 0.8%, GPU: 1.0%
+🔋 Sample 1951: 5.1W, CPU: 2.3%, GPU: 5.0%
+  Progress: 32600 inferences, 1771.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1956: 5.1W, CPU: 2.3%, GPU: 8.0%
+  Progress: 32700 inferences, 1778.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1961: 5.1W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1966: 5.1W, CPU: 2.2%, GPU: 0.0%
+  Progress: 32800 inferences, 1785.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1971: 5.1W, CPU: 0.7%, GPU: 0.0%
+  Progress: 32900 inferences, 1792.9s elapsed, avg latency: 1.59ms
+🔋 Sample 1976: 5.1W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1981: 5.1W, CPU: 0.8%, GPU: 0.0%
+  Progress: 33000 inferences, 1799.9s elapsed, avg latency: 1.59ms
+🔋 Power monitoring stopped. Duration: 1800.17s
+📊 Avg Power: 5.03W, Peak Power: 5.25W
+
+📊 Results:
+   Avg Latency: 1.59 ms
+   P95 Latency: 1.73 ms
+   Violations: 0 (0.00%)
+   Avg Power: 5.03 W
+   Total Energy: 9062.81 J
+   Energy/Inference: 0.2746 J
+💾 Results saved to apm_paper_study_20251218_150806/aae_results/results/aae_static_high_bursty_results.json
+
+⏳ Thermal cooldown: 30 seconds...
+
+============================================================
+ADAPTIVE: bursty
+  Three-Tier Thresholds:
+    15W → 25W: 8.0ms
+    25W → MAXN: 9.0ms
+  Hysteresis: 30.0s
+  Frequency Scaling: False
+  Sparsity Factor: 5.0x
+============================================================
+🔄 Power mode: UNKNOWN → 15W (initialization) [switch time: 23ms]
+🔋 Power monitoring started (sampling every 100ms)
+🔋 Sample 1: 5.1W, CPU: 4.2%, GPU: 19.0%
+  Progress: 100 inferences, 1.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 200 inferences, 2.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 300 inferences, 3.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 400 inferences, 4.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 500 inferences, 5.0s elapsed, mode: 15W, switches: 1, avg latency: 1.55ms
+🔋 Sample 6: 5.1W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 11: 5.0W, CPU: 0.0%, GPU: 5.0%
+🔋 Sample 16: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 600 inferences, 14.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 21: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 26: 5.0W, CPU: 0.8%, GPU: 4.0%
+  Progress: 700 inferences, 24.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 31: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 36: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 800 inferences, 34.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 41: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 46: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 900 inferences, 44.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 51: 5.0W, CPU: 0.8%, GPU: 8.0%
+🔋 Sample 56: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 1000 inferences, 54.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 61: 5.1W, CPU: 2.5%, GPU: 11.0%
+  Progress: 1100 inferences, 56.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 1200 inferences, 57.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 1300 inferences, 58.0s elapsed, mode: 15W, switches: 1, avg latency: 1.55ms
+  Progress: 1400 inferences, 59.0s elapsed, mode: 15W, switches: 1, avg latency: 1.55ms
+🔋 Sample 66: 5.2W, CPU: 4.2%, GPU: 3.0%
+  Progress: 1500 inferences, 60.0s elapsed, mode: 15W, switches: 1, avg latency: 1.55ms
+🔋 Sample 71: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 76: 5.0W, CPU: 2.3%, GPU: 8.0%
+  Progress: 1600 inferences, 69.9s elapsed, mode: 15W, switches: 1, avg latency: 1.55ms
+🔋 Sample 81: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 86: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 1700 inferences, 79.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 91: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 96: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 1800 inferences, 89.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 101: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 106: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 1900 inferences, 99.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 111: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 116: 5.0W, CPU: 2.2%, GPU: 5.0%
+🔋 Sample 121: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 2000 inferences, 109.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 2100 inferences, 111.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 2200 inferences, 112.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 2300 inferences, 113.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 2400 inferences, 114.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 126: 5.2W, CPU: 4.5%, GPU: 3.0%
+  Progress: 2500 inferences, 115.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 131: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 136: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 2600 inferences, 124.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 141: 5.0W, CPU: 2.3%, GPU: 5.0%
+🔋 Sample 146: 5.0W, CPU: 2.0%, GPU: 0.0%
+  Progress: 2700 inferences, 134.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 151: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 156: 5.0W, CPU: 0.8%, GPU: 5.0%
+  Progress: 2800 inferences, 144.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 161: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 166: 5.0W, CPU: 3.3%, GPU: 0.0%
+  Progress: 2900 inferences, 154.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 171: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 176: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 181: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 3000 inferences, 164.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 3100 inferences, 166.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 3200 inferences, 167.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 3300 inferences, 168.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 186: 5.2W, CPU: 5.0%, GPU: 3.0%
+  Progress: 3400 inferences, 169.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+  Progress: 3500 inferences, 170.0s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 191: 5.0W, CPU: 2.2%, GPU: 5.0%
+🔋 Sample 196: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 3600 inferences, 179.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 201: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 206: 5.0W, CPU: 0.7%, GPU: 8.0%
+  Progress: 3700 inferences, 189.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 211: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 216: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 3800 inferences, 199.9s elapsed, mode: 15W, switches: 1, avg latency: 1.56ms
+🔋 Sample 221: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 226: 5.0W, CPU: 3.0%, GPU: 0.0%
+🔋 Sample 231: 5.0W, CPU: 3.0%, GPU: 3.0%
+  Progress: 3900 inferences, 209.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 236: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 241: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 4000 inferences, 219.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 4100 inferences, 221.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 4200 inferences, 222.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 4300 inferences, 223.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 246: 5.2W, CPU: 3.8%, GPU: 3.0%
+  Progress: 4400 inferences, 224.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 4500 inferences, 225.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 251: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 256: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 4600 inferences, 234.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 261: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 266: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 4700 inferences, 244.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 271: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 276: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 4800 inferences, 254.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 281: 5.1W, CPU: 0.0%, GPU: 5.0%
+🔋 Sample 286: 5.1W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 291: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 4900 inferences, 264.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 296: 5.0W, CPU: 2.3%, GPU: 2.0%
+🔋 Sample 301: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 5000 inferences, 274.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 5100 inferences, 276.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 5200 inferences, 277.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 306: 5.2W, CPU: 5.2%, GPU: 30.0%
+  Progress: 5300 inferences, 278.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 5400 inferences, 279.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 5500 inferences, 280.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 311: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 316: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 5600 inferences, 289.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 321: 5.0W, CPU: 0.7%, GPU: 3.0%
+🔋 Sample 326: 5.0W, CPU: 3.7%, GPU: 0.0%
+  Progress: 5700 inferences, 299.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 331: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 336: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 341: 5.0W, CPU: 1.7%, GPU: 0.0%
+  Progress: 5800 inferences, 309.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 346: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 351: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 5900 inferences, 319.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 356: 5.0W, CPU: 2.7%, GPU: 0.0%
+🔋 Sample 361: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 6000 inferences, 329.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 6100 inferences, 331.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 6200 inferences, 332.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 366: 5.2W, CPU: 4.7%, GPU: 11.0%
+  Progress: 6300 inferences, 333.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 6400 inferences, 334.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 6500 inferences, 335.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 371: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 376: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 6600 inferences, 344.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 381: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 386: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 391: 5.0W, CPU: 3.0%, GPU: 0.0%
+  Progress: 6700 inferences, 354.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 396: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 401: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 6800 inferences, 364.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 406: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 411: 5.0W, CPU: 1.5%, GPU: 2.0%
+  Progress: 6900 inferences, 374.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 416: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 421: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 7000 inferences, 384.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 7100 inferences, 386.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 426: 5.2W, CPU: 2.7%, GPU: 11.0%
+  Progress: 7200 inferences, 387.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 7300 inferences, 388.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 7400 inferences, 389.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 7500 inferences, 390.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 431: 5.1W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 436: 5.0W, CPU: 3.0%, GPU: 5.0%
+  Progress: 7600 inferences, 399.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 441: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 446: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 451: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 7700 inferences, 409.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 456: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 461: 5.0W, CPU: 0.8%, GPU: 5.0%
+  Progress: 7800 inferences, 419.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 466: 5.0W, CPU: 3.0%, GPU: 0.0%
+🔋 Sample 471: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 7900 inferences, 429.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 476: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 481: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 8000 inferences, 439.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 8100 inferences, 441.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 486: 5.2W, CPU: 2.5%, GPU: 10.0%
+  Progress: 8200 inferences, 442.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 8300 inferences, 443.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 8400 inferences, 444.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 8500 inferences, 445.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 491: 5.1W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 496: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 501: 5.0W, CPU: 0.0%, GPU: 5.0%
+  Progress: 8600 inferences, 454.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 506: 5.0W, CPU: 3.8%, GPU: 0.0%
+🔋 Sample 511: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 8700 inferences, 464.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 516: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 521: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 8800 inferences, 474.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 526: 5.0W, CPU: 1.5%, GPU: 8.0%
+🔋 Sample 531: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 8900 inferences, 484.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 536: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 541: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 9000 inferences, 494.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 546: 5.1W, CPU: 0.0%, GPU: 11.0%
+  Progress: 9100 inferences, 496.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 9200 inferences, 497.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 9300 inferences, 498.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 9400 inferences, 499.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 9500 inferences, 500.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 551: 5.2W, CPU: 5.2%, GPU: 3.0%
+🔋 Sample 556: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 561: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 9600 inferences, 509.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 566: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 571: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 9700 inferences, 519.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 576: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 581: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 9800 inferences, 529.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 586: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 591: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 9900 inferences, 539.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 596: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 601: 5.0W, CPU: 1.5%, GPU: 2.0%
+  Progress: 10000 inferences, 549.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 606: 5.0W, CPU: 1.7%, GPU: 0.0%
+  Progress: 10100 inferences, 551.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 10200 inferences, 552.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 10300 inferences, 553.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 10400 inferences, 554.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 611: 5.2W, CPU: 5.7%, GPU: 3.0%
+  Progress: 10500 inferences, 555.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 616: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 621: 5.1W, CPU: 1.3%, GPU: 0.0%
+  Progress: 10600 inferences, 564.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 626: 5.1W, CPU: 5.2%, GPU: 0.0%
+🔋 Sample 631: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 10700 inferences, 574.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 636: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 641: 5.0W, CPU: 1.5%, GPU: 5.0%
+  Progress: 10800 inferences, 584.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 646: 5.0W, CPU: 1.7%, GPU: 24.0%
+🔋 Sample 651: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 10900 inferences, 594.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 656: 5.1W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 661: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 666: 5.1W, CPU: 1.5%, GPU: 0.0%
+  Progress: 11000 inferences, 604.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 11100 inferences, 606.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 11200 inferences, 607.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 11300 inferences, 608.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 11400 inferences, 609.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 671: 5.2W, CPU: 4.2%, GPU: 3.0%
+  Progress: 11500 inferences, 610.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 676: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 681: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 11600 inferences, 619.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 686: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 691: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 11700 inferences, 629.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 696: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 701: 5.0W, CPU: 2.8%, GPU: 2.0%
+  Progress: 11800 inferences, 639.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 706: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 711: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 716: 5.0W, CPU: 0.8%, GPU: 8.0%
+  Progress: 11900 inferences, 649.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 721: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 726: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 12000 inferences, 659.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 12100 inferences, 661.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 12200 inferences, 662.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 12300 inferences, 663.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 731: 5.2W, CPU: 4.2%, GPU: 3.0%
+  Progress: 12400 inferences, 664.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 12500 inferences, 665.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 736: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 741: 5.0W, CPU: 1.5%, GPU: 5.0%
+  Progress: 12600 inferences, 674.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 746: 5.0W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 751: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 12700 inferences, 684.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 756: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 761: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 12800 inferences, 694.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 766: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 771: 5.0W, CPU: 1.3%, GPU: 0.0%
+🔋 Sample 776: 5.0W, CPU: 1.7%, GPU: 0.0%
+  Progress: 12900 inferences, 704.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 781: 5.0W, CPU: 1.5%, GPU: 4.0%
+🔋 Sample 786: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 13000 inferences, 714.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 13100 inferences, 716.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 13200 inferences, 717.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 791: 5.2W, CPU: 4.7%, GPU: 3.0%
+  Progress: 13300 inferences, 718.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 13400 inferences, 719.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 13500 inferences, 720.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 796: 5.0W, CPU: 0.0%, GPU: 5.0%
+🔋 Sample 801: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 13600 inferences, 729.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 806: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 811: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 13700 inferences, 739.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 816: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 821: 5.0W, CPU: 0.8%, GPU: 8.0%
+🔋 Sample 826: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 13800 inferences, 749.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 831: 5.0W, CPU: 3.0%, GPU: 0.0%
+🔋 Sample 836: 5.0W, CPU: 0.0%, GPU: 5.0%
+  Progress: 13900 inferences, 759.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 841: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 846: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 14000 inferences, 769.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 14100 inferences, 771.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 14200 inferences, 772.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 851: 5.2W, CPU: 4.7%, GPU: 1.0%
+  Progress: 14300 inferences, 773.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 14400 inferences, 774.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 14500 inferences, 775.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 856: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 861: 5.0W, CPU: 2.2%, GPU: 8.0%
+  Progress: 14600 inferences, 784.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 866: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 871: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 14700 inferences, 794.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 876: 5.0W, CPU: 1.7%, GPU: 5.0%
+🔋 Sample 881: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 886: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 14800 inferences, 804.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 891: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 896: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 14900 inferences, 814.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 901: 5.0W, CPU: 1.5%, GPU: 5.0%
+🔋 Sample 906: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 15000 inferences, 824.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 15100 inferences, 826.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 911: 5.2W, CPU: 4.2%, GPU: 2.0%
+  Progress: 15200 inferences, 827.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 15300 inferences, 828.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 15400 inferences, 829.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 15500 inferences, 830.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 916: 5.1W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 921: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 15600 inferences, 839.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 926: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 931: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 936: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 15700 inferences, 849.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 941: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 946: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 15800 inferences, 859.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 951: 5.0W, CPU: 1.7%, GPU: 5.0%
+🔋 Sample 956: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 15900 inferences, 869.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 961: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 966: 5.0W, CPU: 0.8%, GPU: 5.0%
+  Progress: 16000 inferences, 879.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 16100 inferences, 881.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 971: 5.2W, CPU: 4.2%, GPU: 8.0%
+  Progress: 16200 inferences, 882.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 16300 inferences, 883.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 16400 inferences, 884.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 16500 inferences, 885.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 976: 5.1W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 981: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 16600 inferences, 894.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 986: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 991: 5.0W, CPU: 4.2%, GPU: 8.0%
+🔋 Sample 996: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 16700 inferences, 904.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1001: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1006: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 16800 inferences, 914.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1011: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1016: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 16900 inferences, 924.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1021: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1026: 5.0W, CPU: 2.3%, GPU: 5.0%
+  Progress: 17000 inferences, 934.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1031: 5.1W, CPU: 2.5%, GPU: 11.0%
+  Progress: 17100 inferences, 936.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 17200 inferences, 937.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 17300 inferences, 938.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 17400 inferences, 939.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 17500 inferences, 940.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1036: 5.1W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1041: 5.0W, CPU: 4.2%, GPU: 0.0%
+🔋 Sample 1046: 5.0W, CPU: 3.5%, GPU: 0.0%
+  Progress: 17600 inferences, 949.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1051: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 1056: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 17700 inferences, 959.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1061: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 1066: 5.0W, CPU: 0.0%, GPU: 5.0%
+  Progress: 17800 inferences, 969.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1071: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1076: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 17900 inferences, 979.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1081: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1086: 5.0W, CPU: 1.7%, GPU: 0.0%
+  Progress: 18000 inferences, 989.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1091: 5.1W, CPU: 1.7%, GPU: 10.0%
+  Progress: 18100 inferences, 991.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 18200 inferences, 992.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 18300 inferences, 993.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 18400 inferences, 994.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1096: 5.2W, CPU: 5.3%, GPU: 3.0%
+  Progress: 18500 inferences, 995.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1101: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1106: 5.0W, CPU: 1.5%, GPU: 8.0%
+  Progress: 18600 inferences, 1004.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1111: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1116: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 18700 inferences, 1014.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1121: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 1126: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 18800 inferences, 1024.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1131: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1136: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 18900 inferences, 1034.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1141: 5.0W, CPU: 0.8%, GPU: 1.0%
+🔋 Sample 1146: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 1151: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 19000 inferences, 1044.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 19100 inferences, 1046.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 19200 inferences, 1047.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 19300 inferences, 1048.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 19400 inferences, 1049.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1156: 5.2W, CPU: 5.8%, GPU: 3.0%
+  Progress: 19500 inferences, 1050.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1161: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1166: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 19600 inferences, 1059.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1171: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1176: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 19700 inferences, 1069.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1181: 5.0W, CPU: 1.5%, GPU: 3.0%
+🔋 Sample 1186: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 19800 inferences, 1079.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1191: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1196: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 19900 inferences, 1089.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1201: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 1206: 5.0W, CPU: 0.8%, GPU: 8.0%
+🔋 Sample 1211: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 20000 inferences, 1099.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 20100 inferences, 1101.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 20200 inferences, 1102.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 20300 inferences, 1103.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1216: 5.2W, CPU: 4.5%, GPU: 3.0%
+  Progress: 20400 inferences, 1104.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 20500 inferences, 1105.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1221: 5.1W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 1226: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 20600 inferences, 1114.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1231: 5.0W, CPU: 1.5%, GPU: 4.0%
+🔋 Sample 1236: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 20700 inferences, 1124.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1241: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1246: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 20800 inferences, 1134.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1251: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1256: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 1261: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 20900 inferences, 1144.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1266: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1271: 5.0W, CPU: 1.5%, GPU: 4.0%
+  Progress: 21000 inferences, 1154.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 21100 inferences, 1156.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 21200 inferences, 1157.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 21300 inferences, 1158.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1276: 5.2W, CPU: 4.7%, GPU: 3.0%
+  Progress: 21400 inferences, 1159.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 21500 inferences, 1160.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1281: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1286: 5.1W, CPU: 10.7%, GPU: 0.0%
+  Progress: 21600 inferences, 1169.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1291: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1296: 5.0W, CPU: 1.5%, GPU: 5.0%
+  Progress: 21700 inferences, 1179.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1301: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1306: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 21800 inferences, 1189.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1311: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1316: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1321: 5.0W, CPU: 2.2%, GPU: 2.0%
+  Progress: 21900 inferences, 1199.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1326: 5.1W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1331: 5.1W, CPU: 2.3%, GPU: 9.0%
+  Progress: 22000 inferences, 1209.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 22100 inferences, 1211.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 22200 inferences, 1212.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1336: 5.2W, CPU: 5.0%, GPU: 2.0%
+  Progress: 22300 inferences, 1213.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 22400 inferences, 1214.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 22500 inferences, 1215.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1341: 5.1W, CPU: 3.7%, GPU: 0.0%
+🔋 Sample 1346: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 22600 inferences, 1224.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1351: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 1356: 5.0W, CPU: 0.8%, GPU: 5.0%
+  Progress: 22700 inferences, 1234.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1361: 5.0W, CPU: 3.0%, GPU: 0.0%
+🔋 Sample 1366: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1371: 5.0W, CPU: 2.3%, GPU: 5.0%
+  Progress: 22800 inferences, 1244.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1376: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 1381: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 22900 inferences, 1254.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1386: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1391: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 23000 inferences, 1264.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 23100 inferences, 1266.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 23200 inferences, 1267.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1396: 5.2W, CPU: 5.7%, GPU: 2.0%
+  Progress: 23300 inferences, 1268.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 23400 inferences, 1269.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 23500 inferences, 1270.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1401: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1406: 5.0W, CPU: 1.5%, GPU: 5.0%
+  Progress: 23600 inferences, 1279.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1411: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1416: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1421: 5.1W, CPU: 1.7%, GPU: 8.0%
+  Progress: 23700 inferences, 1289.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1426: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1431: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 23800 inferences, 1299.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1436: 5.0W, CPU: 1.7%, GPU: 0.0%
+🔋 Sample 1441: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 23900 inferences, 1309.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1446: 5.0W, CPU: 0.0%, GPU: 3.0%
+🔋 Sample 1451: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 24000 inferences, 1319.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 24100 inferences, 1321.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1456: 5.2W, CPU: 2.7%, GPU: 11.0%
+  Progress: 24200 inferences, 1322.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 24300 inferences, 1323.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 24400 inferences, 1324.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 24500 inferences, 1325.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1461: 5.1W, CPU: 0.7%, GPU: 1.0%
+🔋 Sample 1466: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 24600 inferences, 1334.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1471: 5.0W, CPU: 0.8%, GPU: 5.0%
+🔋 Sample 1476: 5.0W, CPU: 3.0%, GPU: 0.0%
+🔋 Sample 1481: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 24700 inferences, 1344.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1486: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1491: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 24800 inferences, 1354.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1496: 5.0W, CPU: 0.0%, GPU: 4.0%
+🔋 Sample 1501: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 24900 inferences, 1364.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1506: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1511: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 25000 inferences, 1374.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 25100 inferences, 1376.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1516: 5.2W, CPU: 3.3%, GPU: 8.0%
+  Progress: 25200 inferences, 1377.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 25300 inferences, 1378.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 25400 inferences, 1379.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 25500 inferences, 1380.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1521: 5.1W, CPU: 2.3%, GPU: 4.0%
+🔋 Sample 1526: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1531: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 25600 inferences, 1389.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1536: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1541: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 25700 inferences, 1399.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1546: 5.0W, CPU: 2.3%, GPU: 5.0%
+🔋 Sample 1551: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 25800 inferences, 1409.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1556: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1561: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 25900 inferences, 1419.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1566: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1571: 5.0W, CPU: 0.8%, GPU: 5.0%
+  Progress: 26000 inferences, 1429.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1576: 5.1W, CPU: 3.5%, GPU: 11.0%
+  Progress: 26100 inferences, 1431.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 26200 inferences, 1432.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 26300 inferences, 1433.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 26400 inferences, 1434.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 26500 inferences, 1435.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1581: 5.2W, CPU: 3.5%, GPU: 3.0%
+🔋 Sample 1586: 5.0W, CPU: 1.5%, GPU: 3.0%
+🔋 Sample 1591: 5.0W, CPU: 1.3%, GPU: 0.0%
+  Progress: 26600 inferences, 1444.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1596: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1601: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 26700 inferences, 1454.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1606: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1611: 5.0W, CPU: 0.0%, GPU: 5.0%
+  Progress: 26800 inferences, 1464.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1616: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1621: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 26900 inferences, 1474.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1626: 5.0W, CPU: 3.0%, GPU: 0.0%
+🔋 Sample 1631: 5.0W, CPU: 0.7%, GPU: 0.0%
+  Progress: 27000 inferences, 1484.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1636: 5.0W, CPU: 3.8%, GPU: 5.0%
+  Progress: 27100 inferences, 1486.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 27200 inferences, 1487.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 27300 inferences, 1488.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 27400 inferences, 1489.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1641: 5.2W, CPU: 5.3%, GPU: 3.0%
+  Progress: 27500 inferences, 1490.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1646: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1651: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 27600 inferences, 1499.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1656: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1661: 5.0W, CPU: 2.3%, GPU: 5.0%
+  Progress: 27700 inferences, 1509.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1666: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1671: 5.0W, CPU: 3.0%, GPU: 0.0%
+  Progress: 27800 inferences, 1519.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1676: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1681: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 27900 inferences, 1529.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1686: 5.1W, CPU: 0.7%, GPU: 5.0%
+🔋 Sample 1691: 5.0W, CPU: 3.5%, GPU: 0.0%
+🔋 Sample 1696: 5.0W, CPU: 1.7%, GPU: 0.0%
+  Progress: 28000 inferences, 1539.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 28100 inferences, 1541.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 28200 inferences, 1542.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 28300 inferences, 1543.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 28400 inferences, 1544.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1701: 5.2W, CPU: 3.8%, GPU: 3.0%
+  Progress: 28500 inferences, 1545.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1706: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1711: 5.0W, CPU: 2.2%, GPU: 5.0%
+  Progress: 28600 inferences, 1554.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1716: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1721: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 28700 inferences, 1564.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1726: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1731: 5.0W, CPU: 2.3%, GPU: 0.0%
+  Progress: 28800 inferences, 1574.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1736: 5.0W, CPU: 1.3%, GPU: 8.0%
+🔋 Sample 1741: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 28900 inferences, 1584.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1746: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1751: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1756: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 29000 inferences, 1594.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 29100 inferences, 1596.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 29200 inferences, 1597.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 29300 inferences, 1598.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1761: 5.2W, CPU: 5.7%, GPU: 3.0%
+  Progress: 29400 inferences, 1599.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 29500 inferences, 1600.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1766: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1771: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 29600 inferences, 1609.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1776: 5.0W, CPU: 2.3%, GPU: 8.0%
+🔋 Sample 1781: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 29700 inferences, 1619.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1786: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1791: 5.0W, CPU: 0.0%, GPU: 0.0%
+  Progress: 29800 inferences, 1629.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1796: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1801: 5.0W, CPU: 0.0%, GPU: 2.0%
+🔋 Sample 1806: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 29900 inferences, 1639.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1811: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1816: 5.1W, CPU: 0.0%, GPU: 0.0%
+  Progress: 30000 inferences, 1649.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 30100 inferences, 1651.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 30200 inferences, 1652.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 30300 inferences, 1653.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1821: 5.2W, CPU: 4.2%, GPU: 3.0%
+  Progress: 30400 inferences, 1654.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 30500 inferences, 1655.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1826: 5.0W, CPU: 2.2%, GPU: 5.0%
+🔋 Sample 1831: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 30600 inferences, 1664.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1836: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1841: 5.0W, CPU: 1.7%, GPU: 0.0%
+  Progress: 30700 inferences, 1674.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1846: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1851: 5.0W, CPU: 0.8%, GPU: 2.0%
+🔋 Sample 1856: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 30800 inferences, 1684.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1861: 5.0W, CPU: 0.7%, GPU: 0.0%
+🔋 Sample 1866: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 30900 inferences, 1694.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1871: 5.0W, CPU: 0.8%, GPU: 0.0%
+🔋 Sample 1876: 5.0W, CPU: 1.5%, GPU: 5.0%
+  Progress: 31000 inferences, 1704.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 31100 inferences, 1706.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 31200 inferences, 1707.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1881: 5.2W, CPU: 4.5%, GPU: 3.0%
+  Progress: 31300 inferences, 1708.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 31400 inferences, 1709.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 31500 inferences, 1710.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1886: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1891: 5.0W, CPU: 3.5%, GPU: 0.0%
+  Progress: 31600 inferences, 1719.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1896: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1901: 5.0W, CPU: 2.2%, GPU: 0.0%
+  Progress: 31700 inferences, 1729.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1906: 5.0W, CPU: 2.2%, GPU: 0.0%
+🔋 Sample 1911: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1916: 5.0W, CPU: 0.0%, GPU: 8.0%
+  Progress: 31800 inferences, 1739.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1921: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1926: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 31900 inferences, 1749.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1931: 5.0W, CPU: 0.0%, GPU: 0.0%
+🔋 Sample 1936: 5.0W, CPU: 0.8%, GPU: 0.0%
+  Progress: 32000 inferences, 1759.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 32100 inferences, 1761.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 32200 inferences, 1762.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1941: 5.2W, CPU: 1.8%, GPU: 9.0%
+  Progress: 32300 inferences, 1763.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 32400 inferences, 1764.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+  Progress: 32500 inferences, 1765.0s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1946: 5.1W, CPU: 2.8%, GPU: 0.0%
+🔋 Sample 1951: 5.1W, CPU: 1.3%, GPU: 5.0%
+  Progress: 32600 inferences, 1771.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1956: 5.0W, CPU: 0.8%, GPU: 4.0%
+  Progress: 32700 inferences, 1778.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1961: 5.0W, CPU: 2.3%, GPU: 0.0%
+🔋 Sample 1966: 5.0W, CPU: 2.8%, GPU: 0.0%
+  Progress: 32800 inferences, 1785.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1971: 5.0W, CPU: 1.5%, GPU: 0.0%
+  Progress: 32900 inferences, 1792.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Sample 1976: 5.0W, CPU: 1.5%, GPU: 0.0%
+🔋 Sample 1981: 5.0W, CPU: 0.8%, GPU: 8.0%
+  Progress: 33000 inferences, 1799.9s elapsed, mode: 15W, switches: 1, avg latency: 1.57ms
+🔋 Power monitoring stopped. Duration: 1800.23s
+📊 Avg Power: 5.03W, Peak Power: 5.25W
+
+📊 Results:
+   Avg Latency: 1.57 ms
+   P95 Latency: 1.73 ms
+   Violations: 0 (0.00%)
+   Mode Switches: 1
+   Low Power Time: 100.0%
+   Avg Power: 5.03 W
+   Total Energy: 9059.72 J
+   Energy/Inference: 0.2745 J
+💾 Results saved to apm_paper_study_20251218_150806/aae_results/results/aae_adaptive_bursty_results.json
+💾 Results saved to apm_paper_study_20251218_150806/aae_results/results/aae_adaptive_summary.json
+
+✅ Adaptive benchmark completed!
+📊 Results saved to apm_paper_study_20251218_150806/aae_results/results/
