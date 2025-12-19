@@ -32,6 +32,9 @@ class JetsonPowerMonitor:
         self.memory_data = []
         self.cpu_data = []
         self.gpu_data = []
+        self.temp_cpu_data = []
+        self.temp_gpu_data = []
+        self.temp_soc_data = []
         self.timestamps = []
         self.monitor_thread = None
         self.start_time = None
@@ -47,6 +50,9 @@ class JetsonPowerMonitor:
         self.memory_data.clear()
         self.cpu_data.clear()
         self.gpu_data.clear()
+        self.temp_cpu_data.clear()
+        self.temp_gpu_data.clear()
+        self.temp_soc_data.clear()
         self.timestamps.clear()
         self.start_time = time.time()
         
@@ -98,6 +104,9 @@ class JetsonPowerMonitor:
                 self.memory_data.append(memory_info.used / 1024 / 1024)  # MB
                 self.cpu_data.append(tegra_data.get('cpu_usage', 0))
                 self.gpu_data.append(tegra_data.get('gpu_usage', 0))
+                self.temp_cpu_data.append(tegra_data.get('temp_cpu_c', 0))
+                self.temp_gpu_data.append(tegra_data.get('temp_gpu_c', 0))
+                self.temp_soc_data.append(tegra_data.get('temp_soc_c', 0))
                 
                 sample_count += 1
                 # Debug: print every few samples
@@ -162,7 +171,8 @@ class JetsonPowerMonitor:
         Parse a line from tegrastats output.
         Jetson Orin Nano format: "08-02-2025 22:11:48 RAM 3880/7620MB ... VDD_IN 5280mW/5280mW VDD_CPU_GPU_CV 1280mW/1280mW ..."
         """
-        data = {'power_w': 0.0, 'cpu_usage': 0.0, 'gpu_usage': 0.0, 'memory_mb': 0.0}
+        data = {'power_w': 0.0, 'cpu_usage': 0.0, 'gpu_usage': 0.0, 'memory_mb': 0.0,
+                'temp_cpu_c': 0.0, 'temp_gpu_c': 0.0, 'temp_soc_c': 0.0}
         
         try:
             # Extract power consumption - VDD_IN is total system power for Jetson Orin Nano
@@ -198,7 +208,27 @@ class JetsonPowerMonitor:
                 if '/' in ram_section:
                     used_mem = float(ram_section.split('/')[0])
                     data['memory_mb'] = used_mem
-                    
+
+            # Extract temperature readings - format "CPU@45C", "GPU@52.5C", "SOC0@48C"
+            if 'CPU@' in line:
+                temp_section = line.split('CPU@')[1].split('C')[0]
+                data['temp_cpu_c'] = float(temp_section)
+
+            if 'GPU@' in line:
+                temp_section = line.split('GPU@')[1].split('C')[0]
+                data['temp_gpu_c'] = float(temp_section)
+
+            if 'SOC' in line and '@' in line:
+                # Handle SOC0@48C, SOC2@50C, etc.
+                # Extract first SOC reading
+                soc_parts = line.split('SOC')
+                if len(soc_parts) > 1:
+                    for part in soc_parts[1:]:
+                        if '@' in part:
+                            temp_str = part.split('@')[1].split('C')[0]
+                            data['temp_soc_c'] = float(temp_str)
+                            break  # Use first SOC reading
+
         except (ValueError, IndexError, AttributeError) as e:
             # Debug: print parsing errors for troubleshooting
             # print(f"Tegrastats parsing error: {e}, line: {line[:100]}...")
@@ -214,6 +244,9 @@ class JetsonPowerMonitor:
                 'total_energy_j': 0, 'avg_memory_mb': 0, 'peak_memory_mb': 0,
                 'avg_cpu_usage': 0, 'peak_cpu_usage': 0,
                 'avg_gpu_usage': 0, 'peak_gpu_usage': 0,
+                'avg_temp_cpu_c': 0, 'peak_temp_cpu_c': 0,
+                'avg_temp_gpu_c': 0, 'peak_temp_gpu_c': 0,
+                'avg_temp_soc_c': 0, 'peak_temp_soc_c': 0,
                 'monitoring_duration_s': total_time
             }
             
@@ -221,6 +254,9 @@ class JetsonPowerMonitor:
         memory_array = np.array(self.memory_data)
         cpu_array = np.array(self.cpu_data)
         gpu_array = np.array(self.gpu_data)
+        temp_cpu_array = np.array(self.temp_cpu_data) if self.temp_cpu_data else np.array([0])
+        temp_gpu_array = np.array(self.temp_gpu_data) if self.temp_gpu_data else np.array([0])
+        temp_soc_array = np.array(self.temp_soc_data) if self.temp_soc_data else np.array([0])
         
         # Power metrics
         avg_power = np.mean(power_array)
@@ -261,7 +297,18 @@ class JetsonPowerMonitor:
             'peak_cpu_usage': float(peak_cpu),
             'avg_gpu_usage': float(avg_gpu),
             'peak_gpu_usage': float(peak_gpu),
-            
+
+            # Temperature metrics
+            'avg_temp_cpu_c': float(np.mean(temp_cpu_array)),
+            'peak_temp_cpu_c': float(np.max(temp_cpu_array)),
+            'min_temp_cpu_c': float(np.min(temp_cpu_array)),
+            'avg_temp_gpu_c': float(np.mean(temp_gpu_array)),
+            'peak_temp_gpu_c': float(np.max(temp_gpu_array)),
+            'min_temp_gpu_c': float(np.min(temp_gpu_array)),
+            'avg_temp_soc_c': float(np.mean(temp_soc_array)),
+            'peak_temp_soc_c': float(np.max(temp_soc_array)),
+            'min_temp_soc_c': float(np.min(temp_soc_array)),
+
             # Monitoring metadata
             'monitoring_duration_s': total_time,
             'sample_count': len(self.power_data),
