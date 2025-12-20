@@ -1,0 +1,43 @@
+/ssd/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano/src/visualize_adaptive_results.py:449: UserWarning: Glyph 128202 (\N{BAR CHART}) missing from current font.
+  plt.savefig(output_path, dpi=300, bbox_inches='tight')
+/ssd/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano/src/visualize_adaptive_results.py:449: UserWarning: Glyph 128202 (\N{BAR CHART}) missing from current font.
+  plt.savefig(output_path, dpi=300, bbox_inches='tight')
+/ssd/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano/src/visualize_adaptive_results.py:449: UserWarning: Glyph 128202 (\N{BAR CHART}) missing from current font.
+  plt.savefig(output_path, dpi=300, bbox_inches='tight')
+/ssd/Benchmark-Study-of-RF-Anomaly-Detection-Models-on-NVIDIA-Jetson-Orin-Nano/src/visualize_adaptive_results.py:449: UserWarning: Glyph 128202 (\N{BAR CHART}) missing from current font.
+  plt.savefig(output_path, dpi=300, bbox_inches='tight')
+📊 Generating visualizations for resnet_ae
+   Results: apm_paper_study_20251219_164731/resnet_ae_results/results
+   Output: apm_paper_study_20251219_164731/resnet_ae_results/figures
+
+✓ Loaded results for bursty workload
+✓ Loaded results for periodic workload
+✓ Loaded results for continuous workload
+✓ Loaded results for variable workload
+
+============================================================
+GENERATING FIGURES
+============================================================
+
+Creating plots for bursty workload...
+📊 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_bursty_energy_latency.png
+📊 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_bursty_adaptive_dashboard.png
+Creating plots for periodic workload...
+📊 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_periodic_energy_latency.png
+📊 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_periodic_adaptive_dashboard.png
+Creating plots for continuous workload...
+📊 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_continuous_energy_latency.png
+📊 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_continuous_adaptive_dashboard.png
+Creating plots for variable workload...
+📊 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_variable_energy_latency.png
+📊 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_variable_adaptive_dashboard.png
+
+Creating cross-workload comparison plots...
+📊 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_benchmark_summary.png
+📄 Saved: apm_paper_study_20251219_164731/resnet_ae_results/figures/resnet_ae_summary.md
+
+============================================================
+✅ Visualization complete!
+📊 Figures saved to apm_paper_study_20251219_164731/resnet_ae_results/figures/
+============================================================
+
