@@ -1,0 +1,69 @@
+Study started at Fri Dec 19 04:47:31 PM CST 2025
+Starting benchmark at Fri Dec 19 04:47:31 PM CST 2025
+
+
+========================================================================
+BENCHMARKING MODEL: ae
+========================================================================
+Start time: Fri Dec 19 04:47:31 PM CST 2025
+
+Using PyTorch model: src/output/weights/ae_best.pth
+
+--------------------------------------------------------------------
+Model: ae | Workload: bursty
+--------------------------------------------------------------------
+Time: Fri Dec 19 04:47:31 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 30 min
+  - Adaptive test: 30 min
+✅ Completed: ae - bursty
+Time: Fri Dec 19 05:48:18 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: ae | Workload: periodic
+--------------------------------------------------------------------
+Time: Fri Dec 19 05:50:18 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 30 min
+  - Adaptive test: 30 min
+✅ Completed: ae - periodic
+Time: Fri Dec 19 06:48:44 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: ae | Workload: continuous
+--------------------------------------------------------------------
+Time: Fri Dec 19 06:50:44 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 30 min
+  - Adaptive test: 30 min
+✅ Completed: ae - continuous
+Time: Fri Dec 19 07:51:32 PM CST 2025
+⏳ Thermal cooldown (2 minutes)...
+
+--------------------------------------------------------------------
+Model: ae | Workload: variable
+--------------------------------------------------------------------
+Time: Fri Dec 19 07:53:32 PM CST 2025
+
+Step 1/2: Running endurance tests with auto-calibration (MAXN + Adaptive, ~2 hours)...
+  - Hardware profiling: ~30s
+  - MAXN baseline: 30 min
+  - Adaptive test: 30 min
+✅ Completed: ae - variable
+Time: Fri Dec 19 08:54:21 PM CST 2025
+
+--------------------------------------------------------------------
+Generating visualizations for ae...
+--------------------------------------------------------------------
+✅ Visualizations complete for ae
+📊 Figures saved to: apm_paper_study_20251219_164731/ae_results/figures/
+--------------------------------------------------------------------
+Pushing results to GitHub...
